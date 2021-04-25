@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7AA6A592-E9AB-422E-8D0E-6D5259CC4ADE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.Builder</RootNamespace>
+    <AssemblyName>ProtonType.XnaContentPipeline.Builder</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)bin\Debug\x86\net4\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR XNA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)bin\Release\x86\net4\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS;EDITOR XNA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\PipelineBuildEvent.cs" />
+    <Compile Include="Models\SourceFileCollection.cs" />
+    <Compile Include="Models\PipelineProjectBuilder.cs" />
+    <Compile Include="ViewModels\PipelineBuilderStatusBarItemViewModel.cs" />
+    <Compile Include="ViewModels\PipelineBuilderViewModel.cs" />
+    <Compile Include="ViewModels\PipelineBuildItemViewModel.cs" />
+    <Compile Include="Views\PipelineBuilderStatusBarItemView.xaml.cs">
+      <DependentUpon>PipelineBuilderStatusBarItemView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PipelineBuilderView.xaml.cs">
+      <DependentUpon>PipelineBuilderView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(PROTONTYPE_PATH)\ProtonType.Framework\ProtonType.Framework.NET4.csproj">
+      <Project>{7ED07123-58DF-440E-BE73-FA37F48AF799}</Project>
+      <Name>ProtonType.Framework.NET4</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.XNA.csproj">
+      <Project>{748B18AA-6D31-48FC-ABF5-D96946E4F213}</Project>
+      <Name>ProtonType.XnaContentPipeline.ContentFile.NET4.XNA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET4.XNA.csproj">
+      <Project>{E0C4AA17-8CF1-48F1-B092-DDE1B1CFB90B}</Project>
+      <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.XNA</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\PipelineBuilderStatusBarItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PipelineBuilderView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

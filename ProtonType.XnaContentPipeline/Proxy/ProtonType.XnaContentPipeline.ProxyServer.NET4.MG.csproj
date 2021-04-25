@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{52767CCB-66BC-44A1-A100-E0470E21A24B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ProxyServer</RootNamespace>
+    <AssemblyName>ProtonType.XnaContentPipeline.ProxyServer</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)bin\Debug\AnyCPU\net4\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR MONOGAME</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)bin\Release\AnyCPU\net4\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS;EDITOR MONOGAME</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>tainicom.ProtonType.XnaContentPipeline.ProxyServer.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="MonoGame.Framework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework.Content.Pipeline">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Converters\StringToColorConverter.cs" />
+    <Compile Include="Common\ImporterDescription.cs" />
+    <Compile Include="Common\ProcessorDescription.cs" />
+    <Compile Include="Common\ProcessorParamDescription.cs" />
+    <Compile Include="Common\ProxyMsgType.cs" />
+    <Compile Include="Common\TaskResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
+    <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
+    <Compile Include="Server\Assemblies\ImporterInfo.cs" />
+    <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
+    <Compile Include="Server\BuildLogger.cs" />
+    <Compile Include="Server\IPCServer.cs" />
+    <Compile Include="Server\LegacyMGCB\PathHelper.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineBuildEvent.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineImporterContext.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineManager.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineProcessorContext.cs" />
+    <Compile Include="Server\LegacyMGCB\SourceFileCollection.cs" />
+    <Compile Include="Server\ParametersContext.cs" />
+    <Compile Include="Server\PipelineProxyServer.cs" />
+    <Compile Include="Server\Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

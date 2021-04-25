@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="tainicom.ProtonType.XnaContentPipeline.Builder.Views.PipelineBuilderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:pg="http://schemas.tainicom.net/wpfpropertygrid"
+             xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
+             mc:Ignorable="d"
+             d:DesignWidth="250" d:DesignHeight="500"
+             >
+    
+    <UserControl.Resources>
+
+    </UserControl.Resources>
+    
+    <Grid  >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="10 10 10 10">
+            <StackPanel>
+                <TextBlock Text="{Binding ProjectName}" FontSize="24" Foreground="#404040"/>
+                <TextBlock Text="{Binding OriginalPath}" FontSize="10" Foreground="#808080"/>
+            </StackPanel>
+        </Grid>
+
+        <GridSplitter Grid.Row="1" Height="2" Background="Gray" HorizontalAlignment="Stretch" IsEnabled="False"/>
+        
+        <Grid Grid.Row="2" Margin="10 10 10 10">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <StackPanel>
+                        <TextBlock Text="Queued" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                        <TextBlock Text="{Binding QueuedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
+                    
+                        <TextBlock Text="Processed" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                        <TextBlock Text="{Binding ProcessedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
+                        
+                        <TextBlock Text="Failed" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                        <TextBlock Text="{Binding FailedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <GridSplitter Grid.Column="1" Width="1" Background="Gray" HorizontalAlignment="Stretch" IsEnabled="False"/>
+
+                <Grid Grid.Column="2">
+                    <Grid HorizontalAlignment="Stretch" Margin="2,2,2,2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- search box -->
+                        <Grid Grid.Row="0" Margin="10 10 10 10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" HorizontalAlignment="Stretch" Text="{Binding FilterName, UpdateSourceTrigger=PropertyChanged}" IsEnabled="False" ToolTip="ex: behav;pers"></TextBox>
+                            <TextBlock Grid.Column="1" FontFamily="Segoe UI Symbol" Text="&#xE11A;" Margin="2,0,2,0"/>
+                        </Grid>
+
+
+                        <ListView Grid.Row="1" ItemsSource="{Binding BuildItems, Mode=OneWay}" Margin="10 10 10 10" Background="Transparent" BorderThickness="0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>                            
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Background="Transparent">
+                                            <TextBlock Text="{Binding Name}" Background="Transparent" Padding="2 2 2 2" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        
+                        
+                    </Grid>
+                </Grid>                
+            </Grid>            
+        </Grid>
+
+
+    </Grid>
+</UserControl>

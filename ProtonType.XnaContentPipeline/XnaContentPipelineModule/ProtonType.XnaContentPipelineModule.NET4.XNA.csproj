@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{90FB5B23-EA2F-4F14-B5BC-279DD44183D6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>tainicom.ProtonType.XnaContentPipeline</RootNamespace>
+    <AssemblyName>ProtonType.XnaContentPipelineModule</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)bin\Debug\x86\net4\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR XNA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)bin\Release\x86\net4\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS;EDITOR XNA</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="tainicom.WpfPropertyGrid">
+      <HintPath>..\..\3rdPartyLibraries\WpfPropertyGrid\Libraries\2010.11.10\net40\tainicom.WpfPropertyGrid.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="tainicom.WpfPropertyGrid.Themes">
+      <HintPath>..\..\3rdPartyLibraries\WpfPropertyGrid\Libraries\2010.11.10\net40\tainicom.WpfPropertyGrid.Themes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="..\..\3rdPartyLibraries\TreeViewEx\Libraries\3.0.0\net40\TreeViewEx.dll">
+      <Project>{2854814F-EA3C-41D4-AA94-460C4694F430}</Project>
+      <Name>TreeViewEx</Name>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\DeselectBrowserItemCmd.cs" />
+    <Compile Include="Commands\ExcludeBrowserItemCmd.cs" />
+    <Compile Include="Commands\SelectBrowserItemCmd.cs" />
+    <Compile Include="Commands\IncludeBrowserItemCmd.cs" />
+    <Compile Include="Common\FileIconInterop.cs" />
+    <Compile Include="Contracts\IXnaContentPipelineModule.cs" />
+    <Compile Include="ViewModels\BrowserViewModel\BrowserItemEx.cs" />
+    <Compile Include="ViewModels\BrowserViewModel\FileBrowserEx.cs" />
+    <Compile Include="ViewModels\BrowserViewModel\FileBrowserEx.IReciever.cs" />
+    <Compile Include="ViewModels\BrowserViewModel\FolderItemEx.cs" />
+    <Compile Include="ViewModels\ContentPipelineViewModel.cs" />
+    <Compile Include="ViewModels\ContentPipelineViewModel.IFileViewModel.cs" />
+    <Compile Include="ViewModels\ContentPipelineViewModel.IPipelineLogger.cs" />
+    <Compile Include="Views\FileBrowserView.xaml.cs">
+      <DependentUpon>FileBrowserView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="XnaContentPipelineModule.cs" />
+    <Compile Include="XnaContentPipelineModule.IModule.cs" />
+    <Compile Include="XnaContentPipelineModule.IModuleFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\FileBrowserView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(PROTONTYPE_PATH)\ProtonType.FileSystem\ProtonType.FileSystem.NET4.csproj">
+      <Project>{98E2187D-2831-419D-A90F-723AC645D9ED}</Project>
+      <Name>ProtonType.FileSystem.NET4</Name>
+    </ProjectReference>
+    <ProjectReference Include="$(PROTONTYPE_PATH)\ProtonType.Framework\ProtonType.Framework.NET4.csproj">
+      <Project>{7ED07123-58DF-440E-BE73-FA37F48AF799}</Project>
+      <Name>ProtonType.Framework.NET4</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="$(PROTONTYPE_PATH)\ProtonType.Logger\ProtonType.Logger.NET4.csproj">
+      <Project>{c0862807-accb-4347-922d-7ff0d8560293}</Project>
+      <Name>ProtonType.Logger.NET4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Builder\ProtonType.XnaContentPipeline.Builder.NET4.XNA.csproj">
+      <Project>{7AA6A592-E9AB-422E-8D0E-6D5259CC4ADE}</Project>
+      <Name>ProtonType.XnaContentPipeline.Builder.NET4.XNA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.XNA.csproj">
+      <Project>{748B18AA-6D31-48FC-ABF5-D96946E4F213}</Project>
+      <Name>ProtonType.XnaContentPipeline.ContentFile.NET4.XNA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET4.XNA.csproj">
+      <Project>{E0C4AA17-8CF1-48F1-B092-DDE1B1CFB90B}</Project>
+      <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.XNA</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\BuildSolution_16x.png" />
+    <Resource Include="Icons\BuildSelection_16x.png" />
+    <Resource Include="Icons\Refresh.png" />
+    <Resource Include="Icons\Save_16x.png" />
+    <Resource Include="Icons\FileWarning_16x.png" />
+    <Resource Include="Icons\FolderOpen_16x.png" />
+    <Resource Include="Icons\Folder_16x.png" />
+    <Resource Include="Icons\LocalResources_16x.png" />
+    <Resource Include="Icons\Open_grey_16x.png" />
+    <Resource Include="Icons\OpenFolder_16x.png" />
+    <Resource Include="Icons\PropertyGrid\CategorizedView.png" />
+    <Resource Include="Icons\PropertyGrid\SortAscending.png" />
+    <Resource Include="Icons\CleanData_16x.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

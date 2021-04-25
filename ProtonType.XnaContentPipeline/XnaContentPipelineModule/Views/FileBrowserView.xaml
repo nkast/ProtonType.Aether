@@ -1,0 +1,178 @@
+﻿<UserControl x:Class="tainicom.ProtonType.XnaContentPipeline.Views.FileBrowserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:tvx="clr-namespace:tainicom.TreeViewEx;assembly=TreeViewEx"
+             xmlns:pg="http://schemas.tainicom.net/wpfpropertygrid"
+             xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
+             mc:Ignorable="d"
+             d:DesignWidth="250" d:DesignHeight="500"
+             Loaded="UserControl_Loaded">
+    
+    <UserControl.Resources>
+
+        <HierarchicalDataTemplate ItemsSource="{Binding Items}" x:Key="HierarchicalDataTemplateKey">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding FileIcon}" Width="16" Height="16" Margin="0 0 4 0"></Image>
+                    <TextBlock Text="{Binding Name}" Style="{DynamicResource TextBlockStyle}">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext,RelativeSource={RelativeSource Mode=Self}}">
+                            <MenuItem Header="Open" Command="{Binding OpenCommand}" CommandParameter="{Binding}">
+                                <MenuItem.Icon><Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/Open_grey_16x.png" SnapsToDevicePixels="True"/></MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Include" Command="{Binding IncludeCommand}" CommandParameter="{Binding}"/>
+                            <MenuItem Header="Exclude" Command="{Binding ExcludeCommand}" CommandParameter="{Binding}"/>
+                            <MenuItem Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}" CommandParameter="{Binding}">
+                                <MenuItem.Icon><Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/OpenFolder_16x.png" SnapsToDevicePixels="True"/></MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}" CommandParameter="{Binding}">
+                                <MenuItem.Icon>
+                                    <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/BuildSelection_16x.png" SnapsToDevicePixels="True"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                </TextBlock>
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+        <Style x:Key="TextBlockStyle" TargetType="{x:Type TextBlock}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Included}" Value="False">
+                    <Setter Property="Foreground" Value="Gray" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Missing}" Value="True">
+                    <Setter Property="Foreground" Value="Red" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <DataTemplate x:Key="TextEditor_Inline">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding StringValue,Mode=OneWay}" IsReadOnly="True"/>
+                <Button Grid.Column="1" Margin="2,0,0,0" Content="[...]" Width="20" 
+                Command="pg:PropertyEditorCommands.ShowExtendedEditor" 
+                CommandParameter="{Binding}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TextEditor_Extended_ICollection">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <ListBox Grid.Row="0" ItemsSource="{Binding Value, Mode=TwoWay}" Name="nameListBox" SelectionMode="Extended">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock MinWidth="150" Text="{Binding Mode=OneWay}" ToolTip="{Binding Mode=OneWay}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <Button Content="Add" Margin="2,0,0,0" Command="{Binding Path=Value.AddCollectionItemCommand}" CommandParameter="{Binding ElementName=nameListBox}" IsEnabled="True"/>
+                    <Button Content="Remove" Margin="2,0,0,0" Command="{Binding Path=Value.RemoveCollectionItemCommand}" CommandParameter="{Binding ElementName=nameListBox}" IsEnabled="True"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+    
+    <Grid  >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBarPanel Grid.Row="0" Name="toolBarPanel1" ClipToBounds="True">
+            <ToolBar ToolBarTray.IsLocked="True" Margin="-5,0,-15,0" Padding="5,0,0,0" Background="Transparent">
+                <Button ToolTip="Save" ToolBar.OverflowMode="Never" Command="{Binding SaveCommand}">
+                    <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/Save_16x.png" SnapsToDevicePixels="True"></Image>
+                </Button>
+                <Button ToolTip="Refresh" ToolBar.OverflowMode="Never" IsEnabled="False">
+                    <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/Refresh.png" SnapsToDevicePixels="True"></Image>
+                </Button>
+                <Separator/>
+                <Button ToolTip="Build All" ToolBar.OverflowMode="Never" Command="{Binding BuildAllCommand}" >
+                    <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/BuildSolution_16x.png" SnapsToDevicePixels="True" ></Image>
+                </Button>
+                <Button ToolTip="Clean All" ToolBar.OverflowMode="Never" Command="{Binding CleanAllCommand}" IsEnabled="False">
+                    <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/CleanData_16x.png" SnapsToDevicePixels="True" ></Image>
+                </Button>
+            </ToolBar>
+        </ToolBarPanel>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Margin="2,2,2,2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox HorizontalAlignment="Stretch" Text="{Binding FilterName, UpdateSourceTrigger=PropertyChanged}" IsEnabled="False" ToolTip="Search"></TextBox>
+            <TextBlock Grid.Column="1" FontFamily="Segoe UI Symbol" Text="&#xE11A;" Margin="2,0,2,0"/>
+        </Grid>
+        
+        <tvx:TreeViewEx Grid.Row="2"
+                x:Name="treeView"
+                ItemsSource="{Binding Path=Items}"
+                SelectedItems="{Binding Path=SelectedItems, Mode=OneWay}"
+                AutomationProperties.AutomationId="treeView" 
+                IsTextSearchEnabled="True"
+                TextSearch.TextPath="Name"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ItemTemplate="{StaticResource ResourceKey=HierarchicalDataTemplateKey}" Margin="0,0,0,0" Grid.RowSpan="2"                        
+                             DragCommand="{Binding Path=DragCommand}" 
+                        >
+            <tvx:TreeViewEx.ItemContainerStyle>
+                <Style TargetType="{x:Type tvx:TreeViewExItem}">
+                    <Setter Property="IsExpanded" Value="False"/>
+                </Style>
+            </tvx:TreeViewEx.ItemContainerStyle>
+        </tvx:TreeViewEx>
+
+        <GridSplitter Grid.Row="3" Height="5" Background="Gray" HorizontalAlignment="Stretch"/>
+
+        <pg:PropertyGrid Grid.Row="4" 
+                         Name="propertyGrid" 
+                         PropertyFilterVisibility="Collapsed"          
+                         >
+            <pg:PropertyGrid.Resources>
+                <pg:KaxamlTheme />
+            </pg:PropertyGrid.Resources>
+
+            <pg:PropertyGrid.Layout>
+                <pg:TabbedLayout>
+                    <pg:TabbedLayoutItem CanClose="False">
+                        <pg:TabbedLayoutItem.Header>
+                            <Image ToolTip="Categorized" SnapsToDevicePixels="True" Source="/ProtonType.XnaContentPipelineModule;component/Icons/PropertyGrid/CategorizedView.png" Stretch="None" />
+                        </pg:TabbedLayoutItem.Header>
+                        <pg:CategorizedLayout />
+                    </pg:TabbedLayoutItem>
+                    <pg:TabbedLayoutItem CanClose="False">
+                        <pg:TabbedLayoutItem.Header>
+                            <Image ToolTip="Alphabetical" SnapsToDevicePixels="True" Source="/ProtonType.XnaContentPipelineModule;component/Icons/PropertyGrid/SortAscending.png"  Stretch="None"/>
+                        </pg:TabbedLayoutItem.Header>
+                        <pg:AlphabeticalLayout/>
+                    </pg:TabbedLayoutItem>
+                </pg:TabbedLayout>
+            </pg:PropertyGrid.Layout>
+
+            <pg:PropertyGrid.Editors>
+                <pg:TypeEditor EditedType="{x:Type sc:ICollection}" InlineTemplate="{StaticResource TextEditor_Inline}" ExtendedTemplate="{StaticResource TextEditor_Extended_ICollection}"/>
+            </pg:PropertyGrid.Editors>
+
+        </pg:PropertyGrid>
+
+    </Grid>
+</UserControl>
