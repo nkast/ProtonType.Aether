@@ -27,7 +27,7 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
             {
                 using (var proxyClient = new PipelineProxyServer(args[1]))
                 {
-                proxyClient.Run();
+                    proxyClient.Run();
                 }
             }
             else
