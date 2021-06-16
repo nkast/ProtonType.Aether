@@ -127,12 +127,6 @@ namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
         
         public void NewProject(string projectFilePath)
         {
-            SaveProject();
-
-            // TODO: Do we reuse PipelineProjectViewModel instances?
-            if (IsProjectOpen)
-                CloseProject();
-            
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
 
