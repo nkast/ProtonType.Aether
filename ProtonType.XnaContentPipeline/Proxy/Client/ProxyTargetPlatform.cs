@@ -22,10 +22,10 @@ using System;
 
 namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
 {
-       /// <summary>
+    /// <summary>
     /// Defines a set of graphic capabilities.
     /// </summary>
-	public enum ProxyTargetPlatform
+    public enum ProxyTargetPlatform
     {
        
         /// <summary>
@@ -82,13 +82,6 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         NativeClient,
 
         /// <summary>
-        /// Sony PlayStation Mobile (PS Vita)
-        /// (MonoGame)
-        /// </summary>
-        [Obsolete("PlayStation Mobile is no longer supported")]
-        PlayStationMobile,
-
-        /// <summary>
         /// Windows Phone 8
         /// (MonoGame)
         /// </summary>
@@ -106,10 +99,10 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         PlayStation4,
 
         /// <summary>
-        /// PlayStation Vita
+        /// Sony PlayStation5
         /// </summary>
-        PSVita,
-       
+        PlayStation5,
+
         /// <summary>
         /// Xbox One
         /// </summary>
@@ -129,5 +122,5 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         /// WebAssembly and Bridge.NET
         /// </summary>
         Web
-	   }
+    }
 }
