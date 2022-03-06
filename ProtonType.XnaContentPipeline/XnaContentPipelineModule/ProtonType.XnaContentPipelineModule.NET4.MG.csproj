@@ -44,12 +44,12 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="MonoGame.Framework">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="MonoGame.Framework.Content.Pipeline">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.Content.Pipeline.dll</HintPath>
-    </Reference>    
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
     <Reference Include="$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.FileSystem.dll">
       <Project>{98E2187D-2831-419D-A90F-723AC645D9ED}</Project>
       <Name>ProtonType.FileSystem.NET4</Name>
@@ -62,7 +62,7 @@
     <Reference Include="$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.LoggerModule.dll">
       <Project>{c0862807-accb-4347-922d-7ff0d8560293}</Project>
       <Name>ProtonType.Logger.NET4</Name>
-    </Reference>    
+    </Reference>
     <Reference Include="tainicom.WpfPropertyGrid">
       <HintPath>..\..\3rdPartyLibraries\WpfPropertyGrid\Libraries\2010.11.10\net40\tainicom.WpfPropertyGrid.dll</HintPath>
       <Private>True</Private>
