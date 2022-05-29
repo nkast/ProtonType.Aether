@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <OutputType>Library</OutputType>
+    <RootNamespace>tainicom.ProtonType.XnaGraphics</RootNamespace>
+    <AssemblyName>ProtonType.XnaGraphics</AssemblyName>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Controls\FitboxContent.cs" />
+    <Compile Include="Controls\ScreenTypeDesc.cs" />
+    <Compile Include="Controls\XNAImage.cs" />
+    <Compile Include="Graphics\BaseGraphicsDeviceManager.cs" />
+    <Compile Include="Graphics\D3D9.cs" />
+    <Compile Include="Graphics\D3D11Image.cs" />
+    <Compile Include="Graphics\D3DImageGraphicsDeviceManager.cs" />
+    <Compile Include="Graphics\GraphicsDeviceService.cs" />
+    <Compile Include="Graphics\ServiceContainer.cs" />
+    <Compile Include="Graphics\XnaImageGraphicsDeviceManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  
+</Project>

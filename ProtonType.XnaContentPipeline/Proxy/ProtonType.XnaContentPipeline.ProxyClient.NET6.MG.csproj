@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <OutputType>Library</OutputType>
+    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
+    <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
+    <DefineConstants>WINDOWS EDITOR MONOGAME</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework.Content.Pipeline">
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\net6.0-windows\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Client\IProxyLogger.cs" />
+    <Compile Include="Client\ProxyGraphicsProfile.cs" />
+    <Compile Include="Client\ProxyTargetPlatform.cs" />
+    <Compile Include="Common\Converters\StringToColorConverter.cs" />
+    <Compile Include="Common\ImporterDescription.cs" />
+    <Compile Include="Common\ProcessorDescription.cs" />
+    <Compile Include="Common\ProcessorParamDescription.cs" />
+    <Compile Include="Common\TaskResult.cs" />
+    <Compile Include="Client\IPCClient.cs" />
+    <Compile Include="Client\PipelineAsyncTask.cs" />
+    <Compile Include="Client\PipelineProxyClient.cs" />
+    <Compile Include="Common\ProxyMsgType.cs" />
+    <Compile Include="Properties\AssemblyInfo.ProxyClient.cs" />
+  </ItemGroup>
+  
+</Project>

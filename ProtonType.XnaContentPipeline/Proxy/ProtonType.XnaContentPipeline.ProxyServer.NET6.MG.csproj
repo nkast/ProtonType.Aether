@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ProxyServer</RootNamespace>
+    <AssemblyName>ProtonType.XnaContentPipeline.ProxyServer</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
+    <DefineConstants>WINDOWS EDITOR MONOGAME</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework.Content.Pipeline">
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\net6.0-windows\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Common\Converters\StringToColorConverter.cs" />
+    <Compile Include="Common\ImporterDescription.cs" />
+    <Compile Include="Common\ProcessorDescription.cs" />
+    <Compile Include="Common\ProcessorParamDescription.cs" />
+    <Compile Include="Common\ProxyMsgType.cs" />
+    <Compile Include="Common\TaskResult.cs" />
+    <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
+    <Compile Include="Server\Assemblies\ImporterInfo.cs" />
+    <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
+    <Compile Include="Server\BuildLogger.cs" />
+    <Compile Include="Server\IPCServer.cs" />
+    <Compile Include="Server\LegacyMGCB\PathHelper.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineBuildEvent.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineImporterContext.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineManager.cs" />
+    <Compile Include="Server\LegacyMGCB\PipelineProcessorContext.cs" />
+    <Compile Include="Server\LegacyMGCB\SourceFileCollection.cs" />
+    <Compile Include="Server\ParametersContext.cs" />
+    <Compile Include="Server\PipelineProxyServer.cs" />
+    <Compile Include="Server\Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
+  </ItemGroup>
+  
+</Project>
