@@ -12,6 +12,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
+    <DefineConstants>MONOGAME</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
