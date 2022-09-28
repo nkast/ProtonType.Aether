@@ -38,11 +38,6 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         /// </summary>
         Xbox360,
 
-        /// <summary>
-        /// Windows Phone
-        /// </summary>
-        WindowsPhone,
-
         // MonoGame-specific platforms listed below
 
         /// <summary>
@@ -82,12 +77,6 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         NativeClient,
 
         /// <summary>
-        /// Windows Phone 8
-        /// (MonoGame)
-        /// </summary>
-        WindowsPhone8,
-
-        /// <summary>
         /// Raspberry Pi
         /// (MonoGame)
         /// </summary>
@@ -119,8 +108,8 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         Stadia,
 
         /// <summary>
-        /// WebAssembly and Bridge.NET
+        /// Blazor/WebAssembly (WebGL)
         /// </summary>
-        Web
+        BlazorGL,
     }
 }
