@@ -103,11 +103,6 @@ namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
         Switch,
 
         /// <summary>
-        /// Google Stadia
-        /// </summary>
-        Stadia,
-
-        /// <summary>
         /// Blazor/WebAssembly (WebGL)
         /// </summary>
         BlazorGL,
