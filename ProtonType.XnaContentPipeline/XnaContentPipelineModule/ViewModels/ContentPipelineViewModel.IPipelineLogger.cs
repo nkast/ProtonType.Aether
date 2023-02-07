@@ -18,9 +18,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using tainicom.ProtonType.Logger.Contracts;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public partial class ContentPipelineViewModel : IPipelineLogger
     {

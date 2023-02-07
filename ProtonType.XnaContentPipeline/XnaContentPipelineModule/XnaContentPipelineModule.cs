@@ -16,7 +16,7 @@
 
 using System;
 
-namespace tainicom.ProtonType.XnaContentPipeline 
+namespace nkast.ProtonType.XnaContentPipeline 
 {
     public partial class XnaContentPipelineModule
     {

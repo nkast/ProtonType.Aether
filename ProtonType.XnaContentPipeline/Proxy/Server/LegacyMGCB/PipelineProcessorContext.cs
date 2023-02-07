@@ -22,7 +22,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     class LegacyPipelineProcessorContext : ContentProcessorContext
     {

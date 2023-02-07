@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels.Converters
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels.Converters
 {
     internal class UnkownParamStandardValuesConverter : TypeConverter
     {

@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     /// <summary>
     /// Container class implements the IServiceProvider interface. This is used

@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     /// <summary>	
     /// An internal set of functionality used for interopping with native Win32 APIs.	

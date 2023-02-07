@@ -8,7 +8,7 @@
     <ProjectGuid>{E5002B78-FCDA-4A5A-B4FB-2D91E944AE87}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>tainicom.ProtonType.XnaGraphics</RootNamespace>
+    <RootNamespace>nkast.ProtonType.XnaGraphics</RootNamespace>
     <AssemblyName>ProtonType.XnaGraphics</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

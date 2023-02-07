@@ -21,7 +21,7 @@
 
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     class LegacyPipelineImporterContext : ContentImporterContext
     {

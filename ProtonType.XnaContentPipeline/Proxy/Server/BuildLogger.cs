@@ -18,7 +18,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     public class BuildLogger : ContentBuildLogger
     {

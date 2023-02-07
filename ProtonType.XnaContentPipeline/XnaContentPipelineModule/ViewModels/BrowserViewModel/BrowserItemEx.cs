@@ -20,9 +20,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using tainicom.ProtonType.Framework.Helpers;
 using tainicom.ProtonType.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Components.Common;
+using nkast.ProtonType.XnaContentPipeline.Components.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class BrowserItemEx: BrowserItem
     {   

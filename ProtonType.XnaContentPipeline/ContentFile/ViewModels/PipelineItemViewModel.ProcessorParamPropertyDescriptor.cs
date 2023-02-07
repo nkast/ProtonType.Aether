@@ -17,10 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels.Converters;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ViewModels.Converters;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public partial class PipelineItemViewModel
     {

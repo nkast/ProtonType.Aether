@@ -16,9 +16,9 @@
 
 using tainicom.ProtonType.Framework.Commands;
 using tainicom.ProtonType.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Commands
+namespace nkast.ProtonType.XnaContentPipeline.Commands
 {
     internal class DeselectBrowserItemCmd : CommandBase<FileBrowserEx>
     {

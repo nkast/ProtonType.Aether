@@ -21,7 +21,7 @@ using Texture = SharpDX.Direct3D9.Texture;
 using Surface = SharpDX.Direct3D9.Surface;
 
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     /// <summary>
     /// Wraps the <see cref="D3DImage"/> to make it compatible with Direct3D 11.

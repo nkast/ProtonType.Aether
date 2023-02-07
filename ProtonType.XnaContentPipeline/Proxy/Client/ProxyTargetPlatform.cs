@@ -20,7 +20,7 @@
 
 using System;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
+namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
     /// <summary>
     /// Defines a set of graphic capabilities.

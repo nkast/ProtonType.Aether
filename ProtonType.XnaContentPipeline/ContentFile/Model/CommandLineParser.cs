@@ -26,7 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     /// <summary>
     /// Adapted from this generic command line argument parser:

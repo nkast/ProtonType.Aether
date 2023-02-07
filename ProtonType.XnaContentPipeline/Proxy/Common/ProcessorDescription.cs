@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     [Serializable]
     public class ProcessorDescription

@@ -25,9 +25,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     internal class PipelineProjectReaderException : Exception
     {

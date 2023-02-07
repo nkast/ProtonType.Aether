@@ -19,7 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace tainicom.ProtonType.XnaGraphics.Controls
+namespace nkast.ProtonType.XnaGraphics.Controls
 {
     public class FitboxContent : ContentControl
     {

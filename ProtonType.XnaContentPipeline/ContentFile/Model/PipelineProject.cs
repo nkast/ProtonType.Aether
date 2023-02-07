@@ -23,9 +23,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     /*internal*/ public class PipelineProject : IPipelineItem
     {

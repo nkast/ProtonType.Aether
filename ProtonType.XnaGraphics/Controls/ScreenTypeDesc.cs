@@ -16,7 +16,7 @@
 
 using System;
 
-namespace tainicom.ProtonType.XnaGraphics.Controls
+namespace nkast.ProtonType.XnaGraphics.Controls
 {
     public class ScreenTypeDesc
     {

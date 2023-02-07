@@ -16,7 +16,7 @@
 
 using System;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     public enum TaskResult
     {

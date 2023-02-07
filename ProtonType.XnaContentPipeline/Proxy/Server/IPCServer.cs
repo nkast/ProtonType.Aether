@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     public abstract class IPCServer : IDisposable
     {

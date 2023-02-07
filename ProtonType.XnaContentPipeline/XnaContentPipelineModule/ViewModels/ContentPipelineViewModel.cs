@@ -18,9 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Data;
-using tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.Builder.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class PipelineItemViewModelAddedEventArgs : EventArgs
     {

@@ -28,7 +28,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.Models
+namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
     public class PipelineBuildEvent
     {

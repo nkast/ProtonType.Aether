@@ -27,10 +27,10 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
-using tainicom.ProtonType.XnaContentPipeline.Common.Converters;
-using tainicom.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
+using nkast.ProtonType.XnaContentPipeline.Common.Converters;
+using nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     class PipelineManager
     {

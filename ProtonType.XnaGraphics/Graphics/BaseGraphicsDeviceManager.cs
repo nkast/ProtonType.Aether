@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     public abstract class BaseGraphicsDeviceManager : IGraphicsDeviceManager, IDisposable
     {

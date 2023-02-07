@@ -21,11 +21,11 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
-using tainicom.ProtonType.XnaContentPipeline.Common;
 using Microsoft.Xna.Framework.Content.Pipeline;
-using tainicom.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     class PipelineProxyServer : IPCServer
     {

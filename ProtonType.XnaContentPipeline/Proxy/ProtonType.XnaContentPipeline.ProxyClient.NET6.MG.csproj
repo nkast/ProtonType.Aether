@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputType>Library</OutputType>
-    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
+    <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>

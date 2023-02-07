@@ -26,9 +26,9 @@
 using System;
 using System.Windows;
 using Microsoft.Xna.Framework.Graphics;
-using tainicom.ProtonType.XnaGraphics.Controls;
+using nkast.ProtonType.XnaGraphics.Controls;
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     public class XnaImageGraphicsDeviceManager : BaseGraphicsDeviceManager
     {

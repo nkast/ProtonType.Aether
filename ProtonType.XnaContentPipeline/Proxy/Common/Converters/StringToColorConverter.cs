@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using Microsoft.Xna.Framework;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common.Converters
+namespace nkast.ProtonType.XnaContentPipeline.Common.Converters
 {
 	public class StringToColorConverter : TypeConverter
 	{

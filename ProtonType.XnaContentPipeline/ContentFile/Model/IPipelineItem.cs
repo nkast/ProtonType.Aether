@@ -14,7 +14,7 @@
 //   limitations under the License.
 #endregion
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     internal interface IPipelineItem
     {

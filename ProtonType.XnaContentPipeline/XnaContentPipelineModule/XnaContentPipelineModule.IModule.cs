@@ -20,9 +20,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using tainicom.ProtonType.Framework.Helpers;
 using tainicom.ProtonType.Framework.Modules;
-using tainicom.ProtonType.XnaContentPipeline.Contracts;
+using nkast.ProtonType.XnaContentPipeline.Contracts;
 
-namespace tainicom.ProtonType.XnaContentPipeline 
+namespace nkast.ProtonType.XnaContentPipeline 
 {
     public partial class XnaContentPipelineModule : NotificationObject, IModule, IModuleUI, IXnaContentPipelineModule
     {
@@ -38,12 +38,12 @@ namespace tainicom.ProtonType.XnaContentPipeline
         #endregion IModule Members
 
         #region IModuleUI Members
-        ObservableCollection<Framework.ViewModels.MenuViewModel> _menus = new ObservableCollection<Framework.ViewModels.MenuViewModel>();
-        ObservableCollection<Framework.ViewModels.ToolbarViewModel> _toolbars = new ObservableCollection<Framework.ViewModels.ToolbarViewModel>();
-        internal ObservableCollection<Framework.ViewModels.StatusBarItemViewModel> _statusbars = new ObservableCollection<tainicom.ProtonType.Framework.ViewModels.StatusBarItemViewModel>();
-        IEnumerable<Framework.ViewModels.MenuViewModel> IModuleUI.Menus { get { return _menus; } }
-        IEnumerable<Framework.ViewModels.ToolbarViewModel> IModuleUI.Toolbars { get { return _toolbars; } }
-        IEnumerable<Framework.ViewModels.StatusBarItemViewModel> IModuleUI.StatusBars { get { return _statusbars; } }
+        ObservableCollection<tainicom.ProtonType.Framework.ViewModels.MenuViewModel> _menus = new ObservableCollection<tainicom.ProtonType.Framework.ViewModels.MenuViewModel>();
+        ObservableCollection<tainicom.ProtonType.Framework.ViewModels.ToolbarViewModel> _toolbars = new ObservableCollection<tainicom.ProtonType.Framework.ViewModels.ToolbarViewModel>();
+        internal ObservableCollection<tainicom.ProtonType.Framework.ViewModels.StatusBarItemViewModel> _statusbars = new ObservableCollection<tainicom.ProtonType.Framework.ViewModels.StatusBarItemViewModel>();
+        IEnumerable<tainicom.ProtonType.Framework.ViewModels.MenuViewModel> IModuleUI.Menus { get { return _menus; } }
+        IEnumerable<tainicom.ProtonType.Framework.ViewModels.ToolbarViewModel> IModuleUI.Toolbars { get { return _toolbars; } }
+        IEnumerable<tainicom.ProtonType.Framework.ViewModels.StatusBarItemViewModel> IModuleUI.StatusBars { get { return _statusbars; } }
         #endregion IModuleUI Members
         
 

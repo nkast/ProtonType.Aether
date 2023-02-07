@@ -17,9 +17,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     public class ProxyLogger : IProxyLogger
     {

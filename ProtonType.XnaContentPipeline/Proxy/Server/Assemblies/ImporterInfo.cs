@@ -16,9 +16,9 @@
 
 using System;
 using System.Collections.Generic;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 {
     class ImporterInfo
     {

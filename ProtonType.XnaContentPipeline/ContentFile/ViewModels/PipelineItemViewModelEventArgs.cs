@@ -15,9 +15,9 @@
 #endregion
 
 using System;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class PipelineItemViewModelEventArgs : EventArgs
     {

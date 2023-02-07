@@ -17,7 +17,7 @@
 using System;
 using tainicom.ProtonType.Framework.Modules;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Contracts
+namespace nkast.ProtonType.XnaContentPipeline.Contracts
 {
     public interface IXnaContentPipelineModule : IModule
     {

@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using tainicom.ProtonType.Framework.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     class ProcessorParamsViewModel : BaseViewModel
     {

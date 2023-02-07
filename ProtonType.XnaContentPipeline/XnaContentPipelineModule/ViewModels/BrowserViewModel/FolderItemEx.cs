@@ -23,7 +23,7 @@ using System.Windows.Media.Imaging;
 using tainicom.ProtonType.Framework.Helpers;
 using tainicom.ProtonType.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class FolderItemEx : FolderItem
     {

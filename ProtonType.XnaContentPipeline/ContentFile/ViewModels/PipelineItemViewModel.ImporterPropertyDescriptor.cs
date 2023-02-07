@@ -17,7 +17,7 @@
 using System;
 using System.ComponentModel;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public partial class PipelineItemViewModel
     {

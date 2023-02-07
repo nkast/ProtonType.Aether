@@ -15,9 +15,9 @@
 #endregion
 
 using System.Windows.Controls;
-using tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.Builder.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.Views
+namespace nkast.ProtonType.XnaContentPipeline.Builder.Views
 {
     /// <summary>
     /// 

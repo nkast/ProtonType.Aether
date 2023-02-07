@@ -23,7 +23,7 @@ using WinForms = System.Windows.Forms;
 using SysDrawing = System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace tainicom.ProtonType.XnaGraphics.Controls
+namespace nkast.ProtonType.XnaGraphics.Controls
 {
     /// <summary>
     /// Interaction logic for XNAImage.xaml

@@ -18,11 +18,11 @@ using System;
 using System.Windows.Controls;
 using tainicom.ProtonType.Framework.Commands;
 using tainicom.ProtonType.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Commands;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels;
 using tainicom.TreeViewEx;
+using nkast.ProtonType.XnaContentPipeline.Commands;
+using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Views
+namespace nkast.ProtonType.XnaContentPipeline.Views
 {
     /// <summary>
     /// 
@@ -43,7 +43,7 @@ namespace tainicom.ProtonType.XnaContentPipeline.Views
             viewModel.SelectionChanged += new EventHandler<EventArgs>(viewModel_SelectionChanged);
         }
 
-        void propertyGrid_PropertyValueChanged(object sender, WpfPropertyGrid.PropertyValueChangedEventArgs e)
+        void propertyGrid_PropertyValueChanged(object sender, tainicom.WpfPropertyGrid.PropertyValueChangedEventArgs e)
         {
             bool refreshPropertyGrid = false;
 
@@ -115,7 +115,7 @@ namespace tainicom.ProtonType.XnaContentPipeline.Views
 
         void listView_OnSelecting(object sender, SelectionChangedCancelEventArgs e)
         {
-            var treeViewEx = (TreeViewEx.TreeViewEx)sender;
+            var treeViewEx = (tainicom.TreeViewEx.TreeViewEx)sender;
             FileBrowserEx viewModel = (FileBrowserEx)DataContext;
             ContentPipelineViewModel model = viewModel.ContentPipelineViewModel;
 

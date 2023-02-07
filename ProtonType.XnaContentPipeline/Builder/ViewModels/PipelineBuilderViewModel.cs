@@ -20,12 +20,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using tainicom.ProtonType.Framework.Attributes;
 using tainicom.ProtonType.Framework.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Builder.Models;
-using tainicom.ProtonType.XnaContentPipeline.Builder.Views;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.Builder.Models;
+using nkast.ProtonType.XnaContentPipeline.Builder.Views;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 {
     [DefaultView(typeof(PipelineBuilderView), "Pipeline Builder")]
     public class PipelineBuilderViewModel : DocumentViewModel
@@ -138,7 +138,7 @@ namespace tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels
             OnPipelineItemBuildCompleted(new PipelineItemViewModelBuildCompletedEventArgs(pipelineItemVM, e.Result));
         }
 
-        private PipelineItemViewModel FindPipelineItemVM(tainicom.ProtonType.XnaContentPipeline.Common.PipelineItem pipelineItem)
+        private PipelineItemViewModel FindPipelineItemVM(nkast.ProtonType.XnaContentPipeline.Common.PipelineItem pipelineItem)
         {
             foreach (var plItemVM in _projectVM.PipelineItemsVM)
             {

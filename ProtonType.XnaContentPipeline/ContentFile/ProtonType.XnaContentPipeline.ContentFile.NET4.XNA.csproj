@@ -8,7 +8,7 @@
     <ProjectGuid>{748B18AA-6D31-48FC-ABF5-D96946E4F213}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ContentFile</RootNamespace>
+    <RootNamespace>nkast.ProtonType.XnaContentPipeline.ContentFile</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ContentFile</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -27,11 +27,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.Common.Converters;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common.Converters;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 {
     partial class AssembliesMgr
     {

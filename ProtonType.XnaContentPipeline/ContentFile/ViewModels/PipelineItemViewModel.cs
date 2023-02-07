@@ -22,9 +22,9 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using tainicom.ProtonType.Framework.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public partial class PipelineItemViewModel : BaseViewModel, IPipelineItemViewModel
     {

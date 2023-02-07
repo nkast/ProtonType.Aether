@@ -21,7 +21,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Components.Common
+namespace nkast.ProtonType.XnaContentPipeline.Components.Common
 {
     internal static class FileIconInterop
     {

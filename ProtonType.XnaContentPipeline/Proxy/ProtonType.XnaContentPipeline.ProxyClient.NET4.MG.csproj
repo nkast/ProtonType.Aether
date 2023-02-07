@@ -8,7 +8,7 @@
     <ProjectGuid>{82C354D3-8D37-4B2B-9046-0D36A98EE450}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>tainicom.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
+    <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

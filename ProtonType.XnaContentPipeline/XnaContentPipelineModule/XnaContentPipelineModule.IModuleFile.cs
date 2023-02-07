@@ -19,9 +19,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using tainicom.ProtonType.Framework.Commands;
 using tainicom.ProtonType.Framework.Modules;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline 
+namespace nkast.ProtonType.XnaContentPipeline 
 {
     public partial class XnaContentPipelineModule: IModuleFile, IModuleFileSave
     {

@@ -23,7 +23,7 @@ using Color = Microsoft.Xna.Framework.Color;
 using Matrix = Microsoft.Xna.Framework.Matrix;
 
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     public class D3DImageGraphicsDeviceManager : BaseGraphicsDeviceManager
     {

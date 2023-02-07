@@ -21,7 +21,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Common
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     /*internal*/ public partial class PipelineItem : IPipelineItem, INotifyPropertyChanged
     {

@@ -27,7 +27,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     [XmlRoot(ElementName = "PipelineBuildEvent")]
     public class PipelineBuildEvent

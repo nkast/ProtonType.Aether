@@ -26,10 +26,10 @@ using System.IO;
 using System.Linq;
 using tainicom.ProtonType.Framework.Modules;
 using tainicom.ProtonType.Framework.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class PipelineProjectViewModel : BaseViewModel, IPipelineItemViewModel
     {

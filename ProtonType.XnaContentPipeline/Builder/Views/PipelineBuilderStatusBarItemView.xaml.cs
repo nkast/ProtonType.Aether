@@ -16,7 +16,7 @@
 
 using System.Windows.Controls;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.Views
+namespace nkast.ProtonType.XnaContentPipeline.Builder.Views
 {
     /// <summary>
     /// Interaction logic for PipelineBuilderStatusBarItemView.xaml

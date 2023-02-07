@@ -24,10 +24,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
-namespace tainicom.ProtonType.ContentLib.ViewModels.Converters
+namespace nkast.ProtonType.ContentLib.ViewModels.Converters
 {
     internal class ImporterDescriptionConverter : TypeConverter
     {

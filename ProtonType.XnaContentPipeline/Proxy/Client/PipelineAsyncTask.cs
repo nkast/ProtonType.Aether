@@ -17,9 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
+namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
     public class PipelineAsyncTask : IAsyncResult
     {

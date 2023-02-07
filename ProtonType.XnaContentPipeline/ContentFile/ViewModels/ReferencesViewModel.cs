@@ -28,12 +28,12 @@ using tainicom.ProtonType.Framework.Commands;
 using tainicom.ProtonType.Framework.Helpers;
 using tainicom.ProtonType.Framework.Modules;
 using tainicom.ProtonType.Framework.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.Common.Converters;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common.Converters;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 using Win32 = Microsoft.Win32;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public class ReferencesViewModel : BaseViewModel, IList, IReceiver, INotifyCollectionChanged
     {

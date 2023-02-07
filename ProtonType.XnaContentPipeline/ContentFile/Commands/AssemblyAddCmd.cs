@@ -17,7 +17,7 @@
 using System.Collections;
 using tainicom.ProtonType.Framework.Commands;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     internal class AssemblyAddCmd : CommandBase
     {

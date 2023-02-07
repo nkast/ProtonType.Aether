@@ -23,7 +23,7 @@ using PresentInterval = SharpDX.Direct3D9.PresentInterval;
 using Texture = SharpDX.Direct3D9.Texture;
 
 
-namespace tainicom.ProtonType.XnaGraphics
+namespace nkast.ProtonType.XnaGraphics
 {
     /// <summary>
     /// Represents a Direct3D 9 device required for Direct3D 11 interoperability.

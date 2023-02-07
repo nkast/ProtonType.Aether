@@ -14,7 +14,7 @@
 //   limitations under the License.
 #endregion
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public interface IPipelineItemViewModel
     {

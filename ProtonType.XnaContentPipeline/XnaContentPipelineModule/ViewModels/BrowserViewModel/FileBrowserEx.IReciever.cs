@@ -20,7 +20,7 @@ using System.Collections.ObjectModel;
 using tainicom.ProtonType.Framework.Commands;
 using tainicom.ProtonType.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     public partial class FileBrowserEx : IReceiver
     {

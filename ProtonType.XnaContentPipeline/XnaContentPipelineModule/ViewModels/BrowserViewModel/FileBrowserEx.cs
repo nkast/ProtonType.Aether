@@ -26,7 +26,7 @@ using tainicom.ProtonType.ViewModels;
 using tainicom.TreeViewEx;
 using tainicom.TreeViewEx.DragNDrop;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {
     [DefaultView(typeof(Views.FileBrowserView))]
     public partial class FileBrowserEx : FileBrowser

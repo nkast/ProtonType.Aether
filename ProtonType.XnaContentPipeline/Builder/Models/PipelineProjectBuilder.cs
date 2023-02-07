@@ -21,10 +21,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using tainicom.ProtonType.XnaContentPipeline.Common;
-using tainicom.ProtonType.XnaContentPipeline.ProxyClient;
+using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.Models
+namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
     internal class PipelineProjectBuilder
     {

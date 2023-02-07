@@ -16,7 +16,7 @@
 
 using tainicom.ProtonType.Framework.ViewModels;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 {
     public class PipelineBuilderStatusBarItemViewModel : StatusBarItemViewModel
     {

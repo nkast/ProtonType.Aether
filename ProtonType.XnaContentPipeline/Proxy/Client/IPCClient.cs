@@ -18,7 +18,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyClient
+namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
     public abstract class IPCClient : IDisposable
     {

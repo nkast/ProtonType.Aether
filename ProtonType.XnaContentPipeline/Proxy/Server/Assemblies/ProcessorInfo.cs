@@ -17,9 +17,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 {
     class ProcessorInfo
     {

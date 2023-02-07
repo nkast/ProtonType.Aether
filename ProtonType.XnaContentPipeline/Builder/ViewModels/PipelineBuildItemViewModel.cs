@@ -15,9 +15,9 @@
 #endregion
 
 using tainicom.ProtonType.Framework.ViewModels;
-using tainicom.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace tainicom.ProtonType.XnaContentPipeline.Builder.ViewModels
+namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 {
     public class PipelineBuildItemViewModel : BaseViewModel
     {
