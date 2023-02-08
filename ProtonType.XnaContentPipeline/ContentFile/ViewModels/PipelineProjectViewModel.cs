@@ -24,8 +24,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using tainicom.ProtonType.Framework.Modules;
-using tainicom.ProtonType.Framework.ViewModels;
+using nkast.ProtonType.Framework.Modules;
+using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 

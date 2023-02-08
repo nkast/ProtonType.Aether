@@ -18,8 +18,8 @@ using System;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using tainicom.ProtonType.Framework.Helpers;
-using tainicom.ProtonType.ViewModels;
+using nkast.ProtonType.Framework.Helpers;
+using nkast.ProtonType.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Components.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ViewModels

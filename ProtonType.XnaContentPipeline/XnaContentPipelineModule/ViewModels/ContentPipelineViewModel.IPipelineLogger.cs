@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline;
-using tainicom.ProtonType.Logger.Contracts;
+using nkast.ProtonType.Logger.Contracts;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ViewModels

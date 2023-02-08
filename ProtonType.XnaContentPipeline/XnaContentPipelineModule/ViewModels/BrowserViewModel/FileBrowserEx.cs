@@ -20,9 +20,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using tainicom.ProtonType.Framework.Attributes;
-using tainicom.ProtonType.Framework.Helpers;
-using tainicom.ProtonType.ViewModels;
+using nkast.ProtonType.Framework.Attributes;
+using nkast.ProtonType.Framework.Helpers;
+using nkast.ProtonType.ViewModels;
 using tainicom.TreeViewEx;
 using tainicom.TreeViewEx.DragNDrop;
 

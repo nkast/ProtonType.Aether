@@ -15,7 +15,7 @@
 #endregion
 
 using System;
-using tainicom.ProtonType.Framework.Modules;
+using nkast.ProtonType.Framework.Modules;
 
 namespace nkast.ProtonType.XnaContentPipeline.Contracts
 {

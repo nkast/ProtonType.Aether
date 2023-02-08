@@ -14,7 +14,7 @@
 //   limitations under the License.
 #endregion
 
-using tainicom.ProtonType.Framework.ViewModels;
+using nkast.ProtonType.Framework.ViewModels;
 
 namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 {

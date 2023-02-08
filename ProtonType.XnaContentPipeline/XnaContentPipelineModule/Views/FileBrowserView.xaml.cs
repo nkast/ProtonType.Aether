@@ -16,8 +16,8 @@
 
 using System;
 using System.Windows.Controls;
-using tainicom.ProtonType.Framework.Commands;
-using tainicom.ProtonType.ViewModels;
+using nkast.ProtonType.Framework.Commands;
+using nkast.ProtonType.ViewModels;
 using tainicom.TreeViewEx;
 using nkast.ProtonType.XnaContentPipeline.Commands;
 using nkast.ProtonType.XnaContentPipeline.ViewModels;

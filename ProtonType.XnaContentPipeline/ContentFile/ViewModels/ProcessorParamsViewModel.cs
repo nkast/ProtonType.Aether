@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using tainicom.ProtonType.Framework.ViewModels;
+using nkast.ProtonType.Framework.ViewModels;
 
 namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 {

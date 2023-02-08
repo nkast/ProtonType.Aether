@@ -21,7 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using tainicom.ProtonType.Framework.ViewModels;
+using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ViewModels

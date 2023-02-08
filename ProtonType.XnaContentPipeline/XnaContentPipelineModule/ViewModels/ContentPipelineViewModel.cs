@@ -203,7 +203,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             // TODO: open Builder View by clicking on the status bar and/or add a new button.
             // add pipelineBuilder view
             var site = this.Module.Site;
-            var addPaneCmd = new tainicom.ProtonType.Framework.Commands.AddPaneCmd(site, _pipelineBuilder);
+            var addPaneCmd = new nkast.ProtonType.Framework.Commands.AddPaneCmd(site, _pipelineBuilder);
             site.Controller.EnqueueAndExecute(addPaneCmd);
 
 
