@@ -23,8 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common

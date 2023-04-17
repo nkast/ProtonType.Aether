@@ -15,7 +15,6 @@
 #endregion
 
 using System;
-using System.IO;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
