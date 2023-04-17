@@ -358,24 +358,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                 return true;
             }
 
-            // Multiple flags
-            if (arg.Length >= 2 &&
-               ((arg[0] == '-' && arg[1] != '-') || arg[0] == '/') &&
-               !arg.Contains(":") && !arg.Contains("=") &&
-               !_optionalOptions.ContainsKey(arg.Substring(1)))
-            {
-                for (int i = 1; i < arg.Length; i++)
-                {
-                    string name;
-                    if (!_flags.TryGetValue(arg[i].ToString(), out name))
-                    {
-                        var msg = string.Format("Unknown option '{0}'", arg[i].ToString());
-                        ShowError(msg);
-                        break;
-                    }
-                }
-            }
-
             // Not a flag, parse argument
             return ParseArgument(arg);
         }
