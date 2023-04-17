@@ -40,9 +40,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             _globalLogger = new BuildLogger(this, _globalContext.Guid);
             _assembliesMgr = new AssembliesMgr();
 
-            // load all build-in importers/procesors from 'Content.Pipeline.Importers.dll'
-            var pipelineAsm = typeof(Microsoft.Xna.Framework.Content.Pipeline.TextureImporter).Assembly;
-            AddAssembly(_globalContext.Guid, pipelineAsm.Location);
+            // load build-in importers/processors
+            AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.PassThroughProcessor).Assembly.Location); // Common
         }
  
         private void WriteMsg(ProxyMsgType msgType)
