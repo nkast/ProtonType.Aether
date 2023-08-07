@@ -320,7 +320,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             {
                 try
                 {
-                    var importContext = new LegacyPipelineImporterContext(this, logger);
+                    var importContext = new LegacyPipelineImporterContext(this, logger, pipelineEvent);
                     importedObject = importer.Import(pipelineEvent.SourceFile, importContext);
                 }
                 catch (PipelineException)
@@ -338,7 +338,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             else
             {
-                var importContext = new LegacyPipelineImporterContext(this, logger);
+                var importContext = new LegacyPipelineImporterContext(this, logger, pipelineEvent);
                 importedObject = importer.Import(pipelineEvent.SourceFile, importContext);
             }
 
