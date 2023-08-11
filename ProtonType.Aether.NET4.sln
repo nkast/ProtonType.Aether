@@ -2,19 +2,19 @@
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1433
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaGraphics.NET4.MG", "ProtonType.XnaGraphics\ProtonType.XnaGraphics.NET4.MG.csproj", "{52E94705-ECCE-4592-9D7C-145B9D8D248D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaGraphics.NET4.KNI", "ProtonType.XnaGraphics\ProtonType.XnaGraphics.NET4.KNI.csproj", "{52E94705-ECCE-4592-9D7C-145B9D8D248D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XnaContentPipeline", "XnaContentPipeline", "{27530753-40D6-43A7-A448-D0806FCB4FA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.Builder.NET4.MG", "ProtonType.XnaContentPipeline\Builder\ProtonType.XnaContentPipeline.Builder.NET4.MG.csproj", "{18ABBFE2-2243-4A2F-A6AD-4A00982FCE47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.Builder.NET4.KNI", "ProtonType.XnaContentPipeline\Builder\ProtonType.XnaContentPipeline.Builder.NET4.KNI.csproj", "{18ABBFE2-2243-4A2F-A6AD-4A00982FCE47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ContentFile.NET4.MG", "ProtonType.XnaContentPipeline\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.MG.csproj", "{7DA58252-12F5-4811-8CEB-8321CBB42088}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ContentFile.NET4.KNI", "ProtonType.XnaContentPipeline\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.KNI.csproj", "{7DA58252-12F5-4811-8CEB-8321CBB42088}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyClient.NET4.MG", "ProtonType.XnaContentPipeline\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET4.MG.csproj", "{82C354D3-8D37-4B2B-9046-0D36A98EE450}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI", "ProtonType.XnaContentPipeline\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI.csproj", "{82C354D3-8D37-4B2B-9046-0D36A98EE450}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyServer.NET4.MG", "ProtonType.XnaContentPipeline\Proxy\ProtonType.XnaContentPipeline.ProxyServer.NET4.MG.csproj", "{52767CCB-66BC-44A1-A100-E0470E21A24B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyServer.NET4.KNI", "ProtonType.XnaContentPipeline\Proxy\ProtonType.XnaContentPipeline.ProxyServer.NET4.KNI.csproj", "{52767CCB-66BC-44A1-A100-E0470E21A24B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipelineModule.NET4.MG", "ProtonType.XnaContentPipeline\XnaContentPipelineModule\ProtonType.XnaContentPipelineModule.NET4.MG.csproj", "{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipelineModule.NET4.KNI", "ProtonType.XnaContentPipeline\XnaContentPipelineModule\ProtonType.XnaContentPipelineModule.NET4.KNI.csproj", "{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

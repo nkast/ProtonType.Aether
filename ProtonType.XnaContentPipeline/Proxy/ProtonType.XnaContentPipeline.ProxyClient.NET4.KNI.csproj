@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>$(SolutionDir)bin\Debug\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR MONOGAME</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR KNI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -28,7 +28,7 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>$(SolutionDir)bin\Release\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;WINDOWS;EDITOR MONOGAME</DefineConstants>
+    <DefineConstants>TRACE;WINDOWS;EDITOR KNI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -38,13 +38,17 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="WindowsBase" />
+    <Reference Include="Xna.Framework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="MonoGame.Framework.Content.Pipeline">
+    <Reference Include="Xna.Framework.Content.Pipeline">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.Content.Pipeline.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

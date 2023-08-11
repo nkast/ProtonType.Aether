@@ -90,7 +90,7 @@ namespace nkast.ProtonType.XnaGraphics
             
             if (adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 graphicsProfile = GraphicsProfile.HiDef;
-#if MONOGAME
+#if KNI
             if (adapter.IsProfileSupported(GraphicsProfile.FL10_0))
                 graphicsProfile = GraphicsProfile.FL10_0;
 #endif

@@ -17,6 +17,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<Reference Include="Xna.Framework">
+	  <SpecificVersion>False</SpecificVersion>
+	  <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Framework\netstandard2.0\Xna.Framework.dll</HintPath>
+	</Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Controls\FitboxContent.cs" />
     <Compile Include="Controls\ScreenTypeDesc.cs" />
     <Compile Include="Controls\XNAImage.cs" />
@@ -28,10 +44,6 @@
     <Compile Include="Graphics\ServiceContainer.cs" />
     <Compile Include="Graphics\XnaImageGraphicsDeviceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
   </ItemGroup>
   
 </Project>

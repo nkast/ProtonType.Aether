@@ -141,7 +141,7 @@ namespace nkast.ProtonType.XnaGraphics
                     // Get a pointer to the back buffer.
                     IntPtr pBackBuffer = _imageSource.BackBuffer;
 
-#if MONOGAME
+#if KNI
                     System.Runtime.InteropServices.Marshal.Copy(rawImage, 0, pBackBuffer, rawImageLen);
 #else
                     CopyAndConvertRGBA2BGRA(rawImage, pBackBuffer, rawImageLen);
@@ -243,7 +243,7 @@ namespace nkast.ProtonType.XnaGraphics
             if (_renderTarget == null)
             {
                 var surfaceFormat = Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color;
-#if MONOGAME
+#if KNI
                 surfaceFormat = Microsoft.Xna.Framework.Graphics.SurfaceFormat.Bgra32;
 #else
                 surfaceFormat = Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color;

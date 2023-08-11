@@ -29,7 +29,7 @@ namespace nkast.ProtonType.XnaGraphics
     {
         private readonly Image _control;
         private RenderTarget2D _renderTarget;
-#if MONOGAME
+#if KNI
         private D3D11Image _imageSource;
 #else
         private System.Windows.Interop.D3DImage _imageSource;
@@ -90,7 +90,7 @@ namespace nkast.ProtonType.XnaGraphics
             if (disposing)
             {
                 _control.Source = null;
-#if MONOGAME 
+#if KNI 
                 if (_imageSource != null)
                     _imageSource.Dispose();
 #endif
@@ -107,7 +107,7 @@ namespace nkast.ProtonType.XnaGraphics
         
         private void InitializeImageSource()
         {
-#if MONOGAME 
+#if KNI 
             _imageSource = new D3D11Image();
 #else
             _imageSource = new System.Windows.Interop.D3DImage();
@@ -119,7 +119,7 @@ namespace nkast.ProtonType.XnaGraphics
 
         private void CreateBackBuffer()
         {
-#if MONOGAME 
+#if KNI 
             _imageSource.ThrowIfDisposed();
             _imageSource.SetBackBuffer2(null);
 #else
@@ -136,7 +136,7 @@ namespace nkast.ProtonType.XnaGraphics
 
             int width = Math.Max((int)_control.ActualWidth, 1);
             int height = Math.Max((int)_control.ActualHeight, 1);
-#if MONOGAME
+#if KNI
             SurfaceFormat surfaceFormat = SurfaceFormat.Bgra32;
             _renderTarget = new RenderTarget2D(this.GraphicsDevice, width, height, false, surfaceFormat, DepthFormat.Depth24Stencil8, PreferredMultiSampleCount, RenderTargetUsage.DiscardContents, true);
 #else
@@ -144,7 +144,7 @@ namespace nkast.ProtonType.XnaGraphics
             _renderTarget = new RenderTarget2D(this.GraphicsDevice, width, height, false, surfaceFormat, DepthFormat.Depth24Stencil8, PreferredMultiSampleCount, RenderTargetUsage.DiscardContents);
 #endif
 
-#if MONOGAME 
+#if KNI 
             _imageSource.ThrowIfDisposed();
             _imageSource.SetBackBuffer2(_renderTarget);
 #else
@@ -180,13 +180,13 @@ namespace nkast.ProtonType.XnaGraphics
         
         public override void EndDraw()
         {
-#if MONOGAME
+#if KNI
             GraphicsDevice.Flush();
 #endif
             // resolve texture
             GraphicsDevice.SetRenderTarget(null);
 
-#if MONOGAME
+#if KNI
             _imageSource.ThrowIfDisposed();
 
             if (_imageSource._backBuffer != null)
