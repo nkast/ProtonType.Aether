@@ -42,6 +42,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // load build-in importers/processors
             AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.PassThroughProcessor).Assembly.Location); // Common
+            AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.SoundEffectProcessor).Assembly.Location); // Audio
+            AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.VideoProcessor).Assembly.Location); // Media
+            AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.TextureProcessor).Assembly.Location); // Graphics
+            AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.EffectProcessor).Assembly.Location); // Graphics Effects
         }
  
         private void WriteMsg(ProxyMsgType msgType)
