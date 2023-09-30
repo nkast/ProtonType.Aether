@@ -1,6 +1,6 @@
 # ProtonType.XnaGraphics
 
-XAML controls for rendering KNI/XNA/MonoGame.
+XAML controls for rendering KNI/XNA.
 
 ![ProtonType](../Documentation/Images/ProtonType.XnaGraphics.PNG)
 
