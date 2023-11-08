@@ -32,6 +32,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
     [XmlRoot(ElementName = "SourceFileCollection")]
     public sealed class SourceFileCollection
     {
+        public static readonly string XmlExtension = ".mgcontent";
+
         public GraphicsProfile Profile { get; set; }
 
         public TargetPlatform Platform { get; set; }
@@ -52,7 +54,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             Config = string.Empty;
         }
 
-        static public SourceFileCollection Read(string filePath)
+        static public SourceFileCollection LoadXml(string filePath)
         {
             var deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
@@ -62,25 +64,30 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             catch (Exception)
             {
+                return null;
             }
-
-            return new SourceFileCollection();
         }
 
-        public void Write(string filePath)
+        public void SaveXml(string filePath)
         {
             var serializer = new XmlSerializer(typeof(SourceFileCollection));
             using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
-                serializer.Serialize(textWriter, this);            
+                serializer.Serialize(textWriter, this);
         }
 
-        public void Merge(SourceFileCollection previousContent)
+        internal void AddFile(string sourceFile, string outputFile)
         {
-            var initialCount = previousContent.SourceFiles.Count;
-            for (int i = 0; i < previousContent.SourceFiles.Count; i++)
+            this.SourceFiles.Add(sourceFile);
+            this.DestFiles.Add(outputFile);
+        }
+
+        public void Merge(SourceFileCollection previousFileCollection)
+        {
+            var initialCount = previousFileCollection.SourceFiles.Count;
+            for (int i = 0; i < previousFileCollection.SourceFiles.Count; i++)
             {
-                var sourceFile = previousContent.SourceFiles[i];
-                var destFile   = previousContent.DestFiles[i];
+                var sourceFile = previousFileCollection.SourceFiles[i];
+                var destFile   = previousFileCollection.DestFiles[i];
 
                 var inContent = SourceFiles.Any(e => string.Equals(e, sourceFile, StringComparison.InvariantCultureIgnoreCase));
                 if (!inContent)

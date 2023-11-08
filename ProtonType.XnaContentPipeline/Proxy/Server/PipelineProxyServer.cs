@@ -465,17 +465,18 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
 
             // Load the previously serialized list of built content.
-            var contentFile = Path.Combine(intermediatePath, PipelineBuildEvent.Extension);
-            var previousContent = SourceFileCollection.Read(contentFile);
+            SourceFileCollection previousFileCollection = LoadFileCollection(intermediatePath);
+            if (previousFileCollection == null)
+                previousFileCollection = new SourceFileCollection();
 
             // If the target changed in any way then we need to force
             // a full rebuild even under incremental builds.
-            var targetChanged = previousContent.Config != Config ||
-                                previousContent.Platform != Platform ||
-                                previousContent.Profile != Profile;
+            var targetChanged = previousFileCollection.Config != Config ||
+                                previousFileCollection.Platform != Platform ||
+                                previousFileCollection.Profile != Profile;
 
 
-            var newContent = new SourceFileCollection
+            SourceFileCollection newFileCollection = new SourceFileCollection
             {
                 Profile = _manager.Profile = Profile,
                 Platform = _manager.Platform = Platform,
@@ -491,8 +492,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                                       c.Processor,
                                       c.ProcessorParams);
 
-                newContent.SourceFiles.Add(c.SourceFile);
-                newContent.DestFiles.Add(c.OutputFile);
+                newFileCollection.AddFile(c.SourceFile, c.OutputFile);
             }
             catch (InvalidContentException ex)
             {
@@ -535,18 +535,37 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             // of previous content with the new list.
             if (Incremental && !targetChanged)
             {
-                newContent.Merge(previousContent);
+                newFileCollection.Merge(previousFileCollection);
             }
 
             // Delete the old file and write the new content 
             // list if we have any to serialize.
-            if (File.Exists(contentFile))
-                File.Delete(contentFile);
+            DeleteFileCollection(intermediatePath);
 
-            if (newContent.SourceFiles.Count > 0)
-                newContent.Write(contentFile);
+            if (newFileCollection.SourceFiles.Count > 0)
+                SaveFileCollection(intermediatePath, newFileCollection);
 
             return TaskResult.SUCCEEDED;
+        }
+
+        private static void DeleteFileCollection(string intermediatePath)
+        {
+            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
+            if (File.Exists(intermediateXmlFileCollectionPath))
+                File.Delete(intermediateXmlFileCollectionPath);
+        }
+
+        private static void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
+        {
+            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
+            fileCollection.SaveXml(intermediateXmlFileCollectionPath);
+        }
+
+        private SourceFileCollection LoadFileCollection(string intermediatePath)
+        {
+            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
+            SourceFileCollection fileCollection = SourceFileCollection.LoadXml(intermediateXmlFileCollectionPath);
+            return fileCollection;
         }
 
         public class CopyItem

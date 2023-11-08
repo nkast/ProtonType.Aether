@@ -26,14 +26,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
     class LegacyPipelineImporterContext : ContentImporterContext
     {
         private readonly PipelineManager _manager;
-        private readonly PipelineBuildEvent _pipelineEvent;
         private readonly ContentBuildLogger _logger;
+        private readonly PipelineBuildEvent _buildEvent;
 
-        public LegacyPipelineImporterContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent pipelineEvent)
+        public LegacyPipelineImporterContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent buildEvent)
         {
             _manager = manager;
-            _pipelineEvent = pipelineEvent;
             _logger = logger;
+            _buildEvent = buildEvent;
         }
 
         public override string IntermediateDirectory { get { return _manager.IntermediateDirectory; } }
@@ -42,8 +42,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public override void AddDependency(string filename)
         {
-            if (!_pipelineEvent.Dependencies.Contains(filename))
-                _pipelineEvent.Dependencies.Add(filename);
+            if (!_buildEvent.Dependencies.Contains(filename))
+                _buildEvent.Dependencies.Add(filename);
         }
     }
 }

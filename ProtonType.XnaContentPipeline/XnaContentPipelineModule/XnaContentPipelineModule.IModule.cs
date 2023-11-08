@@ -41,6 +41,7 @@ namespace nkast.ProtonType.XnaContentPipeline
         ObservableCollection<nkast.ProtonType.Framework.ViewModels.MenuViewModel> _menus = new ObservableCollection<nkast.ProtonType.Framework.ViewModels.MenuViewModel>();
         ObservableCollection<nkast.ProtonType.Framework.ViewModels.ToolbarViewModel> _toolbars = new ObservableCollection<nkast.ProtonType.Framework.ViewModels.ToolbarViewModel>();
         internal ObservableCollection<nkast.ProtonType.Framework.ViewModels.StatusBarItemViewModel> _statusbars = new ObservableCollection<nkast.ProtonType.Framework.ViewModels.StatusBarItemViewModel>();
+
         IEnumerable<nkast.ProtonType.Framework.ViewModels.MenuViewModel> IModuleUI.Menus { get { return _menus; } }
         IEnumerable<nkast.ProtonType.Framework.ViewModels.ToolbarViewModel> IModuleUI.Toolbars { get { return _toolbars; } }
         IEnumerable<nkast.ProtonType.Framework.ViewModels.StatusBarItemViewModel> IModuleUI.StatusBars { get { return _statusbars; } }

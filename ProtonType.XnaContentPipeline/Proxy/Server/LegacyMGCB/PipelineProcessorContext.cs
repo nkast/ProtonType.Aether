@@ -27,14 +27,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
     class LegacyPipelineProcessorContext : ContentProcessorContext
     {
         private readonly PipelineManager _manager;
-        private readonly PipelineBuildEvent _pipelineEvent;
         private readonly ContentBuildLogger _logger;
+        private readonly PipelineBuildEvent _buildEvent;
 
-        public LegacyPipelineProcessorContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent pipelineEvent)
+        public LegacyPipelineProcessorContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent buildEvent)
         {
             _manager = manager;
-            _pipelineEvent = pipelineEvent;
             _logger = logger;
+            _buildEvent = buildEvent;
         }
 
         public override TargetPlatform TargetPlatform { get { return _manager.Platform; } }
@@ -44,22 +44,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public override string IntermediateDirectory { get { return _manager.IntermediateDirectory; } }
         public override string OutputDirectory { get { return _manager.OutputDirectory; } }
-        public override string OutputFilename { get { return _pipelineEvent.DestFile; } }
+        public override string OutputFilename { get { return _buildEvent.DestFile; } }
 
-        public override OpaqueDataDictionary Parameters { get { return _pipelineEvent.Parameters; } }
+        public override OpaqueDataDictionary Parameters { get { return _buildEvent.Parameters; } }
 
         public override ContentBuildLogger Logger { get { return _logger; } }
 
         public override void AddDependency(string filename)
         {
-            if (!_pipelineEvent.Dependencies.Contains(filename))
-                _pipelineEvent.Dependencies.Add(filename);
+            if (!_buildEvent.Dependencies.Contains(filename))
+                _buildEvent.Dependencies.Add(filename);
         }
 
         public override void AddOutputFile(string filename)
         {
-            if (!_pipelineEvent.BuildOutput.Contains(filename))
-                _pipelineEvent.BuildOutput.Add(filename);
+            if (!_buildEvent.BuildOutput.Contains(filename))
+                _buildEvent.BuildOutput.Add(filename);
         }
 
         public override TOutput Convert<TInput, TOutput>(   TInput input, 
@@ -72,15 +72,15 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             var processedObject = processor.Process(input, processContext);
            
             // Add its dependencies and built assets to ours.
-            foreach (var i in processContext._pipelineEvent.Dependencies)
+            foreach (var i in processContext._buildEvent.Dependencies)
             {
-                if (!_pipelineEvent.Dependencies.Contains(i))
-                    _pipelineEvent.Dependencies.Add(i);
+                if (!_buildEvent.Dependencies.Contains(i))
+                    _buildEvent.Dependencies.Add(i);
             }
-            foreach (var i in processContext._pipelineEvent.BuildAsset)
+            foreach (var i in processContext._buildEvent.BuildAsset)
             {
-                if (!_pipelineEvent.BuildAsset.Contains(i))
-                    _pipelineEvent.BuildAsset.Add(i);
+                if (!_buildEvent.BuildAsset.Contains(i))
+                    _buildEvent.BuildAsset.Add(i);
             }
 
             return (TOutput)processedObject;
@@ -100,7 +100,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool processAsset = !string.IsNullOrEmpty(processorName);
             _manager._assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
-            var buildEvent = new PipelineBuildEvent 
+            PipelineBuildEvent buildEvent = new PipelineBuildEvent 
             { 
                 SourceFile = sourceFilepath,
                 Importer = importerName,
@@ -111,8 +111,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             var processedObject = _manager.ProcessContent(buildEvent, _logger);
 
             // Record that we processed this dependent asset.
-            if (!_pipelineEvent.Dependencies.Contains(sourceFilepath))
-                _pipelineEvent.Dependencies.Add(sourceFilepath);
+            if (!_buildEvent.Dependencies.Contains(sourceFilepath))
+                _buildEvent.Dependencies.Add(sourceFilepath);
 
             return (TOutput)processedObject;
         }
@@ -130,8 +130,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             var buildEvent = _manager.BuildContent(_logger, sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
 
             // Record that we built this dependent asset.
-            if (!_pipelineEvent.BuildAsset.Contains(buildEvent.DestFile))
-                _pipelineEvent.BuildAsset.Add(buildEvent.DestFile);
+            if (!_buildEvent.BuildAsset.Contains(buildEvent.DestFile))
+                _buildEvent.BuildAsset.Add(buildEvent.DestFile);
 
             return new ExternalReference<TOutput>(buildEvent.DestFile);
         }

@@ -32,8 +32,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
     public class PipelineBuildEvent
     {
+        public static readonly string XmlExtension = ".mgcontent";
+
         private static readonly OpaqueDataDictionary EmptyParameters = new OpaqueDataDictionary();
-        public static readonly string Extension = ".mgcontent";
 
         public PipelineBuildEvent()
         {
@@ -142,15 +143,15 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         /// </remarks>
         public List<string> BuildOutput { get; set; }
 
-        public static PipelineBuildEvent Load(string filePath)
+        public static PipelineBuildEvent LoadXml(string filePath)
         {
             var fullFilePath = Path.GetFullPath(filePath);
             var deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
-            PipelineBuildEvent pipelineEvent;
+            PipelineBuildEvent buildEvent;
             try
             {
                 using (var textReader = new XmlTextReader(fullFilePath))
-                    pipelineEvent = (PipelineBuildEvent)deserializer.Deserialize(textReader);
+                    buildEvent = (PipelineBuildEvent)deserializer.Deserialize(textReader);
             }
             catch (Exception)
             {
@@ -158,14 +159,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             }
 
             // Repopulate the parameters from the serialized state.
-            foreach (var pair in pipelineEvent.ParametersXml)
-                pipelineEvent.Parameters.Add(pair.Key, pair.Value);
-            pipelineEvent.ParametersXml.Clear();
+            foreach (var pair in buildEvent.ParametersXml)
+                buildEvent.Parameters.Add(pair.Key, pair.Value);
+            buildEvent.ParametersXml.Clear();
 
-            return pipelineEvent;
+            return buildEvent;
         }
 
-        public void Save(string filePath)
+        public void SaveXml(string filePath)
         {
             var fullFilePath = Path.GetFullPath(filePath);
             // Make sure the directory exists.

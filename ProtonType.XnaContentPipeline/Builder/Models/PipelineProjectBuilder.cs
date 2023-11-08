@@ -296,14 +296,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         internal void CleanItem(PipelineItem pipelineItem)
         {
-            var intermediatePath = _project.ReplaceSymbols(_project.IntermediateDir);
+            string intermediatePath = _project.ReplaceSymbols(_project.IntermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(_project.Location, intermediatePath)));
 
-            var sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
-            var contentFile = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
-            contentFile = contentFile.Replace("\\", "/");
-            var pipelineBuildEvent = PipelineBuildEvent.Load(contentFile);
+            string sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
+            string intermediateXmlEventPath = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.XmlExtension);
+            intermediateXmlEventPath = intermediateXmlEventPath.Replace("\\", "/");
+            PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
 
             if (pipelineBuildEvent != null)
             {
@@ -317,9 +317,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 foreach (var asset in pipelineBuildEvent.BuildAsset)
                 {
                     string assetEventFilepath;
-                    var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                    PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset, out assetEventFilepath);
 
-                    if (assetCachedEvent == null)
+                    if (assetCachedBuildEvent == null)
                     {
                        // Logger.LogMessage("Cleaning {0}", asset);
 
@@ -344,17 +344,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             // First try to load the event file.
             ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
             string eventFilepath;
-            var cachedEvent = LoadBuildEvent(outputFilepath, out eventFilepath);
+            PipelineBuildEvent cachedBuildEvent = LoadBuildEvent(outputFilepath, out eventFilepath);
 
-            if (cachedEvent != null)
+            if (cachedBuildEvent != null)
             {
                 // Recursively clean additional (nested) assets.
-                foreach (var asset in cachedEvent.BuildAsset)
+                foreach (var asset in cachedBuildEvent.BuildAsset)
                 {
                     string assetEventFilepath;
-                    var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                    PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset, out assetEventFilepath);
 
-                    if (assetCachedEvent == null)
+                    if (assetCachedBuildEvent == null)
                     {
                         //Logger.LogMessage("Cleaning {0}", asset);
 
@@ -370,7 +370,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 }
 
                 // Remove related output files (non-XNB files) that were copied to the output folder.
-                foreach (var asset in cachedEvent.BuildOutput)
+                foreach (var asset in cachedBuildEvent.BuildOutput)
                 {
                     //Logger.LogMessage("Cleaning {0}", asset);
                     FileHelper.DeleteIfExists(asset);
@@ -387,11 +387,5 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         }
         */
 
-        private PipelineBuildEvent LoadBuildEvent(string destFile, out string eventFilepath)
-        {
-            var contentPath = Path.ChangeExtension(PathHelper.GetRelativePath(_project.OutputDir, destFile), PipelineBuildEvent.Extension);
-            eventFilepath = Path.Combine(_project.IntermediateDir, contentPath);
-            return PipelineBuildEvent.Load(eventFilepath);
-        }
     }
 }

@@ -88,20 +88,20 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             OutputDirectory = LegacyPathHelper.NormalizeDirectory(outputDir);
             IntermediateDirectory = LegacyPathHelper.NormalizeDirectory(intermediateDir);
 
-	        RegisterCustomConverters();
+            RegisterCustomConverters();
             
             _assembliesMgr = assembliesMgr;
         }
 
-	    public void AssignTypeConverter<TType, TTypeConverter> ()
-	    {
-		    TypeDescriptor.AddAttributes (typeof (TType), new TypeConverterAttribute (typeof (TTypeConverter)));
-	    }
+        public void AssignTypeConverter<TType, TTypeConverter> ()
+        {
+            TypeDescriptor.AddAttributes (typeof (TType), new TypeConverterAttribute (typeof (TTypeConverter)));
+        }
 
-	    private void RegisterCustomConverters ()
-	    {
+        private void RegisterCustomConverters ()
+        {
             AssignTypeConverter<Microsoft.Xna.Framework.Color, StringToColorConverter>();
-	    }
+        }
 
         public OpaqueDataDictionary ValidateProcessorParameters(string processorName, OpaqueDataDictionary processorParameters)
         {
@@ -164,11 +164,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             outputFilepath = LegacyPathHelper.Normalize(outputFilepath);
         }
 
-        private PipelineBuildEvent LoadBuildEvent(string destFile, out string eventFilepath)
+        private void DeleteBuildEvent(string destFile)
         {
-            var contentPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
-            eventFilepath = Path.Combine(IntermediateDirectory, contentPath);
-            return PipelineBuildEvent.Load(eventFilepath);
+            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
+            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
+            if (File.Exists(intermediateXmlEventPath))
+                File.Delete(intermediateXmlEventPath);
+        }
+
+        private void SaveBuildEvent(string destFile, PipelineBuildEvent buildEvent)
+        {
+            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
+            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
+            buildEvent.SaveXml(intermediateXmlEventPath);
+        }
+
+        private PipelineBuildEvent LoadBuildEvent(string destFile)
+        {
+            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
+            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
+            return PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
         }
 
         public void RegisterContent(string sourceFilepath, string outputFilepath = null, string importerName = null, string processorName = null, OpaqueDataDictionary processorParameters = null)
@@ -178,7 +193,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             _assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
-            var contentEvent = new PipelineBuildEvent
+            PipelineBuildEvent buildEvent = new PipelineBuildEvent
             {
                 SourceFile = sourceFilepath,
                 DestFile = outputFilepath,
@@ -188,7 +203,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             };
 
             // Register pipeline build event. (Required to correctly resolve external dependencies.)
-            TrackPipelineBuildEvent(contentEvent);
+            TrackPipelineBuildEvent(buildEvent);
         }
 
         public PipelineBuildEvent BuildContent(ContentBuildLogger logger, string sourceFilepath, string outputFilepath = null, string importerName = null, string processorName = null, OpaqueDataDictionary processorParameters = null)
@@ -199,7 +214,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             _assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
             // Record what we're building and how.
-            var contentEvent = new PipelineBuildEvent
+            PipelineBuildEvent buildEvent = new PipelineBuildEvent
             {
                 SourceFile = sourceFilepath,
                 DestFile = outputFilepath,
@@ -209,62 +224,60 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             };
 
             // Load the previous content event if it exists.
-            string eventFilepath;
-            var cachedEvent = LoadBuildEvent(contentEvent.DestFile, out eventFilepath);
+            PipelineBuildEvent cachedBuildEvent = LoadBuildEvent(buildEvent.DestFile);
 
-            BuildContent(contentEvent, logger, cachedEvent, eventFilepath);
+            BuildContent(buildEvent, logger, cachedBuildEvent, buildEvent.DestFile);
 
-            return contentEvent;
+            return buildEvent;
         }
 
-        private void BuildContent(PipelineBuildEvent pipelineEvent, ContentBuildLogger logger, PipelineBuildEvent cachedEvent, string eventFilepath)
+        private void BuildContent(PipelineBuildEvent buildEvent, ContentBuildLogger logger, PipelineBuildEvent cachedBuildEvent, string destFilePath)
         {
-            if (!File.Exists(pipelineEvent.SourceFile))
+            if (!File.Exists(buildEvent.SourceFile))
             {
-                logger.LogMessage("{0}", pipelineEvent.SourceFile);
-                throw new PipelineException("The source file '{0}' does not exist.", pipelineEvent.SourceFile);
+                logger.LogMessage("{0}", buildEvent.SourceFile);
+                throw new PipelineException("The source file '{0}' does not exist.", buildEvent.SourceFile);
             }
 
-            logger.PushFile(pipelineEvent.SourceFile);
+            logger.PushFile(buildEvent.SourceFile);
 
             // Keep track of all build events. (Required to resolve automatic names "AssetName_n".)
-            TrackPipelineBuildEvent(pipelineEvent);
+            TrackPipelineBuildEvent(buildEvent);
 
-            var rebuild = NeedsRebuild(_assembliesMgr, pipelineEvent, cachedEvent);
+            var rebuild = NeedsRebuild(_assembliesMgr, buildEvent, cachedBuildEvent);
             if (rebuild)
-                logger.LogMessage("{0}", pipelineEvent.SourceFile);
+                logger.LogMessage("{0}", buildEvent.SourceFile);
             else
-                logger.LogMessage("Skipping {0}", pipelineEvent.SourceFile);
+                logger.LogMessage("Skipping {0}", buildEvent.SourceFile);
 
             try
             {
                 if (!rebuild)
                 {
                     // While this asset doesn't need to be rebuilt the dependent assets might.
-                    foreach (var asset in cachedEvent.BuildAsset)
+                    foreach (var asset in cachedBuildEvent.BuildAsset)
                     {
-                        string assetEventFilepath;
-                        var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                        PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset);
 
                         // If we cannot find the cached event for the dependancy
                         // then we have to trigger a rebuild of the parent content.
-                        if (assetCachedEvent == null)
+                        if (assetCachedBuildEvent == null)
                         {
                             rebuild = true;
                             break;
                         }
 
-                        var depEvent = new PipelineBuildEvent
+                        PipelineBuildEvent depBuildEvent = new PipelineBuildEvent
                         {
-                            SourceFile = assetCachedEvent.SourceFile,
-                            DestFile = assetCachedEvent.DestFile,
-                            Importer = assetCachedEvent.Importer,
-                            Processor = assetCachedEvent.Processor,
-                            Parameters = assetCachedEvent.Parameters,
+                            SourceFile = assetCachedBuildEvent.SourceFile,
+                            DestFile = assetCachedBuildEvent.DestFile,
+                            Importer = assetCachedBuildEvent.Importer,
+                            Processor = assetCachedBuildEvent.Processor,
+                            Parameters = assetCachedBuildEvent.Parameters,
                         };
 
-                        // Give the asset a chance to rebuild.                    
-                        BuildContent(depEvent, logger, assetCachedEvent, assetEventFilepath);
+                        // Give the asset a chance to rebuild.                   
+                        BuildContent(depBuildEvent, logger, assetCachedBuildEvent, asset);
                     }
                 }
 
@@ -274,19 +287,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     var startTime = DateTime.UtcNow;
 
                     // Import and process the content.
-                    var processedObject = ProcessContent(pipelineEvent, logger);
+                    var processedObject = ProcessContent(buildEvent, logger);
 
                     // Write the content to disk.
-                    WriteXnb(processedObject, pipelineEvent);
+                    WriteXnb(processedObject, buildEvent);
 
                     // Store the timestamp of the DLLs containing the importer and processor.
-                    ImporterInfo  importerInfo  = _assembliesMgr.GetImporterInfo(pipelineEvent.Importer);
-                    ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(pipelineEvent.Processor);
-                    pipelineEvent.ImporterTime  = (importerInfo != null) ? importerInfo.AssemblyTimestamp : DateTime.MaxValue;                    
-                    pipelineEvent.ProcessorTime = (processorInfo != null) ? processorInfo.AssemblyTimestamp : DateTime.MaxValue;
+                    ImporterInfo importerInfo = _assembliesMgr.GetImporterInfo(buildEvent.Importer);
+                    ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
+                    buildEvent.ImporterTime = (importerInfo != null) ? importerInfo.AssemblyTimestamp : DateTime.MaxValue;
+                    buildEvent.ProcessorTime = (processorInfo != null) ? processorInfo.AssemblyTimestamp : DateTime.MaxValue;
 
                     // Store the new event into the intermediate folder.
-                    pipelineEvent.Save(eventFilepath);
+                    SaveBuildEvent(destFilePath, buildEvent);
 
                     var buildTime = DateTime.UtcNow - startTime;
                 }
@@ -297,22 +310,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
-        public object ProcessContent(PipelineBuildEvent pipelineEvent, ContentBuildLogger logger)
+        public object ProcessContent(PipelineBuildEvent buildEvent, ContentBuildLogger logger)
         {
-            if (!File.Exists(pipelineEvent.SourceFile))
-                throw new PipelineException("The source file '{0}' does not exist.", pipelineEvent.SourceFile);
+            if (!File.Exists(buildEvent.SourceFile))
+                throw new PipelineException("The source file '{0}' does not exist.", buildEvent.SourceFile);
 
             // Store the last write time of the source file
             // so we can detect if it has been changed.
-            pipelineEvent.SourceTime = File.GetLastWriteTime(pipelineEvent.SourceFile);
+            buildEvent.SourceTime = File.GetLastWriteTime(buildEvent.SourceFile);
 
             // Make sure we can find the importer and processor.
-            var importerInfo = _assembliesMgr.GetImporterInfo(pipelineEvent.Importer);
+            var importerInfo = _assembliesMgr.GetImporterInfo(buildEvent.Importer);
             if (importerInfo == null)
-                throw new PipelineException("Failed to create importer '{0}'", pipelineEvent.Importer);
+                throw new PipelineException("Failed to create importer '{0}'", buildEvent.Importer);
             var importer = _assembliesMgr.CreateImporter(importerInfo);
             if (importer == null)
-                throw new PipelineException("Failed to create importer '{0}'", pipelineEvent.Importer);
+                throw new PipelineException("Failed to create importer '{0}'", buildEvent.Importer);
 
             // Try importing the content.
             object importedObject;
@@ -320,8 +333,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             {
                 try
                 {
-                    var importContext = new LegacyPipelineImporterContext(this, logger, pipelineEvent);
-                    importedObject = importer.Import(pipelineEvent.SourceFile, importContext);
+                    var importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
+                    importedObject = importer.Import(buildEvent.SourceFile, importContext);
                 }
                 catch (PipelineException)
                 {
@@ -333,26 +346,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 }
                 catch (Exception inner)
                 {
-                    throw new PipelineException(string.Format("Importer '{0}' had unexpected failure.", pipelineEvent.Importer), inner);
+                    throw new PipelineException(string.Format("Importer '{0}' had unexpected failure.", buildEvent.Importer), inner);
                 }
             }
             else
             {
-                var importContext = new LegacyPipelineImporterContext(this, logger, pipelineEvent);
-                importedObject = importer.Import(pipelineEvent.SourceFile, importContext);
+                var importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
+                importedObject = importer.Import(buildEvent.SourceFile, importContext);
             }
 
             // The pipelineEvent.Processor can be null or empty. In this case the
             // asset should be imported but not processed.
-            if (string.IsNullOrEmpty(pipelineEvent.Processor))
+            if (string.IsNullOrEmpty(buildEvent.Processor))
                 return importedObject;
 
-            var processorInfo = _assembliesMgr.GetProcessorInfo(pipelineEvent.Processor);
+            var processorInfo = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
             if (processorInfo == null)
-                throw new PipelineException("Failed to create processor '{0}'", pipelineEvent.Processor);
-            var processor = _assembliesMgr.CreateProcessor(processorInfo, pipelineEvent.Parameters);
+                throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
+            var processor = _assembliesMgr.CreateProcessor(processorInfo, buildEvent.Parameters);
             if (processor == null)
-                throw new PipelineException("Failed to create processor '{0}'", pipelineEvent.Processor);
+                throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
 
             // Make sure the input type is valid.
             if (!processor.InputType.IsAssignableFrom(importedObject.GetType()))
@@ -360,7 +373,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 throw new PipelineException(
                     string.Format("The type '{0}' cannot be processed by {1} as a {2}.",
                     importedObject.GetType().FullName,
-                    pipelineEvent.Processor,
+                    buildEvent.Processor,
                     processor.InputType.FullName));
             }
 
@@ -371,7 +384,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             {
                 try
                 {
-                    var processContext = new LegacyPipelineProcessorContext(this, logger, pipelineEvent);
+                    var processContext = new LegacyPipelineProcessorContext(this, logger, buildEvent);
                     processedObject = processor.Process(importedObject, processContext);
                 }
                 catch (PipelineException)
@@ -384,12 +397,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 }
                 catch (Exception inner)
                 {
-                    throw new PipelineException(string.Format("Processor '{0}' had unexpected failure.", pipelineEvent.Processor), inner);
+                    throw new PipelineException(string.Format("Processor '{0}' had unexpected failure.", buildEvent.Processor), inner);
                 }
             }
             else
             {
-                var processContext = new LegacyPipelineProcessorContext(this, logger, pipelineEvent);
+                var processContext = new LegacyPipelineProcessorContext(this, logger, buildEvent);
                 processedObject = processor.Process(importedObject, processContext);
             }
 
@@ -400,18 +413,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             // First try to load the event file.
             ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
-            string eventFilepath = null;
-            var cachedEvent = LoadBuildEvent(outputFilepath, out eventFilepath);
+            PipelineBuildEvent cachedBuildEvent = LoadBuildEvent(outputFilepath);
 
-            if (cachedEvent != null)
+            if (cachedBuildEvent != null)
             {
                 // Recursively clean additional (nested) assets.
-                foreach (var asset in cachedEvent.BuildAsset)
+                foreach (var asset in cachedBuildEvent.BuildAsset)
                 {
-                    string assetEventFilepath;
-                    var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                    PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset);
 
-                    if (assetCachedEvent == null)
+                    if (assetCachedBuildEvent == null)
                     {
                         logger.LogMessage("Cleaning {0}", asset);
 
@@ -420,8 +431,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                             File.Delete(asset);
 
                         // Remove event file (.mgcontent file) from intermediate folder.
-                        if (File.Exists(assetEventFilepath))
-                            File.Delete(assetEventFilepath);
+                        DeleteBuildEvent(asset);
                         continue;
                     }
 
@@ -429,7 +439,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 }
 
                 // Remove related output files (non-XNB files) that were copied to the output folder.
-                foreach (var asset in cachedEvent.BuildOutput)
+                foreach (var asset in cachedBuildEvent.BuildOutput)
                 {
                     logger.LogMessage("Cleaning {0}", asset);
                     if (File.Exists(asset))
@@ -444,8 +454,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 File.Delete(outputFilepath);
 
             // Remove event file (.mgcontent file) from intermediate folder.
-            if (File.Exists(eventFilepath))
-                File.Delete(eventFilepath);
+            DeleteBuildEvent(outputFilepath);
 
             lock (_pipelineBuildEvents)
             {
@@ -453,10 +462,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
-        private void WriteXnb(object content, PipelineBuildEvent pipelineEvent)
+        private void WriteXnb(object content, PipelineBuildEvent buildEvent)
         {
             // Make sure the output directory exists.
-            var outputFileDir = Path.GetDirectoryName(pipelineEvent.DestFile);
+            var outputFileDir = Path.GetDirectoryName(buildEvent.DestFile);
 
             Directory.CreateDirectory(outputFileDir);
 
@@ -464,32 +473,32 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 _compiler = new ContentCompiler();
 
             // Write the XNB.
-            using (var stream = new FileStream(pipelineEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var stream = new FileStream(buildEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
                 _compiler.Compile(stream, content, Platform, Profile, CompressContent, OutputDirectory, outputFileDir);
 
             // Store the last write time of the output XNB here
             // so we can verify it hasn't been tampered with.
-            pipelineEvent.DestTime = File.GetLastWriteTime(pipelineEvent.DestFile);
+            buildEvent.DestTime = File.GetLastWriteTime(buildEvent.DestFile);
         }
 
         /// <summary>
         /// Stores the pipeline build event (in memory) if no matching event is found.
         /// </summary>
-        /// <param name="pipelineEvent">The pipeline build event.</param>
-        private void TrackPipelineBuildEvent(PipelineBuildEvent pipelineEvent)
+        /// <param name="buildEvent">The pipeline build event.</param>
+        private void TrackPipelineBuildEvent(PipelineBuildEvent buildEvent)
         {
             List<PipelineBuildEvent> pipelineBuildEvents;
             lock (_pipelineBuildEvents)
             {
-                bool eventsFound = _pipelineBuildEvents.TryGetValue(pipelineEvent.SourceFile, out pipelineBuildEvents);
+                bool eventsFound = _pipelineBuildEvents.TryGetValue(buildEvent.SourceFile, out pipelineBuildEvents);
                 if (!eventsFound)
                 {
                     pipelineBuildEvents = new List<PipelineBuildEvent>();
-                    _pipelineBuildEvents.Add(pipelineEvent.SourceFile, pipelineBuildEvents);
+                    _pipelineBuildEvents.Add(buildEvent.SourceFile, pipelineBuildEvents);
                 }
 
-                if (FindMatchingEvent(pipelineBuildEvents, pipelineEvent.DestFile, pipelineEvent.Importer, pipelineEvent.Processor, pipelineEvent.Parameters) == null)
-                    pipelineBuildEvents.Add(pipelineEvent);
+                if (FindMatchingEvent(pipelineBuildEvents, buildEvent.DestFile, buildEvent.Importer, buildEvent.Processor, buildEvent.Parameters) == null)
+                    pipelineBuildEvents.Add(buildEvent);
             }
         }
 
@@ -542,8 +551,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             for (int index = 0; ; index++)
             {
                 string destFile = assetName + '_' + index;
-                string eventFile;
-                var existingBuildEvent = LoadBuildEvent(destFile, out eventFile);
+                PipelineBuildEvent existingBuildEvent = LoadBuildEvent(destFile);
                 if (existingBuildEvent == null)
                     return destFile;
 
