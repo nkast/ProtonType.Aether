@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
@@ -56,7 +55,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         static public SourceFileCollection LoadXml(string filePath)
         {
-            var deserializer = new XmlSerializer(typeof(SourceFileCollection));
+            XmlSerializer deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
             {
                 using (var textReader = new StreamReader(filePath))
@@ -70,10 +69,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public void SaveXml(string filePath)
         {
-            var serializer = new XmlSerializer(typeof(SourceFileCollection));
+            XmlSerializer serializer = new XmlSerializer(typeof(SourceFileCollection));
             using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
-                serializer.Serialize(textWriter, this);            
+                serializer.Serialize(textWriter, this);
         }
+
+        public int SourceFilesCount { get { return this.SourceFiles.Count; } }
 
         internal void AddFile(string sourceFile, string outputFile)
         {
@@ -81,20 +82,20 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             this.DestFiles.Add(outputFile);
         }
 
-        public void Merge(SourceFileCollection other)
+        public void Merge(SourceFileCollection previousFileCollection)
         {
-            foreach (var sourceFile in other.SourceFiles)
+            foreach (string prevSourceFile in previousFileCollection.SourceFiles)
             {
-                var inContent = SourceFiles.Any(e => string.Equals(e, sourceFile, StringComparison.InvariantCultureIgnoreCase));
-                if (!inContent)
-                    SourceFiles.Add(sourceFile);
+                bool contains = this.SourceFiles.Exists((sourceFile) => string.Equals(sourceFile, prevSourceFile, StringComparison.InvariantCultureIgnoreCase));
+                if (!contains)
+                    this.SourceFiles.Add(prevSourceFile);
             }
 
-            foreach (var destFile in other.DestFiles)
+            foreach (string prevDestFile in previousFileCollection.DestFiles)
             {
-                var inContent = DestFiles.Any(e => string.Equals(e, destFile, StringComparison.InvariantCultureIgnoreCase));
-                if (!inContent)
-                    DestFiles.Add(destFile);
+                bool contains = this.DestFiles.Exists((destFile) => string.Equals(destFile, prevDestFile, StringComparison.InvariantCultureIgnoreCase));
+                if (!contains)
+                    this.DestFiles.Add(prevDestFile);
             }
         }
     }

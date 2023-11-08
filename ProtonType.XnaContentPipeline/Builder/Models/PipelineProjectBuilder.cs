@@ -303,6 +303,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             string sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
             string intermediateXmlEventPath = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.XmlExtension);
             intermediateXmlEventPath = intermediateXmlEventPath.Replace("\\", "/");
+            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
             PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
 
             if (pipelineBuildEvent != null)

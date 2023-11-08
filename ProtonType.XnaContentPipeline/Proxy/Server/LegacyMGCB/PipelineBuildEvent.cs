@@ -21,11 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
+
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
@@ -41,7 +43,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             Importer = string.Empty;
             Processor = string.Empty;
             Parameters = new OpaqueDataDictionary();
-            ParametersXml = new List<Pair>();
+            XmlParameters = new List<XmlParameter>();
             Dependencies = new List<string>();
             BuildAsset = new List<string>();
             BuildOutput = new List<string>();
@@ -84,16 +86,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         [XmlIgnore]
         public OpaqueDataDictionary Parameters { get; set; }
 
-        public class Pair
+        public class XmlParameter
         {
             public string Key { get; set; }
             public string Value { get; set; }
 
-            public Pair()
+            public XmlParameter()
             {
             }
 
-            public Pair(string key, string value)
+            public XmlParameter(string key, string value)
             {
                 this.Key = key;
                 this.Value = value;
@@ -101,7 +103,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         }
 
         [XmlElement("Parameters")]
-        public List<Pair> ParametersXml { get; set; }
+        public List<XmlParameter> XmlParameters { get; set; }
 
         /// <summary>
         /// Gets or sets the dependencies.
@@ -143,12 +145,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public static PipelineBuildEvent LoadXml(string filePath)
         {
-            var fullFilePath = Path.GetFullPath(filePath);
-            var deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
+            XmlSerializer deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
             PipelineBuildEvent buildEvent;
             try
             {
-                using (var textReader = new XmlTextReader(fullFilePath))
+                using (var textReader = new XmlTextReader(filePath))
                     buildEvent = (PipelineBuildEvent)deserializer.Deserialize(textReader);
             }
             catch (Exception)
@@ -157,41 +158,40 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
 
             // Repopulate the parameters from the serialized state.
-            foreach (var pair in buildEvent.ParametersXml)
-                buildEvent.Parameters.Add(pair.Key, pair.Value);
-            buildEvent.ParametersXml.Clear();
+            foreach (XmlParameter xmlParam in buildEvent.XmlParameters)
+                buildEvent.Parameters.Add(xmlParam.Key, xmlParam.Value);
+            buildEvent.XmlParameters.Clear();
 
             return buildEvent;
         }
 
         public void SaveXml(string filePath)
         {
-            var fullFilePath = Path.GetFullPath(filePath);
             // Make sure the directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath) + Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath) + Path.DirectorySeparatorChar);
 
             // Convert the parameters into something we can serialize.
-            ParametersXml.Clear();
-            foreach (var pair in Parameters)
+            XmlParameters.Clear();
+            foreach (KeyValuePair<string, object> param in Parameters)
             {
-                var key = pair.Key;
-                var valueStr = ConvertToString(pair.Value);
-                ParametersXml.Add(new Pair(key, valueStr));
+                string key = param.Key;
+                string valueStr = ConvertToString(param.Value);
+                XmlParameters.Add(new XmlParameter(key, valueStr));
             }
 
             // Serialize our state.
-            var serializer = new XmlSerializer(typeof(PipelineBuildEvent));
-            using (var textWriter = new StreamWriter(fullFilePath, false, new UTF8Encoding(false)))
+            XmlSerializer serializer = new XmlSerializer(typeof(PipelineBuildEvent));
+            using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
                 serializer.Serialize(textWriter, this);
         }
-        
-        internal static string ConvertToString(object value)
+
+        private static string ConvertToString(object value)
         {
             if (value == null)
                 return null;
 
             //Convert.ToString(value, CultureInfo.InvariantCulture);
-            var typeConverter = TypeDescriptor.GetConverter(value.GetType());
+            TypeConverter typeConverter = TypeDescriptor.GetConverter(value.GetType());
             return typeConverter.ConvertToInvariantString(value);
         }
     }

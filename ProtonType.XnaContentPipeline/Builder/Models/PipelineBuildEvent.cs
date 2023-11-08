@@ -28,6 +28,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
 
+
 namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
     public class PipelineBuildEvent
@@ -43,7 +44,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             Importer = string.Empty;
             Processor = string.Empty;
             Parameters = new OpaqueDataDictionary();
-            ParametersXml = new List<Pair>();
+            XmlParameters = new List<XmlParameter>();
             Dependencies = new List<string>();
             BuildAsset = new List<string>();
             BuildOutput = new List<string>();
@@ -86,16 +87,16 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         [XmlIgnore]
         public OpaqueDataDictionary Parameters { get; set; }
 
-        public class Pair
+        public class XmlParameter
         {
             public string Key { get; set; }
             public string Value { get; set; }
 
-            public Pair()
+            public XmlParameter()
             {
             }
 
-            public Pair(string key, string value)
+            public XmlParameter(string key, string value)
             {
                 this.Key = key;
                 this.Value = value;
@@ -103,7 +104,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         }
 
         [XmlElement("Parameters")]
-        public List<Pair> ParametersXml { get; set; }
+        public List<XmlParameter> XmlParameters { get; set; }
 
         /// <summary>
         /// Gets or sets the dependencies.
@@ -145,12 +146,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public static PipelineBuildEvent LoadXml(string filePath)
         {
-            var fullFilePath = Path.GetFullPath(filePath);
-            var deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
+            XmlSerializer deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
             PipelineBuildEvent buildEvent;
             try
             {
-                using (var textReader = new XmlTextReader(fullFilePath))
+                using (var textReader = new XmlTextReader(filePath))
                     buildEvent = (PipelineBuildEvent)deserializer.Deserialize(textReader);
             }
             catch (Exception)
@@ -159,31 +159,30 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             }
 
             // Repopulate the parameters from the serialized state.
-            foreach (var pair in buildEvent.ParametersXml)
-                buildEvent.Parameters.Add(pair.Key, pair.Value);
-            buildEvent.ParametersXml.Clear();
+            foreach (XmlParameter xmlParam in buildEvent.XmlParameters)
+                buildEvent.Parameters.Add(xmlParam.Key, xmlParam.Value);
+            buildEvent.XmlParameters.Clear();
 
             return buildEvent;
         }
 
         public void SaveXml(string filePath)
         {
-            var fullFilePath = Path.GetFullPath(filePath);
             // Make sure the directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath) + Path.DirectorySeparatorChar);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath) + Path.DirectorySeparatorChar);
 
             // Convert the parameters into something we can serialize.
-            ParametersXml.Clear();
-            foreach (var pair in Parameters)
+            XmlParameters.Clear();
+            foreach (KeyValuePair<string, object> param in Parameters)
             {
-                var key = pair.Key;
-                var valueStr = ConvertToString(pair.Value);
-                ParametersXml.Add(new Pair(key, valueStr));
+                string key = param.Key;
+                string valueStr = ConvertToString(param.Value);
+                XmlParameters.Add(new XmlParameter(key, valueStr));
             }
 
             // Serialize our state.
-            var serializer = new XmlSerializer(typeof(PipelineBuildEvent));
-            using (var textWriter = new StreamWriter(fullFilePath, false, new UTF8Encoding(false)))
+            XmlSerializer serializer = new XmlSerializer(typeof(PipelineBuildEvent));
+            using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
                 serializer.Serialize(textWriter, this);
         }
 
@@ -198,12 +197,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             // Verify that the last write time of the source file matches
             // what we recorded when it was built.  If it is different
             // that means someone modified it and we need to rebuild.
-            var sourceWriteTime = File.GetLastWriteTime(SourceFile);
+            DateTime sourceWriteTime = File.GetLastWriteTime(SourceFile);
             if (cachedEvent.SourceTime != sourceWriteTime)
                 return true;
 
             // Do the same test for the dest file.
-            var destWriteTime = File.GetLastWriteTime(DestFile);
+            DateTime destWriteTime = File.GetLastWriteTime(DestFile);
             if (cachedEvent.DestTime != destWriteTime)
                 return true;
 
@@ -213,7 +212,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 return true;
 
             // Are any of the dependancy files newer than the dest file?
-            foreach (var depFile in cachedEvent.Dependencies)
+            foreach (string depFile in cachedEvent.Dependencies)
             {
                 if (File.GetLastWriteTime(depFile) >= destWriteTime)
                     return true;
@@ -225,13 +224,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 cachedEvent.DestFile != DestFile)
                 return true;
 
+            // Did the importer change?
+            if (cachedEvent.Importer != Importer)
+                return true;
+
+            // Did the processor change?
+            if (cachedEvent.Processor != Processor)
+                return true;
+
             // Did the importer assembly change?
             DateTime importerAssemblyTimestamp = manager.GetImporterAssemblyTimestamp(cachedEvent.Importer);
             if (importerAssemblyTimestamp > cachedEvent.ImporterTime)
-                return true;
-
-            // Did the importer change?
-            if (cachedEvent.Importer != Importer)
                 return true;
 
             // Did the processor assembly change?
@@ -239,12 +242,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             if (processorAssemblyTimestamp > cachedEvent.ProcessorTime)
                 return true;
 
-            // Did the processor change?
-            if (cachedEvent.Processor != Processor)
-                return true;
-
             // Did the parameters change?
-            var defaultValues = manager.GetProcessorDefaultValues(Processor);
+            OpaqueDataDictionary defaultValues = manager.GetProcessorDefaultValues(Processor);
             if (!AreParametersEqual(cachedEvent.Parameters, Parameters, defaultValues))
                 return true;
 
@@ -274,13 +273,13 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             // the default values.
             if (parameters0.Count < parameters1.Count)
             {
-                var dummy = parameters0;
+                OpaqueDataDictionary dummy = parameters0;
                 parameters0 = parameters1;
                 parameters1 = dummy;
             }
 
             // Compare parameters0 with parameters1 or defaultValues.
-            foreach (var pair in parameters0)
+            foreach (KeyValuePair<string, object> pair in parameters0)
             {
                 object value0 = pair.Value;
                 object value1;
@@ -294,7 +293,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             }
 
             // Compare parameters which are only in parameters1 with defaultValues.
-            foreach (var pair in parameters1)
+            foreach (KeyValuePair<string, object> pair in parameters1)
             {
                 if (parameters0.ContainsKey(pair.Key))
                     continue;
@@ -332,7 +331,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             if (value == null)
                 return null;
 
-            var typeConverter = TypeDescriptor.GetConverter(value.GetType());
+            TypeConverter typeConverter = TypeDescriptor.GetConverter(value.GetType());
             return typeConverter.ConvertToInvariantString(value);
         }
     }

@@ -176,6 +176,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
             string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
+            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
             buildEvent.SaveXml(intermediateXmlEventPath);
         }
 
@@ -183,6 +184,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
             string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
+            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
             return PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
         }
 
@@ -244,7 +246,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             // Keep track of all build events. (Required to resolve automatic names "AssetName_n".)
             TrackPipelineBuildEvent(buildEvent);
 
-            var rebuild = NeedsRebuild(_assembliesMgr, buildEvent, cachedBuildEvent);
+            bool rebuild = NeedsRebuild(_assembliesMgr, buildEvent, cachedBuildEvent);
             if (rebuild)
                 logger.LogMessage("{0}", buildEvent.SourceFile);
             else
@@ -255,7 +257,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 if (!rebuild)
                 {
                     // While this asset doesn't need to be rebuilt the dependent assets might.
-                    foreach (var asset in cachedBuildEvent.BuildAsset)
+                    foreach (string asset in cachedBuildEvent.BuildAsset)
                     {
                         PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset);
 
@@ -284,10 +286,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 // Do we need to rebuild?
                 if (rebuild)
                 {
-                    var startTime = DateTime.UtcNow;
+                    DateTime startTime = DateTime.UtcNow;
 
                     // Import and process the content.
-                    var processedObject = ProcessContent(buildEvent, logger);
+                    object processedObject = ProcessContent(buildEvent, logger);
 
                     // Write the content to disk.
                     WriteXnb(processedObject, buildEvent);
@@ -301,7 +303,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     // Store the new event into the intermediate folder.
                     SaveBuildEvent(destFilePath, buildEvent);
 
-                    var buildTime = DateTime.UtcNow - startTime;
+                    TimeSpan buildTime = DateTime.UtcNow - startTime;
                 }
             }
             finally
@@ -320,10 +322,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             buildEvent.SourceTime = File.GetLastWriteTime(buildEvent.SourceFile);
 
             // Make sure we can find the importer and processor.
-            var importerInfo = _assembliesMgr.GetImporterInfo(buildEvent.Importer);
+            ImporterInfo importerInfo = _assembliesMgr.GetImporterInfo(buildEvent.Importer);
             if (importerInfo == null)
                 throw new PipelineException("Failed to create importer '{0}'", buildEvent.Importer);
-            var importer = _assembliesMgr.CreateImporter(importerInfo);
+            IContentImporter importer = _assembliesMgr.CreateImporter(importerInfo);
             if (importer == null)
                 throw new PipelineException("Failed to create importer '{0}'", buildEvent.Importer);
 
@@ -360,10 +362,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             if (string.IsNullOrEmpty(buildEvent.Processor))
                 return importedObject;
 
-            var processorInfo = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
+            ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
             if (processorInfo == null)
                 throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
-            var processor = _assembliesMgr.CreateProcessor(processorInfo, buildEvent.Parameters);
+            IContentProcessor processor = _assembliesMgr.CreateProcessor(processorInfo, buildEvent.Parameters);
             if (processor == null)
                 throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
 
@@ -648,24 +650,24 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 cachedbuildEvent.DestFile != buildEvent.DestFile)
                 return true;
 
+            // Did the importer change?
+            if (cachedbuildEvent.Importer != buildEvent.Importer)
+                return true;
+
+            // Did the processor change?
+            if (cachedbuildEvent.Processor != buildEvent.Processor)
+                return true;
+
             // Did the importer assembly change?
             var cachedImporterInfo = assembliesMgr.GetImporterInfo(cachedbuildEvent.Importer);
             DateTime importerAssemblyTimestamp = (cachedImporterInfo != null) ? cachedImporterInfo.AssemblyTimestamp : DateTime.MaxValue;
             if (importerAssemblyTimestamp > cachedbuildEvent.ImporterTime)
                 return true;
 
-            // Did the importer change?
-            if (cachedbuildEvent.Importer != buildEvent.Importer)
-                return true;
-
             // Did the processor assembly change?
             var cachedProcessorInfo = assembliesMgr.GetProcessorInfo(cachedbuildEvent.Processor);
             DateTime processorInfoAssemblyTimestamp = (cachedProcessorInfo != null) ? cachedProcessorInfo.AssemblyTimestamp : DateTime.MaxValue;
             if (processorInfoAssemblyTimestamp > cachedbuildEvent.ProcessorTime)
-                return true;
-
-            // Did the processor change?
-            if (cachedbuildEvent.Processor != buildEvent.Processor)
                 return true;
 
             // Did the parameters change?
@@ -705,13 +707,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             // the default values.
             if (parameters0.Count < parameters1.Count)
             {
-                var dummy = parameters0;
+                OpaqueDataDictionary dummy = parameters0;
                 parameters0 = parameters1;
                 parameters1 = dummy;
             }
 
             // Compare parameters0 with parameters1 or defaultValues.
-            foreach (var pair in parameters0)
+            foreach (KeyValuePair<string, object> pair in parameters0)
             {
                 object value0 = pair.Value;
                 object value1;
@@ -725,7 +727,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
 
             // Compare parameters which are only in parameters1 with defaultValues.
-            foreach (var pair in parameters1)
+            foreach (KeyValuePair<string, object> pair in parameters1)
             {
                 if (parameters0.ContainsKey(pair.Key))
                     continue;

@@ -542,7 +542,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             // list if we have any to serialize.
             DeleteFileCollection(intermediatePath);
 
-            if (newFileCollection.SourceFiles.Count > 0)
+            if (newFileCollection.SourceFilesCount > 0)
                 SaveFileCollection(intermediatePath, newFileCollection);
 
             return TaskResult.SUCCEEDED;
