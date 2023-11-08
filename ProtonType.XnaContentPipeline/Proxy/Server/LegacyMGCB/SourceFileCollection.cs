@@ -59,7 +59,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             try
             {
                 using (var textReader = new StreamReader(filePath))
-                    return (SourceFileCollection)deserializer.Deserialize(textReader);
+                {
+                    SourceFileCollection result = (SourceFileCollection)deserializer.Deserialize(textReader);
+
+                    if (result.DestFiles.Count != result.SourceFiles.Count)
+                        return null; // file is invalid
+
+                    return result;
+                }
             }
             catch (Exception)
             {
