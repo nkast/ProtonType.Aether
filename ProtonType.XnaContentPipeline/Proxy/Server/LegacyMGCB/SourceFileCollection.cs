@@ -55,11 +55,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         static public SourceFileCollection LoadXml(string filePath)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
             {
                 using (var textReader = new StreamReader(filePath))
                 {
+                    XmlSerializer deserializer = new XmlSerializer(typeof(SourceFileCollection));
                     SourceFileCollection result = (SourceFileCollection)deserializer.Deserialize(textReader);
 
                     if (result.DestFiles.Count != result.SourceFiles.Count)
@@ -76,9 +76,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public void SaveXml(string filePath)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SourceFileCollection));
             using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(SourceFileCollection));
                 serializer.Serialize(textWriter, this);
+            }
         }
 
         public int SourceFilesCount { get { return this.SourceFiles.Count; } }
@@ -94,7 +96,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             for (int i = 0; i < previousFileCollection.SourceFiles.Count; i++)
             {
                 string prevSourceFile = previousFileCollection.SourceFiles[i];
-                string prevDestFile   = previousFileCollection.DestFiles[i];
+                string prevDestFile = previousFileCollection.DestFiles[i];
 
                 bool contains = this.SourceFiles.Exists((sourceFile) => string.Equals(sourceFile, prevSourceFile, StringComparison.InvariantCultureIgnoreCase));
                 if (!contains)
@@ -102,7 +104,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     this.SourceFiles.Add(prevSourceFile);
                     this.DestFiles.Add(prevDestFile);
                 }
-            }            
+            }
         }
     }
 }

@@ -146,12 +146,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public static PipelineBuildEvent LoadXml(string filePath)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
             PipelineBuildEvent buildEvent;
             try
             {
                 using (var textReader = new XmlTextReader(filePath))
+                {
+                    XmlSerializer deserializer = new XmlSerializer(typeof(PipelineBuildEvent));
                     buildEvent = (PipelineBuildEvent)deserializer.Deserialize(textReader);
+                }
             }
             catch (Exception)
             {
@@ -180,10 +182,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 XmlParameters.Add(new XmlParameter(key, valueStr));
             }
 
-            // Serialize our state.
-            XmlSerializer serializer = new XmlSerializer(typeof(PipelineBuildEvent));
             using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(PipelineBuildEvent));
                 serializer.Serialize(textWriter, this);
+            }
         }
 
         /*

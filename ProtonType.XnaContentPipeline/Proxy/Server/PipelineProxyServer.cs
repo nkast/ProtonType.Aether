@@ -564,8 +564,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private SourceFileCollection LoadFileCollection(string intermediatePath)
         {
             string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
-            SourceFileCollection fileCollection = SourceFileCollection.LoadXml(intermediateXmlFileCollectionPath);
-            return fileCollection;
+            return SourceFileCollection.LoadXml(intermediateXmlFileCollectionPath);
         }
 
         public class CopyItem
