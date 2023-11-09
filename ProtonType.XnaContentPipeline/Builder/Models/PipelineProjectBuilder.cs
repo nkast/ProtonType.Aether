@@ -301,10 +301,10 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(_project.Location, intermediatePath)));
 
             string sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
-            string intermediateXmlEventPath = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.XmlExtension);
-            intermediateXmlEventPath = intermediateXmlEventPath.Replace("\\", "/");
-            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
-            PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
+            string intermediateEventPath = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
+            intermediateEventPath = intermediateEventPath.Replace("\\", "/");
+            intermediateEventPath = Path.GetFullPath(intermediateEventPath);
+            PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadBinary(intermediateEventPath);
 
             if (pipelineBuildEvent != null)
             {

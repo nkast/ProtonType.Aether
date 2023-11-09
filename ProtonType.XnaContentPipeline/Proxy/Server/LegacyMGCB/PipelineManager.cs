@@ -166,26 +166,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void DeleteBuildEvent(string destFile)
         {
-            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
-            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
-            if (File.Exists(intermediateXmlEventPath))
-                File.Delete(intermediateXmlEventPath);
+            string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            if (File.Exists(intermediateEventPath))
+                File.Delete(intermediateEventPath);
         }
 
         private void SaveBuildEvent(string destFile, PipelineBuildEvent buildEvent)
         {
-            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
-            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
-            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
-            buildEvent.SaveXml(intermediateXmlEventPath);
+            string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            intermediateEventPath = Path.GetFullPath(intermediateEventPath);
+            buildEvent.SaveBinary(intermediateEventPath);
         }
 
         private PipelineBuildEvent LoadBuildEvent(string destFile)
         {
-            string relativeXmlEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.XmlExtension);
-            string intermediateXmlEventPath = Path.Combine(IntermediateDirectory, relativeXmlEventPath);
-            intermediateXmlEventPath = Path.GetFullPath(intermediateXmlEventPath);
-            return PipelineBuildEvent.LoadXml(intermediateXmlEventPath);
+            string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            intermediateEventPath = Path.GetFullPath(intermediateEventPath);
+            return PipelineBuildEvent.LoadBinary(intermediateEventPath);
         }
 
         public void RegisterContent(string sourceFilepath, string outputFilepath = null, string importerName = null, string processorName = null, OpaqueDataDictionary processorParameters = null)

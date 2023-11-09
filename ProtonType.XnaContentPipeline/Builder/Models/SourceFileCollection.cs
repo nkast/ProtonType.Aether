@@ -21,18 +21,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
-    [XmlRoot(ElementName = "SourceFileCollection")]
     public sealed class SourceFileCollection
     {
         public const string Extension = ".kniContent";
-        public static readonly string XmlExtension = ".mgcontent";
 
         public GraphicsProfile Profile { get; set; }
 
@@ -40,10 +36,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public string Config { get; set; }
 
-        [XmlArrayItem("File")]
         public List<string> SourceFiles { get; set; }
 
-        [XmlArrayItem("File")]
         public List<string> DestFiles { get; set; }
 
 
@@ -54,35 +48,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             Config = string.Empty;
         }
 
-        static public SourceFileCollection LoadXml(string filePath)
-        {
-            try
-            {
-                using (var textReader = new StreamReader(filePath))
-                {
-                    XmlSerializer deserializer = new XmlSerializer(typeof(SourceFileCollection));
-                    SourceFileCollection result = (SourceFileCollection)deserializer.Deserialize(textReader);
-
-                    if (result.DestFiles.Count != result.SourceFiles.Count)
-                        return null; // file is invalid
-
-                    return result;
-                }
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public void SaveXml(string filePath)
-        {
-            using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(SourceFileCollection));
-                serializer.Serialize(textWriter, this);
-            }
-        }
 
         public void SaveBinary(string filePath)
         {

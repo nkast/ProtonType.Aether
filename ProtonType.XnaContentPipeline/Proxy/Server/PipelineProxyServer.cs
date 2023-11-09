@@ -550,21 +550,21 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private static void DeleteFileCollection(string intermediatePath)
         {
-            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
-            if (File.Exists(intermediateXmlFileCollectionPath))
-                File.Delete(intermediateXmlFileCollectionPath);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            if (File.Exists(intermediateFileCollectionPath))
+                File.Delete(intermediateFileCollectionPath);
         }
 
         private static void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
         {
-            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
-            fileCollection.SaveXml(intermediateXmlFileCollectionPath);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            fileCollection.SaveBinary(intermediateFileCollectionPath);
         }
 
         private SourceFileCollection LoadFileCollection(string intermediatePath)
         {
-            string intermediateXmlFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.XmlExtension);
-            return SourceFileCollection.LoadXml(intermediateXmlFileCollectionPath);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            return SourceFileCollection.LoadBinary(intermediateFileCollectionPath);
         }
 
         public class CopyItem
