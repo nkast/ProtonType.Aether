@@ -22,6 +22,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
     {
         Undefined,
         BaseDirectory,
+        ProjectFilename,
         AddAssembly,
         GetImporters,
         GetProcessors,

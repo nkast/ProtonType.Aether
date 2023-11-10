@@ -120,6 +120,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
+        public void SetProjectFilename(string projectFilename)
+        {
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.ProjectFilename);
+                Writer.Write(projectFilename);
+                Writer.Flush();
+            }
+        }
+
         public PipelineAsyncTask AddAssembly(IProxyLogger logger, string assemblyPath)
         {
             var contextGuid = Guid.NewGuid();

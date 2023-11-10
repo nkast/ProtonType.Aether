@@ -42,6 +42,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private readonly Dictionary<string, List<PipelineBuildEvent>> _pipelineBuildEvents;
 
         public string ProjectDirectory { get; private set; }
+        public string ProjectFilename { get; private set; }
+
         public string OutputDirectory { get; private set; }
         public string IntermediateDirectory { get; private set; }
 
@@ -77,7 +79,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// </summary>
         public bool RethrowExceptions { get; set; }
 
-        public PipelineManager(string projectDir, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr)
+        public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr)
         {
             _pipelineBuildEvents = new Dictionary<string, List<PipelineBuildEvent>>();
             RethrowExceptions = true;
@@ -85,6 +87,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             Logger = null;
 
             ProjectDirectory = LegacyPathHelper.NormalizeDirectory(projectDir);
+            ProjectFilename = projectFilename;
+
             OutputDirectory = LegacyPathHelper.NormalizeDirectory(outputDir);
             IntermediateDirectory = LegacyPathHelper.NormalizeDirectory(intermediateDir);
 
@@ -167,7 +171,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private void DeleteBuildEvent(string destFile)
         {
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, ProjectFilename, relativeEventPath);
             if (File.Exists(intermediateEventPath))
                 File.Delete(intermediateEventPath);
         }
@@ -175,7 +179,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private void SaveBuildEvent(string destFile, PipelineBuildEvent buildEvent)
         {
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, ProjectFilename, relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             buildEvent.SaveBinary(intermediateEventPath);
         }
@@ -183,7 +187,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private PipelineBuildEvent LoadBuildEvent(string destFile)
         {
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), PipelineBuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(ProjectFilename), relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             return PipelineBuildEvent.LoadBinary(intermediateEventPath);
         }

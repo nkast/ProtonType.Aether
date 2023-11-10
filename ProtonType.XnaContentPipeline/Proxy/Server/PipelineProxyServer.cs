@@ -30,6 +30,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
     class PipelineProxyServer : IPCServer
     {
         private string BaseDirectory;
+        private string ProjectFilename;
+
         private readonly ParametersContext _globalContext = new ParametersContext();
         private readonly ContentBuildLogger _globalLogger;
         private readonly AssembliesMgr _assembliesMgr;
@@ -132,6 +134,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.BaseDirectory:
                         SetBaseDirectory();
                         break;                    
+                    case ProxyMsgType.ProjectFilename:
+                        SetProjectFilename();
+                        break;
                     case ProxyMsgType.AddAssembly:
                         AddAssembly();
                         break;
@@ -192,6 +197,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             var baseDirectory = Reader.ReadString();
             this.BaseDirectory = baseDirectory;
+        }
+
+        private void SetProjectFilename()
+        {
+            var projectFilename = Reader.ReadString();
+            this.ProjectFilename = projectFilename;
         }
 
         private void AddAssembly()
@@ -458,7 +469,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
             
             PipelineManager _manager;
-            _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath, _assembliesMgr);
+            _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr);
             _manager.CompressContent = CompressContent;
             ContentBuildLogger logger = new BuildLogger(this, itemContext.Guid);
             _manager.Logger = logger;
@@ -548,22 +559,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return TaskResult.SUCCEEDED;
         }
 
-        private static void DeleteFileCollection(string intermediatePath)
+        private void DeleteFileCollection(string intermediatePath)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
             if (File.Exists(intermediateFileCollectionPath))
                 File.Delete(intermediateFileCollectionPath);
         }
 
-        private static void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
+        private void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
             fileCollection.SaveBinary(intermediateFileCollectionPath);
         }
 
         private SourceFileCollection LoadFileCollection(string intermediatePath)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, SourceFileCollection.Extension);
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
             return SourceFileCollection.LoadBinary(intermediateFileCollectionPath);
         }
 

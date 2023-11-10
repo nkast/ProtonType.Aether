@@ -197,6 +197,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             var logger = new ProxyLogger(_viewLogger);
 
             pipelineProxy.SetBaseDirectory(this._project.Location);
+            pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.OriginalPath));
                                 
             pipelineProxy.SetRebuild();
             pipelineProxy.SetIncremental();
@@ -300,8 +301,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(_project.Location, intermediatePath)));
 
+            string projectFilename = Path.GetFileName(_project.OriginalPath);
             string sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
-            string intermediateEventPath = Path.Combine(intermediatePath, pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
+            string intermediateEventPath = Path.Combine(intermediatePath, Path.GetFileNameWithoutExtension(projectFilename), pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
             intermediateEventPath = intermediateEventPath.Replace("\\", "/");
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadBinary(intermediateEventPath);
