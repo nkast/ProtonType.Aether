@@ -310,17 +310,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             return null;
         }
 
-        public ImporterInfo GetImporterInfoByExtension(string ext)
-        {
-            foreach (ImporterInfo importerInfo in _importers)
-            {
-                if (importerInfo.Description.FileExtensions.Any(e => e.Equals(ext, StringComparison.InvariantCultureIgnoreCase)))
-                    return importerInfo;
-            }
-
-            return null;
-        }
-
         public IContentImporter CreateImporter(ImporterInfo importer)
         {
             return Activator.CreateInstance(importer.Type) as IContentImporter;
@@ -363,22 +352,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             // Resolve the importer name.
             if (string.IsNullOrEmpty(importerName))
             {
-                importerName = null;
-                ImporterInfo importerInfo = GetImporterInfoByExtension(Path.GetExtension(sourceFilepath));
-                if (importerInfo != null)
-                    importerName = importerInfo.Description.TypeName;
+                string ext = Path.GetExtension(sourceFilepath);
+                foreach (ImporterInfo importerInfo in _importers)
+                {
+                    if (importerInfo.Description.FileExtensions.Contains(ext, StringComparer.InvariantCultureIgnoreCase))
+                        importerName = importerInfo.Description.TypeName;
+                }
             }
-            if (string.IsNullOrEmpty(importerName))
-                throw new Exception(string.Format("Couldn't find a default importer for '{0}'.", sourceFilepath));
 
             // Resolve the processor name.
             if (string.IsNullOrEmpty(processorName))
             {
-                processorName = null;
-                ImporterInfo importerInfo = GetImporterInfo(importerName);
-                if (importerInfo != null)
-                    processorName = importerInfo.Description.DefaultProcessor;
+                foreach (ImporterInfo importerInfo in _importers)
+                {
+                    if (importerInfo.Description.TypeName.Equals(importerName))
+                        if (importerInfo.Description.DefaultProcessor != null)
+                            processorName = importerInfo.Description.DefaultProcessor;
+                }
             }
+
+            if (string.IsNullOrEmpty(importerName))
+                throw new Exception(string.Format("Couldn't find a default importer for '{0}'.", sourceFilepath));
             if (string.IsNullOrEmpty(processorName))
                 throw new Exception(string.Format("Couldn't find a default processor for importer '{0}'.", importerName));
         }
