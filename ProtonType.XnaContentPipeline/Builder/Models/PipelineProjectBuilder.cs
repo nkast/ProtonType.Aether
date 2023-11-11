@@ -306,18 +306,18 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             string intermediateEventPath = Path.Combine(intermediatePath, Path.GetFileNameWithoutExtension(projectFilename), pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
             intermediateEventPath = intermediateEventPath.Replace("\\", "/");
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
-            PipelineBuildEvent pipelineBuildEvent = PipelineBuildEvent.LoadBinary(intermediateEventPath);
+            PipelineBuildEvent buildEvent = PipelineBuildEvent.LoadBinary(intermediateEventPath);
 
-            if (pipelineBuildEvent != null)
+            if (buildEvent != null)
             {
                 // Remove event file (.mgcontent file) from intermediate folder.
-                if (File.Exists(pipelineBuildEvent.DestFile))
-                    File.Delete(pipelineBuildEvent.DestFile);
+                if (File.Exists(buildEvent.DestFile))
+                    File.Delete(buildEvent.DestFile);
 
                 //TODO: delete external assets. Make sure external assets are not used by other assets.
                 /*
                 // Recursively clean additional (nested) assets.
-                foreach (var asset in pipelineBuildEvent.BuildAsset)
+                foreach (var asset in buildEvent.BuildAsset)
                 {
                     string assetEventFilepath;
                     PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset, out assetEventFilepath);
