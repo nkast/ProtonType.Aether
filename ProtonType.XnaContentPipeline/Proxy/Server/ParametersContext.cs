@@ -50,7 +50,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         internal ParametersContext CreateContext(Guid guid)
         {
-            var context = new ParametersContext(guid);
+            ParametersContext context = new ParametersContext(guid);
             
             context.OutputDir = this.OutputDir;
             context.IntermediateDir = this.IntermediateDir;

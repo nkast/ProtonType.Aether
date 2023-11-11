@@ -80,28 +80,28 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             }
         }
         
-        private ImporterDescription _importer;
+        private ImporterDescription _importerDesc;
         [Category("Build Settings")]
         [tainicom.WpfPropertyGrid.PropertyOrder(-2)]
         [Description("The importer used to load the content file.")]
         public ImporterDescription Importer
         {
-            get { return _importer; }
+            get { return _importerDesc; }
             set
             {
-                if (_importer == value) return;
+                if (_importerDesc == value) return;
 
-                _importer = value;
-                PipelineItem.Importer = _importer.TypeName; // update Model
+                _importerDesc = value;
+                PipelineItem.Importer = _importerDesc.TypeName; // update Model
                 RaisePropertyChanged(() => Importer);
 
 
                 // Validate that our processor can accept input content of the type output by the new importer.
                 // If it cannot, set the default processor.
-                if ((_processor == null || _processor.InputTypeFullName != _importer.OutputTypeFullName) &&
+                if ((_processor == null || _processor.InputTypeFullName != _importerDesc.OutputTypeFullName) &&
                     _processor != PipelineTypes.MissingProcessor)
                 {
-                    Processor = PipelineProject._references.FindProcessor(_importer.DefaultProcessor, _importer);
+                    Processor = PipelineProject._references.FindProcessor(_importerDesc.DefaultProcessor, _importerDesc);
                 }
             }
         }
@@ -142,11 +142,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             this.PipelineProject = pipelineProject;
             this.PipelineItem = item;
 
-            _importer = GetImporterImporterDescription(PipelineItem.Importer);
+            _importerDesc = GetImporterImporterDescription(PipelineItem.Importer);
             _processor = GetProcessorDescription(PipelineItem.Processor);
 
             // update Model
-            PipelineItem.Importer = _importer.TypeName;
+            PipelineItem.Importer = _importerDesc.TypeName;
             PipelineItem.Processor = _processor.TypeName;
             
             // resolve processor params
@@ -179,7 +179,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             //if (BuildAction == BuildAction.Copy)
             //    return null;
 
-            var processorDesc = PipelineProject._references.FindProcessor(processorName, _importer);
+            var processorDesc = PipelineProject._references.FindProcessor(processorName, _importerDesc);
             if (processorDesc == null)
             {
                 // TODO: create a virtual importer

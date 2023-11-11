@@ -50,7 +50,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public override void LogWarning(string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)
         {
             string currentFilename = GetCurrentFilename(contentIdentity);
-            var msg = string.Format(message, messageArgs);
+            string msg = string.Format(message, messageArgs);
             Trace.WriteLine(msg);
             _proxyServer.LogWarning(ContextGuid, currentFilename, helpLink, contentIdentity, msg);
         }

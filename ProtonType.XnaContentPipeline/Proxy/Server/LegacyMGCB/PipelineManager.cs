@@ -109,27 +109,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public OpaqueDataDictionary ValidateProcessorParameters(string processorName, OpaqueDataDictionary processorParameters)
         {
-            var result = new OpaqueDataDictionary();
+            OpaqueDataDictionary result = new OpaqueDataDictionary();
 
-            var processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
+            ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
 
             if (processorInfo == null || processorParameters == null)
             {
                 return result;
             }
 
-            var processorType = processorInfo.Type;
+            Type processorType = processorInfo.Type;
             foreach (var param in processorParameters)
             {
-                var propInfo = processorType.GetProperty(param.Key, BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
-                if (propInfo == null || propInfo.GetSetMethod(false) == null)
+                PropertyInfo property = processorType.GetProperty(param.Key, BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
+                if (property == null || property.GetSetMethod(false) == null)
                     continue;
 
                 // Make sure we can assign the value.
-                if (!propInfo.PropertyType.IsInstanceOfType(param.Value))
+                if (!property.PropertyType.IsInstanceOfType(param.Value))
                 {
                     // Make sure we can convert the value.
-                    var typeConverter = TypeDescriptor.GetConverter(propInfo.PropertyType);
+                    TypeConverter typeConverter = TypeDescriptor.GetConverter(property.PropertyType);
                     if (!typeConverter.CanConvertFrom(param.Value.GetType()))
                         continue;
                 }
@@ -143,10 +143,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private void ResolveOutputFilepath(string sourceFilepath, ref string outputFilepath)
         {
             // If the output path is null... build it from the source file path.
-            if (string.IsNullOrEmpty(outputFilepath))
+            if (String.IsNullOrEmpty(outputFilepath))
             {
-                var filename = Path.GetFileNameWithoutExtension(sourceFilepath) + ".xnb";
-                var directory = LegacyPathHelper.GetRelativePath(ProjectDirectory,
+                string filename = Path.GetFileNameWithoutExtension(sourceFilepath) + ".xnb";
+                string directory = LegacyPathHelper.GetRelativePath(ProjectDirectory,
                                                            Path.GetDirectoryName(sourceFilepath) +
                                                            Path.DirectorySeparatorChar);
                 outputFilepath = Path.Combine(OutputDirectory, directory, filename);
@@ -154,7 +154,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             else
             {
                 // If the extension is not XNB or the source file extension then add XNB.
-                var sourceExt = Path.GetExtension(sourceFilepath);
+                string sourceExt = Path.GetExtension(sourceFilepath);
                 if (outputFilepath.EndsWith(sourceExt, StringComparison.InvariantCultureIgnoreCase))
                     outputFilepath = outputFilepath.Substring(0, outputFilepath.Length - sourceExt.Length);
                 if (!outputFilepath.EndsWith(".xnb", StringComparison.InvariantCultureIgnoreCase))
@@ -192,7 +192,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return PipelineBuildEvent.LoadBinary(intermediateEventPath);
         }
 
-        public void RegisterContent(string sourceFilepath, string outputFilepath = null, string importerName = null, string processorName = null, OpaqueDataDictionary processorParameters = null)
+        public void RegisterContent(string sourceFilepath, string outputFilepath, string importerName, string processorName, OpaqueDataDictionary processorParameters)
         {
             sourceFilepath = LegacyPathHelper.Normalize(sourceFilepath);
             ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
@@ -205,7 +205,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 DestFile = outputFilepath,
                 Importer = importerName,
                 Processor = processorName,
-                Parameters = ValidateProcessorParameters(processorName, processorParameters),
+                ProcessorParams = ValidateProcessorParameters(processorName, processorParameters),
             };
 
             // Register pipeline build event. (Required to correctly resolve external dependencies.)
@@ -226,7 +226,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 DestFile = outputFilepath,
                 Importer = importerName,
                 Processor = processorName,
-                Parameters = ValidateProcessorParameters(processorName, processorParameters),
+                ProcessorParams = ValidateProcessorParameters(processorName, processorParameters),
             };
 
             // Load the previous content event if it exists.
@@ -279,7 +279,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                             DestFile = assetCachedBuildEvent.DestFile,
                             Importer = assetCachedBuildEvent.Importer,
                             Processor = assetCachedBuildEvent.Processor,
-                            Parameters = assetCachedBuildEvent.Parameters,
+                            ProcessorParams = assetCachedBuildEvent.ProcessorParams,
                         };
 
                         // Give the asset a chance to rebuild.                   
@@ -339,7 +339,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             {
                 try
                 {
-                    var importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
+                    LegacyPipelineImporterContext importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
                     importedObject = importer.Import(buildEvent.SourceFile, importContext);
                 }
                 catch (PipelineException)
@@ -357,7 +357,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             else
             {
-                var importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
+                ContentImporterContext importContext = new LegacyPipelineImporterContext(this, logger, buildEvent);
                 importedObject = importer.Import(buildEvent.SourceFile, importContext);
             }
 
@@ -369,7 +369,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
             if (processorInfo == null)
                 throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
-            IContentProcessor processor = _assembliesMgr.CreateProcessor(processorInfo, buildEvent.Parameters);
+            IContentProcessor processor = _assembliesMgr.CreateProcessor(processorInfo, buildEvent.ProcessorParams);
             if (processor == null)
                 throw new PipelineException("Failed to create processor '{0}'", buildEvent.Processor);
 
@@ -408,7 +408,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             else
             {
-                var processContext = new LegacyPipelineProcessorContext(this, logger, buildEvent);
+                ContentProcessorContext processContext = new LegacyPipelineProcessorContext(this, logger, buildEvent);
                 processedObject = processor.Process(importedObject, processContext);
             }
 
@@ -424,7 +424,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             if (cachedBuildEvent != null)
             {
                 // Recursively clean additional (nested) assets.
-                foreach (var asset in cachedBuildEvent.BuildAsset)
+                foreach (string asset in cachedBuildEvent.BuildAsset)
                 {
                     PipelineBuildEvent assetCachedBuildEvent = LoadBuildEvent(asset);
 
@@ -445,7 +445,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 }
 
                 // Remove related output files (non-XNB files) that were copied to the output folder.
-                foreach (var asset in cachedBuildEvent.BuildOutput)
+                foreach (string asset in cachedBuildEvent.BuildOutput)
                 {
                     logger.LogMessage("Cleaning {0}", asset);
                     if (File.Exists(asset))
@@ -503,7 +503,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     _pipelineBuildEvents.Add(buildEvent.SourceFile, pipelineBuildEvents);
                 }
 
-                if (FindMatchingEvent(pipelineBuildEvents, buildEvent.DestFile, buildEvent.Importer, buildEvent.Processor, buildEvent.Parameters) == null)
+                if (FindMatchingEvent(pipelineBuildEvents, buildEvent.DestFile, buildEvent.Importer, buildEvent.Processor, buildEvent.ProcessorParams) == null)
                     pipelineBuildEvents.Add(buildEvent);
             }
         }
@@ -561,13 +561,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 if (existingBuildEvent == null)
                     return destFile;
 
-                var existingBuildEventDestFile = existingBuildEvent.DestFile;
+                string existingBuildEventDestFile = existingBuildEvent.DestFile;
                 existingBuildEventDestFile = LegacyPathHelper.GetRelativePath(ProjectDirectory, existingBuildEventDestFile);
                 existingBuildEventDestFile = Path.Combine(Path.GetDirectoryName(existingBuildEventDestFile), Path.GetFileNameWithoutExtension(existingBuildEventDestFile));
                 existingBuildEventDestFile = LegacyPathHelper.Normalize(existingBuildEventDestFile);
-                
-                var fullDestFile = Path.Combine(OutputDirectory, destFile);
-                var relativeDestFile = LegacyPathHelper.GetRelativePath(ProjectDirectory, fullDestFile);
+
+                string fullDestFile = Path.Combine(OutputDirectory, destFile);
+                string relativeDestFile = LegacyPathHelper.GetRelativePath(ProjectDirectory, fullDestFile);
                 relativeDestFile = LegacyPathHelper.Normalize(relativeDestFile);
 
                 if (existingBuildEventDestFile.Equals(relativeDestFile) &&
@@ -575,10 +575,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     existingBuildEvent.Processor == processorName)
                 {
                     OpaqueDataDictionary defaultValues = null;
-                    var processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
+                    ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
                     if (processorInfo != null)
                         defaultValues = processorInfo.DefaultValues;
-                    if (AreParametersEqual(existingBuildEvent.Parameters, processorParameters, defaultValues))
+                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, defaultValues))
                         return destFile;
                 }
             }
@@ -597,7 +597,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// </returns>
         private PipelineBuildEvent FindMatchingEvent(List<PipelineBuildEvent> pipelineBuildEvents, string destFile, string importerName, string processorName, OpaqueDataDictionary processorParameters)
         {
-            foreach (var existingBuildEvent in pipelineBuildEvents)
+            foreach (PipelineBuildEvent existingBuildEvent in pipelineBuildEvents)
             {
                 if ((destFile == null || existingBuildEvent.DestFile.Equals(destFile))
                     && existingBuildEvent.Importer == importerName
@@ -607,7 +607,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     var processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
                     if (processorInfo != null)
                         defaultValues = processorInfo.DefaultValues;
-                    if (AreParametersEqual(existingBuildEvent.Parameters, processorParameters, defaultValues))
+                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, defaultValues))
                     {
                         return existingBuildEvent;
                     }
@@ -679,7 +679,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             var buildProcessorInfo = assembliesMgr.GetProcessorInfo(buildEvent.Processor);
             if (buildProcessorInfo != null)
                 defaultValues = buildProcessorInfo.DefaultValues;
-            if (!AreParametersEqual(cachedbuildEvent.Parameters, buildEvent.Parameters, defaultValues))
+            if (!AreParametersEqual(cachedbuildEvent.ProcessorParams, buildEvent.ProcessorParams, defaultValues))
                 return true;
 
             return false;

@@ -46,7 +46,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
         internal void AddAssembly(ContentBuildLogger logger, string ProjectDirectory, string assemblyPath)
         {
-            var rootedAssemblyPath = assemblyPath;
+            string rootedAssemblyPath = assemblyPath;
             if (!Path.IsPathRooted(rootedAssemblyPath))
                 rootedAssemblyPath = Path.GetFullPath(Path.Combine(ProjectDirectory, assemblyPath));
 
@@ -67,7 +67,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         {
             try
             {
-                var asm = Assembly.LoadFrom(assemblyPath);
+                Assembly asm = Assembly.LoadFrom(assemblyPath);
                 LoadAssemblyTypes(asm, assemblyPath);
             }
             catch (BadImageFormatException e)
@@ -81,13 +81,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             }
             catch (FileNotFoundException e)
             {
-                var contentIdentity = new ContentIdentity(assemblyPath);
+                ContentIdentity contentIdentity = new ContentIdentity(assemblyPath);
                 logger.LogWarning(null, contentIdentity, e.Message);
                 return;
             }   
             catch (Exception e)
             {
-                var contentIdentity = new ContentIdentity(assemblyPath);
+                ContentIdentity contentIdentity = new ContentIdentity(assemblyPath);
                 logger.LogWarning(null, contentIdentity, "Failed to load assembly '{0}': {1}", assemblyPath, e.Message);
                 return;
             }
@@ -97,20 +97,20 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         {
             Type[] types = asm.GetExportedTypes();
 
-            foreach (var type in types)
+            foreach (Type type in types)
             {
                 if (type.IsAbstract)
                     continue;
 
                 DateTime assemblyTimestamp = File.GetLastWriteTime(asm.Location);
 
-                var legacyImporterInfo = ProcessImporter(type, assemblyPath, assemblyTimestamp);
-                if (legacyImporterInfo != null)
-                    _importers.Add(legacyImporterInfo);
+                ImporterInfo importerInfo = ProcessImporter(type, assemblyPath, assemblyTimestamp);
+                if (importerInfo != null)
+                    _importers.Add(importerInfo);
 
-                var legacyProcessorInfo = ProcessProcessor(type, assemblyPath, assemblyTimestamp);
-                if (legacyProcessorInfo != null)
-                    _processors.Add(legacyProcessorInfo);
+                ProcessorInfo processorInfo = ProcessProcessor(type, assemblyPath, assemblyTimestamp);
+                if (processorInfo != null)
+                    _processors.Add(processorInfo);
             }
         }
         
@@ -192,9 +192,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             if (processorType.GetInterface(@"IContentProcessor") != typeof(IContentProcessor))
                 return null;
 
-            var processorInstance = (IContentProcessor)Activator.CreateInstance(processorType);
-            var inputType = processorInstance.InputType;
-            var outputType = processorInstance.OutputType;
+            IContentProcessor processorInstance = (IContentProcessor)Activator.CreateInstance(processorType);
+            Type inputType = processorInstance.InputType;
+            Type outputType = processorInstance.OutputType;
 
             // find all output base type
             List<string> inputBaseTypesFullName = new List<string>();
@@ -209,18 +209,18 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
             // get params
             const BindingFlags bindings = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            var typeProperties = processorType.GetProperties(bindings);
-            var properties = new List<ProcessorParamDescription>();
+            PropertyInfo[] typeProperties = processorType.GetProperties(bindings);
+            List<ProcessorParamDescription> processorParams = new List<ProcessorParamDescription>();
             foreach (PropertyInfo pi in typeProperties)
             {
                 // TODO: get ContentPipelineIgnore attribute
                 //p.GetCustomAttribute(typeof(ContentPipelineIgnore))
 
-                var defaultObjValue = pi.GetValue(processorInstance, null);
-                var converter = FindConverter(pi.PropertyType);
+                object defaultObjValue = pi.GetValue(processorInstance, null);
+                TypeConverter converter = FindConverter(pi.PropertyType);
                 string defaultValue = (string)converter.ConvertTo(null, System.Globalization.CultureInfo.InvariantCulture, defaultObjValue, typeof(string));
-                
-                var p = new ProcessorParamDescription(
+
+                ProcessorParamDescription processorParam = new ProcessorParamDescription(
                     name: pi.Name,
                     typeName: pi.PropertyType.Name,
                     typeFullName: pi.PropertyType.FullName,
@@ -228,17 +228,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                     defaultValue: defaultValue,
                     standardValues: GetStandardValues(pi.PropertyType)
                     );
-                properties.Add(p);
+                processorParams.Add(processorParam);
             }
-            var processorParams = properties.ToArray();
 
             ProcessorInfo processorInfo = null;
 
             // find ContentProcessorAttribute
-            var attributes = processorType.GetCustomAttributes(typeof(ContentProcessorAttribute), false);
+            object[] attributes = processorType.GetCustomAttributes(typeof(ContentProcessorAttribute), false);
             if (attributes.Length != 0)
             {
-                var processorAttribute = attributes[0] as ContentProcessorAttribute;
+                ContentProcessorAttribute processorAttribute = attributes[0] as ContentProcessorAttribute;
                 var processorDesc = new ProcessorDescription(
                     assemblyPath,
                     processorType.Name,
@@ -246,12 +245,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                     inputType.FullName,
                     inputBaseTypesFullName.ToArray(),
                     outputType.FullName,
-                    processorParams,
+                    processorParams.ToArray(),
                     // ContentProcessorAttribute
                     processorAttribute.DisplayName
                 );
 
-                var defaultProcessorValues = CreateProcessorDefaultValues(processorInstance);
+                OpaqueDataDictionary defaultProcessorValues = CreateProcessorDefaultValues(processorInstance);
                 processorInfo = new ProcessorInfo(processorType, assemblyTimestamp, processorDesc, defaultProcessorValues);
             }
 
@@ -260,14 +259,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         
         string[] GetStandardValues(Type type)
         {
-            var typeDescriptor = TypeDescriptor.GetConverter(type);
+            TypeConverter typeDescriptor = TypeDescriptor.GetConverter(type);
             if (typeDescriptor.GetStandardValuesSupported())
             {
-                var standardValues = new List<string>();
-                foreach (var standardValue in typeDescriptor.GetStandardValues())
+                List<string> standardValues = new List<string>();
+                foreach (object standardValue in typeDescriptor.GetStandardValues())
                 {
-                    var converter = FindConverter(standardValue.GetType());
-                    var strValue = converter.ConvertToInvariantString(standardValue);
+                    TypeConverter converter = FindConverter(standardValue.GetType());
+                    string strValue = converter.ConvertToInvariantString(standardValue);
                     standardValues.Add(strValue);
                 }
                 return standardValues.ToArray();
@@ -290,10 +289,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         public ImporterInfo GetImporterInfo(string importerName)
         {
             // Search for the importer.
-            foreach (var importer in _importers)
+            foreach (ImporterInfo importerInfo in _importers)
             {
-                if (importer.Description.TypeName.Equals(importerName))
-                    return importer;
+                if (importerInfo.Description.TypeName.Equals(importerName))
+                    return importerInfo;
             }
 
             return null;
@@ -302,10 +301,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         public ProcessorInfo GetProcessorInfo(string processorName)
         {
             // Search for the importer.
-            foreach (var processor in _processors)
+            foreach (ProcessorInfo processorInfo in _processors)
             {
-                if (processor.Description.TypeName.Equals(processorName))
-                    return processor;
+                if (processorInfo.Description.TypeName.Equals(processorName))
+                    return processorInfo;
             }
 
             return null;
@@ -313,10 +312,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
         public ImporterInfo GetImporterInfoByExtension(string ext)
         {
-            foreach (var importer in _importers)
+            foreach (ImporterInfo importerInfo in _importers)
             {
-                if (importer.Description.FileExtensions.Any(e => e.Equals(ext, StringComparison.InvariantCultureIgnoreCase)))
-                    return importer;
+                if (importerInfo.Description.FileExtensions.Any(e => e.Equals(ext, StringComparison.InvariantCultureIgnoreCase)))
+                    return importerInfo;
             }
 
             return null;
@@ -329,29 +328,29 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
         public IContentProcessor CreateProcessor(ProcessorInfo processor, OpaqueDataDictionary processorParameters)
         {
-            var processorType = processor.Type;
+            Type processorType = processor.Type;
 
             // Create the processor.
-            var processorInstance = (IContentProcessor)Activator.CreateInstance(processorType);
+            IContentProcessor processorInstance = (IContentProcessor)Activator.CreateInstance(processorType);
 
             // Convert and set the parameters on the processor.
             foreach (var param in processorParameters)
             {
-                var propInfo = processorType.GetProperty(param.Key, BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
-                if (propInfo == null || propInfo.GetSetMethod(false) == null)
+                PropertyInfo property = processorType.GetProperty(param.Key, BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
+                if (property == null || property.GetSetMethod(false) == null)
                     continue;
 
                 // If the property value is already of the correct type then set it.
-                if (propInfo.PropertyType.IsInstanceOfType(param.Value))
-                    propInfo.SetValue(processorInstance, param.Value, null);
+                if (property.PropertyType.IsInstanceOfType(param.Value))
+                    property.SetValue(processorInstance, param.Value, null);
                 else
                 {
                     // Find a type converter for this property.
-                    var typeConverter = TypeDescriptor.GetConverter(propInfo.PropertyType);
+                    TypeConverter typeConverter = TypeDescriptor.GetConverter(property.PropertyType);
                     if (typeConverter.CanConvertFrom(param.Value.GetType()))
                     {
-                        var propValue = typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture, param.Value);
-                        propInfo.SetValue(processorInstance, propValue, null);
+                        object propertyValue = typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture, param.Value);
+                        property.SetValue(processorInstance, propertyValue, null);
                     }
                 }
             }
@@ -365,7 +364,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             if (string.IsNullOrEmpty(importerName))
             {
                 importerName = null;
-                var importerInfo = GetImporterInfoByExtension(Path.GetExtension(sourceFilepath));
+                ImporterInfo importerInfo = GetImporterInfoByExtension(Path.GetExtension(sourceFilepath));
                 if (importerInfo != null)
                     importerName = importerInfo.Description.TypeName;
             }
@@ -376,7 +375,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             if (string.IsNullOrEmpty(processorName))
             {
                 processorName = null;
-                var importerInfo = GetImporterInfo(importerName);
+                ImporterInfo importerInfo = GetImporterInfo(importerName);
                 if (importerInfo != null)
                     processorName = importerInfo.Description.DefaultProcessor;
             }
@@ -391,14 +390,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         /// <returns></returns>
         private static OpaqueDataDictionary CreateProcessorDefaultValues(IContentProcessor processorInstance)
         {
-            var defaultValues = new OpaqueDataDictionary();
+            OpaqueDataDictionary defaultValues = new OpaqueDataDictionary();
             try
             {
-                var properties = processorInstance.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
-                foreach (var property in properties)
+                PropertyInfo[] properties = processorInstance.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
+                foreach (PropertyInfo property in properties)
                 {
-                    var propertyName = property.Name;
-                    var propertyValue = property.GetValue(processorInstance, null);
+                    string propertyName = property.Name;
+                    object propertyValue = property.GetValue(processorInstance, null);
                     defaultValues.Add(propertyName, propertyValue);
                 }
             }

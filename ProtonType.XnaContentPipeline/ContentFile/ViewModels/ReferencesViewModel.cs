@@ -76,27 +76,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             List<PipelineAsyncTask> tasks = new List<PipelineAsyncTask>();
 
             // load all types from references
-            foreach (var refPath in _project.Project.References)
+            foreach (string refPath in _project.Project.References)
             {
                 AssemblyViewModel assembly = CreateAssembly(refPath);
                 if (assembly == null)
                     continue;
 
-                var logger = new ProxyLogger(this._project._logger);
+                IProxyLogger logger = new ProxyLogger(this._project._logger);
 
-                var task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
+                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
                 tasks.Add(task);
 
                 _assemblies.Add(assembly);
             }
 
-            foreach (var task in tasks)
+            foreach (PipelineAsyncTask task in tasks)
                 task.AsyncWaitHandle.WaitOne();
 
-            foreach (var importerDesc in pipelineProxy.GetImporters())
+            foreach (ImporterDescription importerDesc in pipelineProxy.GetImporters())
                 _importers.Add(importerDesc);
 
-            foreach (var processorDesc in pipelineProxy.GetProcessors())
+            foreach (ProcessorDescription processorDesc in pipelineProxy.GetProcessors())
                 _processors.Add(processorDesc);
 
             pipelineProxy.Dispose();
@@ -104,10 +104,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         
         private AssemblyViewModel CreateAssembly(string refPath)
         {
-            var assembly = new AssemblyViewModel(_project, this, refPath);
+            AssemblyViewModel assembly = new AssemblyViewModel(_project, this, refPath);
 
             // check if assembly is allready added
-            foreach (var otherAssembly in _assemblies)
+            foreach (AssemblyViewModel otherAssembly in _assemblies)
             {
                 if (otherAssembly.NormalizedAbsoluteFullPath == assembly.NormalizedAbsoluteFullPath)
                     return null;
@@ -139,12 +139,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         public IEnumerable<ImporterDescription> FindImporters(string fileExtension)
         {
-            var importers = new List<ImporterDescription>();
+            List<ImporterDescription> importers = new List<ImporterDescription>();
 
-            foreach (var importer in Importers)
+            foreach (ImporterDescription importerDesc in Importers)
             {
-                if (importer.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
-                    importers.Add(importer);
+                if (importerDesc.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
+                    importers.Add(importerDesc);
             }
 
             return importers;
@@ -154,43 +154,43 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             if (!string.IsNullOrEmpty(importerName))
             {
-                foreach (var importer in Importers)
+                foreach (ImporterDescription importerDesc in Importers)
                 {
-                    if (importer.TypeName.Equals(importerName))
-                        return importer;
+                    if (importerDesc.TypeName.Equals(importerName))
+                        return importerDesc;
                 }
 
-                foreach (var importer in Importers)
+                foreach (ImporterDescription importerDesc in Importers)
                 {
-                    if (importer.DisplayName.Equals(importerName))
-                        return importer;
+                    if (importerDesc.DisplayName.Equals(importerName))
+                        return importerDesc;
                 }
 
                 //Debug.Fail(string.Format("Importer not found! name={0}, ext={1}", name, fileExtension));
                 return null;
             }
 
-            foreach (var importer in Importers)
+            foreach (ImporterDescription importerDesc in Importers)
             {
-                if (importer.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
-                    return importer;
+                if (importerDesc.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
+                    return importerDesc;
             }
 
             //Debug.Fail(string.Format("Importer not found! name={0}, ext={1}", name, fileExtension));
             return null;
         }
                   
-        public List<ProcessorDescription> FindProcessors(ImporterDescription importer)
+        public List<ProcessorDescription> FindProcessors(ImporterDescription importerDesc)
         {
-            if (importer != null)
+            if (importerDesc != null)
             {
-                var processors = new List<ProcessorDescription>();
+                List<ProcessorDescription> processors = new List<ProcessorDescription>();
 
-                foreach (var processor in Processors)
+                foreach (ProcessorDescription processorDesc in Processors)
                 {
-                    if (IsProcessorValid(importer, processor))
+                    if (IsProcessorValid(importerDesc, processorDesc))
                     {
-                        processors.Add(processor);
+                        processors.Add(processorDesc);
                     }
                 }
 
@@ -215,26 +215,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             return false;
         }
 
-        public ProcessorDescription FindProcessor(string processorName, ImporterDescription importer)
+        public ProcessorDescription FindProcessor(string processorName, ImporterDescription importerDesc)
         {
             if (!string.IsNullOrEmpty(processorName))
             {
-                foreach (var i in Processors)
+                foreach (ProcessorDescription processorDesc in Processors)
                 {
-                    if (i.TypeName.Equals(processorName))
-                        return i;
+                    if (processorDesc.TypeName.Equals(processorName))
+                        return processorDesc;
                 }
 
                 //Debug.Fail(string.Format("Processor not found! name={0}, importer={1}", name, importer));
                 return null;
             }
 
-            if (importer != null)
+            if (importerDesc != null)
             {
-                foreach (var i in Processors)
+                foreach (ProcessorDescription processorDesc in Processors)
                 {
-                    if (i.TypeName.Equals(importer.DefaultProcessor))
-                        return i;
+                    if (processorDesc.TypeName.Equals(importerDesc.DefaultProcessor))
+                        return processorDesc;
                 }
             }
 
@@ -250,7 +250,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             if (listBox.ItemsSource is ReferencesViewModel)
             {
                 // TODO: is referencesViewModel1 == this ?
-                var referencesViewModel1 = listBox.ItemsSource as ReferencesViewModel;
+                ReferencesViewModel referencesViewModel1 = listBox.ItemsSource as ReferencesViewModel;
 
                 // select file and create an AssemblyViewModel
                 Win32.OpenFileDialog ofd = new Win32.OpenFileDialog();
@@ -261,9 +261,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 ofd.InitialDirectory = this._project.Location;
                 if (ofd.ShowDialog() != true)
                     return;
-                var fdFilenameResult = ofd.FileName;
+                string fdFilenameResult = ofd.FileName;
 
-                var refPath = fdFilenameResult;
+                string refPath = fdFilenameResult;
 
                 AssemblyViewModel assembly = CreateAssembly(refPath);
                 if (assembly == null)
@@ -282,7 +282,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             if (listBox.ItemsSource is ReferencesViewModel)
             {
                 // TODO: is referencesViewModel1 == this ?
-                var referencesViewModel1 = listBox.ItemsSource as ReferencesViewModel;
+                ReferencesViewModel referencesViewModel1 = listBox.ItemsSource as ReferencesViewModel;
 
                 if (listBox.SelectedIndex == -1) return;
                 if (listBox.SelectedIndex >= _assemblies.Count) return;
@@ -300,24 +300,24 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         int IList.Add(object value)
         {
-            var assembly = (AssemblyViewModel)value;
+            AssemblyViewModel assembly = (AssemblyViewModel)value;
             int newIndex = _assemblies.Count;
 
             using (PipelineProxyClient pipelineProxy = new PipelineProxyClient())
             {
                 pipelineProxy.SetBaseDirectory(this._project.Location);
-                var logger = new ProxyLogger(this._project._logger);
-                var task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
+                IProxyLogger logger = new ProxyLogger(this._project._logger);
+                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
                 WaitHandle.WaitAll(new[] { task.AsyncWaitHandle });
 
                 _assemblies.Add(assembly);
                 _project.Project.References.Add(assembly.OriginalPath); // update model
 
-                foreach (var importerDesc in pipelineProxy.GetImporters())
+                foreach (ImporterDescription importerDesc in pipelineProxy.GetImporters())
                     if (importerDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
                         _importers.Add(importerDesc);
 
-                foreach (var processorDesc in pipelineProxy.GetProcessors())
+                foreach (ProcessorDescription processorDesc in pipelineProxy.GetProcessors())
                     if (processorDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
                         _processors.Add(processorDesc);
             }
@@ -366,7 +366,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         void IList.RemoveAt(int index)
         {
-            var oldasm = _assemblies[index];
+            AssemblyViewModel oldasm = _assemblies[index];
             _assemblies.RemoveAt(index);
             _project.Project.References.RemoveAt(index); // update model
 

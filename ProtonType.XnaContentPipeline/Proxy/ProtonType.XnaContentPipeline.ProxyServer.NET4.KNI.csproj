@@ -55,13 +55,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
     <Compile Include="Common\Converters\StringToColorConverter.cs" />
     <Compile Include="Common\ImporterDescription.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
     <Compile Include="Common\ProcessorParamDescription.cs" />
     <Compile Include="Common\ProxyMsgType.cs" />
     <Compile Include="Common\TaskResult.cs" />
-    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
     <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />
     <Compile Include="Server\Assemblies\ProcessorInfo.cs" />

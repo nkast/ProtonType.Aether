@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
     <Compile Include="Common\Converters\StringToColorConverter.cs" />
     <Compile Include="Common\ImporterDescription.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
@@ -48,7 +49,6 @@
     <Compile Include="Server\ParametersContext.cs" />
     <Compile Include="Server\PipelineProxyServer.cs" />
     <Compile Include="Server\Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
   </ItemGroup>
   
 </Project>

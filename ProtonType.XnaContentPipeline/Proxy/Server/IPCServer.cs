@@ -29,8 +29,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public IPCServer(string uid)
         {
             _uid = uid;
-            var outStream = Console.OpenStandardOutput();
-            var inStream = Console.OpenStandardInput();
+            Stream outStream = Console.OpenStandardOutput();
+            Stream inStream = Console.OpenStandardInput();
             Writer = new BinaryWriter(outStream);
             Reader = new BinaryReader(inStream);
 
@@ -46,7 +46,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             Writer.Write(_uid);
             Writer.Flush();
 
-            var strIPCClient = Reader.ReadString();
+            string strIPCClient = Reader.ReadString();
 
             if (strIPCClient == "IPCClient OK")
             {

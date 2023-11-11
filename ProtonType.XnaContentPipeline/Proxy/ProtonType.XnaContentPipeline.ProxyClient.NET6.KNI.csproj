@@ -15,10 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Reference Include="Xna.Framework">
-	  <SpecificVersion>False</SpecificVersion>
-	  <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Framework\netstandard2.0\Xna.Framework.dll</HintPath>
-	</Reference>
+    <Reference Include="Xna.Framework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Framework\netstandard2.0\Xna.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.ProxyClient.cs" />
     <Compile Include="Client\IProxyLogger.cs" />
     <Compile Include="Client\ProxyGraphicsProfile.cs" />
     <Compile Include="Client\ProxyTargetPlatform.cs" />
@@ -35,12 +36,11 @@
     <Compile Include="Common\ImporterDescription.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
     <Compile Include="Common\ProcessorParamDescription.cs" />
+    <Compile Include="Common\ProxyMsgType.cs" />
     <Compile Include="Common\TaskResult.cs" />
     <Compile Include="Client\IPCClient.cs" />
     <Compile Include="Client\PipelineAsyncTask.cs" />
     <Compile Include="Client\PipelineProxyClient.cs" />
-    <Compile Include="Common\ProxyMsgType.cs" />
-    <Compile Include="Properties\AssemblyInfo.ProxyClient.cs" />
   </ItemGroup>
   
 </Project>

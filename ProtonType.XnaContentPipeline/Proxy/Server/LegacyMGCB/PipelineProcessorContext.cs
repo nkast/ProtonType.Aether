@@ -46,7 +46,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public override string OutputDirectory { get { return _manager.OutputDirectory; } }
         public override string OutputFilename { get { return _buildEvent.DestFile; } }
 
-        public override OpaqueDataDictionary Parameters { get { return _buildEvent.Parameters; } }
+        public override OpaqueDataDictionary Parameters { get { return _buildEvent.ProcessorParams; } }
 
         public override ContentBuildLogger Logger { get { return _logger; } }
 
@@ -68,7 +68,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             var processorInfo = _manager._assembliesMgr.GetProcessorInfo(processorName);
             var processor = _manager._assembliesMgr.CreateProcessor(processorInfo, processorParameters);
-            var processContext = new LegacyPipelineProcessorContext(_manager, _logger, new PipelineBuildEvent { Parameters = processorParameters });
+            var processContext = new LegacyPipelineProcessorContext(_manager, _logger, new PipelineBuildEvent { ProcessorParams = processorParameters });
             var processedObject = processor.Process(input, processContext);
            
             // Add its dependencies and built assets to ours.
@@ -105,7 +105,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 SourceFile = sourceFilepath,
                 Importer = importerName,
                 Processor = processAsset ? processorName : null,
-                Parameters = _manager.ValidateProcessorParameters(processorName, processorParameters),
+                ProcessorParams = _manager.ValidateProcessorParameters(processorName, processorParameters),
             };
 
             var processedObject = _manager.ProcessContent(buildEvent, _logger);

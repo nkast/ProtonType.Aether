@@ -38,7 +38,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             DestFile = string.Empty;
             Importer = string.Empty;
             Processor = string.Empty;
-            Parameters = new OpaqueDataDictionary();
+            ProcessorParams = new OpaqueDataDictionary();
             Dependencies = new List<string>();
             BuildAsset = new List<string>();
             BuildOutput = new List<string>();
@@ -78,7 +78,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// </summary>
         public DateTime ProcessorTime { get; set; }
 
-        public OpaqueDataDictionary Parameters { get; set; }
+        public OpaqueDataDictionary ProcessorParams { get; set; }
 
         /// <summary>
         /// Gets or sets the dependencies.
@@ -193,8 +193,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 WriteStringOrNull(value.Processor);
                 WriteDateTime(value.ProcessorTime);
 
-                WritePackedInt(value.Parameters.Count);
-                foreach (var param in value.Parameters)
+                WritePackedInt(value.ProcessorParams.Count);
+                foreach (var param in value.ProcessorParams)
                 {
                     WriteStringOrNull(param.Key);
                     WriteStringOrNull(ConvertToString(param.Value));
@@ -283,10 +283,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 value.ProcessorTime = ReadDateTime();
 
                 int parametersCount = ReadPackedInt();
-                value.Parameters = new OpaqueDataDictionary();
+                value.ProcessorParams = new OpaqueDataDictionary();
                 for (int i = 0; i < parametersCount; i++)
                 {
-                    value.Parameters.Add(
+                    value.ProcessorParams.Add(
                         ReadStringOrNull(),
                         ReadStringOrNull());
                 }

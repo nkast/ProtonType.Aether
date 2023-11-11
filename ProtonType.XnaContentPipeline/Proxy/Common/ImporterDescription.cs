@@ -52,8 +52,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             DisplayName = ReadString(reader);
             DefaultProcessor = ReadString(reader);
 
-            var fileExtensionsCount = reader.ReadInt32();
-            var fileExtensions = new List<string>(fileExtensionsCount);
+            int fileExtensionsCount = reader.ReadInt32();
+            List<string> fileExtensions = new List<string>(fileExtensionsCount);
             for (int i = 0; i < fileExtensionsCount; i++)
                 fileExtensions.Add(ReadString(reader));
             FileExtensions = fileExtensions;

@@ -50,10 +50,10 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 #if XNA
             if (typeAssemblyQualifiedName.Contains(", MonoGame.Framework"))
             {
-                var t = typeAssemblyQualifiedName.Split(',');
-                t[1] = t[1].Replace("MonoGame.Framework", "Microsoft.Xna.Framework");
-                Array.Resize(ref t, 2); // keep only type and assembly name. Remove version, etc
-                typeAssemblyQualifiedName = String.Join(",", t);
+                string[] typeNameParts = typeAssemblyQualifiedName.Split(',');
+                typeNameParts[1] = typeNameParts[1].Replace("MonoGame.Framework", "Microsoft.Xna.Framework");
+                Array.Resize(ref typeNameParts, 2); // keep only type and assembly name. Remove version, etc
+                typeAssemblyQualifiedName = String.Join(",", typeNameParts);
             }
 #endif
             return typeAssemblyQualifiedName;

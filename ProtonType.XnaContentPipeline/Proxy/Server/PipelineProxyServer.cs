@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
@@ -113,9 +114,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool isNotNull = Reader.ReadBoolean();
             if (!isNotNull) return null;
             
-            var sourceFilename = ReadString();
-            var sourceTool = ReadString();
-            var fragmentIdentifier = ReadString();
+            string sourceFilename = ReadString();
+            string sourceTool = ReadString();
+            string fragmentIdentifier = ReadString();
 
             return new ContentIdentity(sourceFilename, sourceTool, fragmentIdentifier);
         }
@@ -195,20 +196,20 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void SetBaseDirectory()
         {
-            var baseDirectory = Reader.ReadString();
+            string baseDirectory = Reader.ReadString();
             this.BaseDirectory = baseDirectory;
         }
 
         private void SetProjectFilename()
         {
-            var projectFilename = Reader.ReadString();
+            string projectFilename = Reader.ReadString();
             this.ProjectFilename = projectFilename;
         }
 
         private void AddAssembly()
         {
-            var contextGuid = ReadGuid();
-            var assemblyPath = Reader.ReadString();
+            Guid contextGuid = ReadGuid();
+            string assemblyPath = Reader.ReadString();
 
             AddAssembly(contextGuid, assemblyPath);
             TaskResult taskResult = TaskResult.SUCCEEDED;
@@ -228,9 +229,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 throw new ArgumentException("assemblyPath cannot be null!");
 
             assemblyPath = ReplaceSymbols(assemblyPath);
-            var baseDirectory = (this.BaseDirectory == null) ? String.Empty : LegacyPathHelper.Normalize(this.BaseDirectory);
+            string baseDirectory = (this.BaseDirectory == null) ? String.Empty : LegacyPathHelper.Normalize(this.BaseDirectory);
 
-            var logger = new BuildLogger(this, contextGuid);
+            ContentBuildLogger logger = new BuildLogger(this, contextGuid);
             _assembliesMgr.AddAssembly(logger, baseDirectory, assemblyPath);
         }
 
@@ -238,7 +239,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             lock (Writer)
             {
-                for (var e = _assembliesMgr.GetImporters(); e.MoveNext(); )
+                for (IEnumerator<ImporterDescription> e = _assembliesMgr.GetImporters(); e.MoveNext(); )
                 {
                     WriteMsg(ProxyMsgType.Importer);
                     e.Current.Write(Writer);
@@ -252,7 +253,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             lock (Writer)
             {
-                for (var e = _assembliesMgr.GetProcessors(); e.MoveNext(); )
+                for (IEnumerator<ProcessorDescription> e = _assembliesMgr.GetProcessors(); e.MoveNext(); )
                 {
                     WriteMsg(ProxyMsgType.Processor);
                     e.Current.Write(Writer);
@@ -369,11 +370,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void Copy()
         {
-            var contextGuid = ReadGuid();
+            Guid contextGuid = ReadGuid();
             this._globalContext.OriginalPath = Reader.ReadString();
             this._globalContext.DestinationPath = ReadString();
 
-            var itemContext = this._globalContext.CreateContext(contextGuid);
+            ParametersContext itemContext = this._globalContext.CreateContext(contextGuid);
             
             TaskResult taskResult = Copy(itemContext);
 
@@ -389,11 +390,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void Build()
         {
-            var contextGuid = ReadGuid();
+            Guid contextGuid = ReadGuid();
             this._globalContext.OriginalPath = Reader.ReadString();
             this._globalContext.DestinationPath = ReadString();
 
-            var itemContext = this._globalContext.CreateContext(contextGuid);
+            ParametersContext itemContext = this._globalContext.CreateContext(contextGuid);
 
             TaskResult taskResult = Build(itemContext);
             
@@ -450,21 +451,23 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             bool Incremental = true;
             bool Rebuild = true;
-            var Config = itemContext.Config;
-            var Platform = itemContext.Platform;
-            var Profile = itemContext.Profile;
-            var CompressContent = itemContext.Compress;
-            var _outputDir = itemContext.OutputDir;
-            var _intermediateDir = itemContext.IntermediateDir;
 
-            var projectDirectory = this.BaseDirectory;
+            string Config = itemContext.Config;
+            TargetPlatform Platform = itemContext.Platform;
+            GraphicsProfile Profile = itemContext.Profile;
+            bool CompressContent = itemContext.Compress;
+
+            string _outputDir = itemContext.OutputDir;
+            string _intermediateDir = itemContext.IntermediateDir;
+
+            string projectDirectory = this.BaseDirectory;
             projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
-            
-            var outputPath = ReplaceSymbols(_outputDir);
+
+            string outputPath = ReplaceSymbols(_outputDir);
             if (!Path.IsPathRooted(outputPath))
                 outputPath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
 
-            var intermediatePath = ReplaceSymbols(_intermediateDir);
+            string intermediatePath = ReplaceSymbols(_intermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
             
@@ -482,9 +485,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // If the target changed in any way then we need to force
             // a full rebuild even under incremental builds.
-            var targetChanged = previousFileCollection.Config != Config ||
-                                previousFileCollection.Platform != Platform ||
-                                previousFileCollection.Profile != Profile;
+            bool targetChanged = previousFileCollection.Config != Config ||
+                                 previousFileCollection.Platform != Platform ||
+                                 previousFileCollection.Profile != Profile;
 
 
             SourceFileCollection newFileCollection = new SourceFileCollection
@@ -507,7 +510,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             catch (InvalidContentException ex)
             {
-                var msg = ex.Message;
+                string msg = ex.Message;
                 if (ex.InnerException != null)
                 {
                     msg += Environment.NewLine;
@@ -519,7 +522,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             catch (PipelineException ex)
             {
-                var msg = ex.Message;
+                string msg = ex.Message;
                 if (ex.InnerException != null)
                 {
                     msg += Environment.NewLine;
@@ -531,7 +534,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             catch (Exception ex)
             {
-                var msg = ex.Message;
+                string msg = ex.Message;
                 if (ex.InnerException != null)
                 {
                     msg += Environment.NewLine;
@@ -599,25 +602,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             bool Incremental = true;
             bool Rebuild = true;
-            var Config = itemContext.Config;
-            var Platform = itemContext.Platform;
-            var Profile = itemContext.Profile;
-            var CompressContent = itemContext.Compress;
-            var _outputDir = itemContext.OutputDir;
-            var _intermediateDir = itemContext.IntermediateDir;
 
-            var projectDirectory = this.BaseDirectory;
+            string Config = itemContext.Config;
+            TargetPlatform Platform = itemContext.Platform;
+            GraphicsProfile Profile = itemContext.Profile;
+            bool CompressContent = itemContext.Compress;
+
+            string _outputDir = itemContext.OutputDir;
+            string _intermediateDir = itemContext.IntermediateDir;
+
+            string projectDirectory = this.BaseDirectory;
             projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
 
-            var outputPath = ReplaceSymbols(_outputDir);
+            string outputPath = ReplaceSymbols(_outputDir);
             if (!Path.IsPathRooted(outputPath))
                 outputPath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
 
-            var intermediatePath = ReplaceSymbols(_intermediateDir);
+            string intermediatePath = ReplaceSymbols(_intermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
 
-            var logger = new BuildLogger(this, itemContext.Guid);
+            ContentBuildLogger logger = new BuildLogger(this, itemContext.Guid);
 
             // Process copy items (files that bypass the content pipeline)
             try
@@ -626,20 +631,20 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 // retaining the file extension.
                 // Note that replacing a sub-path like this requires consistent
                 // directory separator characters.
-                var relativeName = c.Link;
+                string relativeName = c.Link;
                 if (string.IsNullOrWhiteSpace(relativeName))
                     relativeName = c.SourceFile.Replace(projectDirectory, string.Empty)
                                         .TrimStart(Path.DirectorySeparatorChar)
                                         .TrimStart(Path.AltDirectorySeparatorChar);
-                var dest = Path.Combine(outputPath, relativeName);
+                string dest = Path.Combine(outputPath, relativeName);
 
                 // Only copy if the source file is newer than the destination.
                 // We may want to provide an option for overriding this, but for
                 // nearly all cases this is the desired behavior.
                 if (File.Exists(dest) && !Rebuild)
                 {
-                    var srcTime = File.GetLastWriteTimeUtc(c.SourceFile);
-                    var dstTime = File.GetLastWriteTimeUtc(dest);
+                    DateTime srcTime = File.GetLastWriteTimeUtc(c.SourceFile);
+                    DateTime dstTime = File.GetLastWriteTimeUtc(dest);
                     if (srcTime <= dstTime)
                     {
                         if (string.IsNullOrEmpty(c.Link))
@@ -651,21 +656,21 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     }
                 }
 
-                var startTime = DateTime.UtcNow;
+                DateTime startTime = DateTime.UtcNow;
 
                 // Create the destination directory if it doesn't already exist.
-                var destPath = Path.GetDirectoryName(dest);
+                string destPath = Path.GetDirectoryName(dest);
                 if (!Directory.Exists(destPath))
                     Directory.CreateDirectory(destPath);
 
                 File.Copy(c.SourceFile, dest, true);
 
                 // Destination file should not be read-only even if original was.
-                var fileAttr = File.GetAttributes(dest);
-                fileAttr = fileAttr & (~FileAttributes.ReadOnly);
-                File.SetAttributes(dest, fileAttr);
+                FileAttributes fileAttribs = File.GetAttributes(dest);
+                fileAttribs = fileAttribs & (~FileAttributes.ReadOnly);
+                File.SetAttributes(dest, fileAttribs);
 
-                var buildTime = DateTime.UtcNow - startTime;
+                TimeSpan buildTime = DateTime.UtcNow - startTime;
 
                 if (string.IsNullOrEmpty(c.Link))
                     logger.LogMessage(String.Format("{0}", c.SourceFile));
@@ -674,7 +679,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
             catch (Exception ex)
             {
-                var msg = ex.Message;
+                string msg = ex.Message;
                 if (ex.InnerException != null)
                 {
                     msg += Environment.NewLine;

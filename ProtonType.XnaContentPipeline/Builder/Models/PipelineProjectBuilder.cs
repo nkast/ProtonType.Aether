@@ -193,8 +193,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         {
             Thread.CurrentThread.Name = "ProcessBuildQueueWorker";
 
-            var pipelineProxy = new PipelineProxyClient();
-            var logger = new ProxyLogger(_viewLogger);
+            PipelineProxyClient pipelineProxy = new PipelineProxyClient();
+            ProxyLogger logger = new ProxyLogger(_viewLogger);
 
             pipelineProxy.SetBaseDirectory(this._project.Location);
             pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.OriginalPath));
@@ -214,7 +214,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             foreach (string assemblyPath in _project.References)
             {
-                var task = pipelineProxy.AddAssembly(logger, assemblyPath);
+                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assemblyPath);
                 tasks.Add(task);
             }
 
