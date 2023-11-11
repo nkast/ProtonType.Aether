@@ -44,11 +44,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         {
         }
 
-        internal void AddAssembly(ContentBuildLogger logger, string ProjectDirectory, string assemblyPath)
+        internal void AddAssembly(ContentBuildLogger logger, string baseDirectory, string assemblyPath)
         {
             string rootedAssemblyPath = assemblyPath;
             if (!Path.IsPathRooted(rootedAssemblyPath))
-                rootedAssemblyPath = Path.GetFullPath(Path.Combine(ProjectDirectory, assemblyPath));
+                rootedAssemblyPath = Path.GetFullPath(Path.Combine(baseDirectory, assemblyPath));
 
             if (!Path.IsPathRooted(rootedAssemblyPath))
                 throw new ArgumentException("assemblyFilePath must be absolute!");

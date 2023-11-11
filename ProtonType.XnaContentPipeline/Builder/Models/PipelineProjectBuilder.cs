@@ -198,7 +198,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             pipelineProxy.SetBaseDirectory(this._project.Location);
             pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.OriginalPath));
-                                
+
             pipelineProxy.SetRebuild();
             pipelineProxy.SetIncremental();
 
@@ -218,7 +218,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 tasks.Add(task);
             }
 
-            foreach (var task in tasks)
+            foreach (PipelineAsyncTask task in tasks)
                 task.AsyncWaitHandle.WaitOne();
             
 
@@ -227,7 +227,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             {
                 OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
 
-                var buildTask = ProcessbuildItem(pipelineProxy, _project, buildItem);
+                PipelineAsyncTask buildTask = ProcessbuildItem(pipelineProxy, _project, buildItem);
                 buildTask.AsyncWaitHandle.WaitOne();
 
                 switch (buildTask.Result)
@@ -250,7 +250,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         private PipelineAsyncTask ProcessbuildItem(PipelineProxyClient pipelineProxy, PipelineProject project, PipelineBuildItem buildItem)
         {
-            var item = buildItem.PipelineItem;
+            PipelineItem item = buildItem.PipelineItem;
 
             pipelineProxy.SetImporter(item.Importer);
 
@@ -260,22 +260,22 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 string processorParamValue = item.ProcessorParams[processorParamName];
                 pipelineProxy.AddProcessorParam(processorParamName, processorParamValue);
             }
-            
-            var originalPath = item.OriginalPath;
-            var destinationPath = item.DestinationPath;
+
+            string originalPath = item.OriginalPath;
+            string destinationPath = item.DestinationPath;
             if (destinationPath == originalPath)
                 destinationPath = null;
 
-            var logger = new ProxyLogger(_viewLogger);
+            IProxyLogger logger = new ProxyLogger(_viewLogger);
 
             if (item.BuildAction == BuildAction.Copy)
             {
-                var buildTask = pipelineProxy.Copy(logger, originalPath, destinationPath);
+                PipelineAsyncTask buildTask = pipelineProxy.Copy(logger, originalPath, destinationPath);
                 return buildTask;
             }
             if (item.BuildAction == BuildAction.Build)
             {
-                var buildTask = pipelineProxy.Build(logger, originalPath, destinationPath);
+                PipelineAsyncTask buildTask = pipelineProxy.Build(logger, originalPath, destinationPath);
                 return buildTask;
             }
 

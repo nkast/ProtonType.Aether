@@ -437,37 +437,37 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 {
                     case ProxyMsgType.LogMessage:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogMessage(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogImportantMessage:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogImportantMessage(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogWarning:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogWarning(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogError:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogError(guid);
                         }
                         break;
 
                     case ProxyMsgType.TaskEnd:
                         {
-                            var guid = ReadGuid();
-                            var taskResult = ReadTaskResult();
-                            var task = _tasks[guid];
+                            Guid guid = ReadGuid();
+                            TaskResult taskResult = ReadTaskResult();
+                            PipelineAsyncTask task = _tasks[guid];
                             _tasks.TryRemove(guid, out task);
                             task.OnCompleted(taskResult);
                             return task;
@@ -532,7 +532,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             {
                 // dispose managed state (managed objects)
             }
-            
+
             Terminate();
 
             base.Dispose(disposing);

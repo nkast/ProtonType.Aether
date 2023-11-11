@@ -323,22 +323,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void SetOutputDir()
         {
-            this._globalContext.OutputDir = Reader.ReadString();
+            string outputDir = Reader.ReadString();
+            this._globalContext.OutputDir = outputDir;
         }
 
         private void SetIntermediateDir()
         {
-            this._globalContext.IntermediateDir = Reader.ReadString();
+            string intermediateDir = Reader.ReadString();
+            this._globalContext.IntermediateDir = intermediateDir;
         }
 
         private void SetPlatform()
         {
-            this._globalContext.Platform = (TargetPlatform)Reader.ReadInt32();
+            TargetPlatform platform = (TargetPlatform)Reader.ReadInt32();
+            this._globalContext.Platform = platform;
         }
 
         private void SetConfig()
         {
-            this._globalContext.Config = Reader.ReadString();
+            string config = Reader.ReadString();
+            this._globalContext.Config = config;
         }
 
         private void SetProfile()
@@ -348,29 +352,33 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void SetCompress()
         {
-            this._globalContext.Compress = Reader.ReadBoolean();
+            bool compress = Reader.ReadBoolean();
+            this._globalContext.Compress = compress;
         }
         
         private void SetImporter()
         {
-            this._globalContext.Importer = ReadString();
+            string importer = ReadString();
+            this._globalContext.Importer = importer;
 
         }
         private void SetProcessor()
         {
-            this._globalContext.Processor = ReadString();
+            string processor = ReadString();
+            this._globalContext.Processor = processor;
             this._globalContext.ProcessorParams.Clear();
         }
         private void AddProcessorParam()
         {
-            var ProcessorParam = Reader.ReadString();
-            var ProcessorParamValue = Reader.ReadString();
-            this._globalContext.ProcessorParams.Add(ProcessorParam, ProcessorParamValue);
+            string processorParam = Reader.ReadString();
+            string processorParamValue = Reader.ReadString();
+            this._globalContext.ProcessorParams.Add(processorParam, processorParamValue);
         }
 
         private void Copy()
         {
             Guid contextGuid = ReadGuid();
+
             this._globalContext.OriginalPath = Reader.ReadString();
             this._globalContext.DestinationPath = ReadString();
 
