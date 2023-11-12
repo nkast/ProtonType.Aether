@@ -153,13 +153,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
         public void BuildAll(bool rebuild)
         {
+            List<PipelineItem> items = new List<PipelineItem>();
             foreach (var pipelineItemVM in _projectVM.PipelineItemsVM)
-                BuildItem(pipelineItemVM, rebuild);
+                items.Add(pipelineItemVM.PipelineItem);
+
+            _pipelineBuilder.BuildAll(items, rebuild);
+
         }
 
         public void BuildItem(PipelineItemViewModel pipelineItemVM, bool rebuild)
         {
-            var builditem = _pipelineBuilder.BuildItem(pipelineItemVM.PipelineItem, rebuild);
+            _pipelineBuilder.BuildItem(pipelineItemVM.PipelineItem, rebuild);
         }
 
         public void CleanAll()

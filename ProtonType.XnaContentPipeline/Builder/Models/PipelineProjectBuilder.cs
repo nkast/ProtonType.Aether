@@ -141,61 +141,100 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             handler(this, e);
         }
 
-        internal PipelineBuildItem BuildItem(PipelineItem pipelineItem, bool rebuild)
+        internal void BuildAll(List<PipelineItem> pipelineItems, bool rebuild)
         {
-            var buildItem = new PipelineBuildItem(pipelineItem, rebuild);
-            lock (_buildTaskLocker)
+            _buildItems.Clear();
+
+            PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             {
-                if (_buildTask == null)
+                InitProxy(pipelineProxy);
+
+                lock (_buildTaskLocker)
                 {
-                    _buildItems.Clear();
+                    if (_buildTask == null)
+                    {
+                        _buildItems.Clear();
+                    }
+                    foreach (var pipelineItem in pipelineItems)
+                    {
+                        var buildItem = new PipelineBuildItem(pipelineItem, rebuild);
+                        _buildItems.Add(buildItem);
+                        _queuedItems.Enqueue(buildItem);
+                        OnBuildQueueItemAdded(new PipelineBuildItemEventArgs(buildItem));
+                    }
                 }
-                _buildItems.Add(buildItem);
-                _queuedItems.Enqueue(buildItem);
+
+                lock (_buildTaskLocker)
+                {
+                    if (_buildTask != null)
+                        throw new InvalidOperationException("_buildTask is not null");
+
+                    _buildTask = Task.Factory.StartNew(() => {
+                        foreach (var pipelineItem in pipelineItems)
+                        {
+                            ProcessBuildQueueWorker(pipelineProxy);
+                        }
+                    });
+                    _buildTask.ContinueWith((t) =>
+                    {
+                        lock (_buildTaskLocker)
+                        {
+                            pipelineProxy.Dispose();
+                            _buildTask = null;
+                        }
+                    });
+                    OnBuildStarted(EventArgs.Empty);
+                }
             }
-            OnBuildQueueItemAdded(new PipelineBuildItemEventArgs(buildItem));
-         
-            ProcessBuildQueue();
-
-            return buildItem;
-        }
-
-        internal void ProcessBuildQueue()
-        {
-            lock (_buildTaskLocker)
-            {
-                if (_buildTask == null)
-                    BeginBuildTask();
-            }
-
             return;
         }
 
-        private void BeginBuildTask()
+        internal void BuildItem(PipelineItem pipelineItem, bool rebuild)
         {
-            if (_buildTask != null)
-                throw new InvalidOperationException("_buildTask is not null");
-
-            _buildTask = Task.Factory.StartNew(ProcessBuildQueueWorker);
-            _buildTask.ContinueWith((t) => StopBuildTask() );
-            OnBuildStarted(EventArgs.Empty);
-        }
-
-        private void StopBuildTask()
-        {
-            lock (_buildTaskLocker)
-            {
-                _buildTask = null;
-            }
-        }
-
-        private void ProcessBuildQueueWorker()
-        {
-            Thread.CurrentThread.Name = "ProcessBuildQueueWorker";
-
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
-            ProxyLogger logger = new ProxyLogger(_viewLogger);
+            {
+                InitProxy(pipelineProxy);
 
+                {
+                    var buildItem = new PipelineBuildItem(pipelineItem, rebuild);
+
+                    lock (_buildTaskLocker)
+                    {
+                        if (_buildTask == null)
+                        {
+                            _buildItems.Clear();
+                        }
+                        _buildItems.Add(buildItem);
+                        _queuedItems.Enqueue(buildItem);
+                    }
+                    OnBuildQueueItemAdded(new PipelineBuildItemEventArgs(buildItem));
+
+                    lock (_buildTaskLocker)
+                    {
+                        if (_buildTask != null)
+                            throw new InvalidOperationException("_buildTask is not null");
+
+                        _buildTask = Task.Factory.StartNew(() =>
+                        {
+                            ProcessBuildQueueWorker(pipelineProxy);
+                        });
+                        _buildTask.ContinueWith((t) =>
+                        {
+                            lock (_buildTaskLocker)
+                            {
+                                pipelineProxy.Dispose();
+                                _buildTask = null;
+                            }
+                        });
+                        OnBuildStarted(EventArgs.Empty);
+                    }
+                }
+            }
+            return;
+        }
+
+        private void InitProxy(PipelineProxyClient pipelineProxy)
+        {
             pipelineProxy.SetBaseDirectory(this._project.Location);
             pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.OriginalPath));
 
@@ -212,6 +251,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             List<PipelineAsyncTask> tasks = new List<PipelineAsyncTask>();
 
+            ProxyLogger logger = new ProxyLogger(_viewLogger);
             foreach (string assemblyPath in _project.References)
             {
                 PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assemblyPath);
@@ -220,7 +260,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             foreach (PipelineAsyncTask task in tasks)
                 task.AsyncWaitHandle.WaitOne();
-            
+        }
+
+        private void ProcessBuildQueueWorker(PipelineProxyClient pipelineProxy)
+        {
+            if (Thread.CurrentThread.Name == null)
+                Thread.CurrentThread.Name = "ProcessBuildQueueWorker";
 
             PipelineBuildItem buildItem;
             while (_queuedItems.TryDequeue(out buildItem))
@@ -242,8 +287,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 
                 OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, buildTask.Result));
             }
-
-            pipelineProxy.Dispose();
 
             return;
         }
