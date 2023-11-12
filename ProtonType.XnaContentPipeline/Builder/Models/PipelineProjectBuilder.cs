@@ -147,6 +147,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             {
+                pipelineProxy.BeginListening();
+
                 InitProxy(pipelineProxy);
 
                 lock (_buildTaskLocker)
@@ -193,6 +195,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         {
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             {
+                pipelineProxy.BeginListening();
+
                 InitProxy(pipelineProxy);
 
                 {

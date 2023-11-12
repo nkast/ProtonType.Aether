@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
@@ -29,6 +30,91 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
         public PipelineProxyClient() : base("ProtonType.XnaContentPipeline.ProxyServer.exe")
         {
             return;
+        }
+
+
+        public void BeginListening()
+        {
+            Task task = Task.Run(() => 
+            {
+                Run();
+            });
+        }
+
+        private void Run()
+        {
+            for (ProxyMsgType msg = ReadMsg(); ; msg = ReadMsg())
+            {
+                switch (msg)
+                {
+                    case ProxyMsgType.LogMessage:
+                        {
+                            var guid = ReadGuid();
+                            LogMessage(guid);
+                        }
+                        break;
+
+                    case ProxyMsgType.LogImportantMessage:
+                        {
+                            var guid = ReadGuid();
+                            LogImportantMessage(guid);
+                        }
+                        break;
+
+                    case ProxyMsgType.LogWarning:
+                        {
+                            var guid = ReadGuid();
+                            LogWarning(guid);
+                        }
+                        break;
+
+                    case ProxyMsgType.LogError:
+                        {
+                            var guid = ReadGuid();
+                            LogError(guid);
+                        }
+                        break;
+
+                    case ProxyMsgType.Importer:
+                        {
+                            var guid = ReadGuid();
+                            var task = _tasks[guid];
+                            ImporterDescription importer = new ImporterDescription(Reader);
+                            var importers = task.AsyncState as List<ImporterDescription>;
+                            importers.Add(importer);
+                        }
+                        break;
+
+                    case ProxyMsgType.Processor:
+                        {
+                            var guid = ReadGuid();
+                            var task = _tasks[guid];
+                            ProcessorDescription importer = new ProcessorDescription(Reader);
+                            var importers = task.AsyncState as List<ProcessorDescription>;
+                            importers.Add(importer);
+                        }
+                        break;
+
+                    case ProxyMsgType.TaskEnd:
+                        {
+                            var guid = ReadGuid();
+                            var taskResult = ReadTaskResult();
+                            var task = _tasks[guid];
+                            _tasks.TryRemove(guid, out task);
+                            task.OnCompleted(taskResult);
+                        }
+                        break;
+
+                    case ProxyMsgType.Terminate:
+                        {
+                            return;
+                        }
+                        break;
+
+                    default:
+                        throw new Exception("Unknown Message");
+                }
+            }
         }
 
         private void WriteMsg(ProxyMsgType msgType)
@@ -132,8 +218,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         public PipelineAsyncTask AddAssembly(IProxyLogger logger, string assemblyPath)
         {
-            var contextGuid = Guid.NewGuid();
-            _tasks[contextGuid] = new PipelineAsyncTask(contextGuid, logger);
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            _tasks[contextGuid] = task;
 
             lock (Writer)
             {
@@ -143,110 +230,44 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            for (ProxyMsgType msg = ReadMsg(); ; msg = ReadMsg())
-            {
-                switch (msg)
-                {
-                    case ProxyMsgType.LogMessage:
-                        {
-                            var guid = ReadGuid();
-                            LogMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogImportantMessage:
-                        {
-                            var guid = ReadGuid();
-                            LogImportantMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogWarning:
-                        {
-                            var guid = ReadGuid();
-                            LogWarning(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogError:
-                        {
-                            var guid = ReadGuid();
-                            LogError(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.TaskEnd:
-                        {
-                            var guid = ReadGuid();
-                            var taskResult = ReadTaskResult();
-                            var task = _tasks[guid];
-                            _tasks.TryRemove(guid, out task);
-                            task.OnCompleted(taskResult);
-                            return task;
-                        }
-
-                    default:
-                        throw new Exception("Unknown Message");
-                }
-            }
+            return task;
         }
         
-        public IEnumerable<ImporterDescription> GetImporters()
+        public PipelineAsyncTask GetImporters(IProxyLogger logger)
         {
+            List<ImporterDescription> importers = new List<ImporterDescription>();
+
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, importers);
+            _tasks[contextGuid] = task;
+
             lock (Writer)
             {
                 WriteMsg(ProxyMsgType.GetImporters);
+                WriteGuid(contextGuid);
                 Writer.Flush();
             }
 
-            List<ImporterDescription> importers = new List<ImporterDescription>();
-            for (ImporterDescription importer; (importer = ReadImporter()) != null; )
-            {
-                importers.Add(importer);
-            }
-            return importers;
+            return task;
         }
 
-        public IEnumerable<ProcessorDescription> GetProcessors()
+        public PipelineAsyncTask GetProcessors(IProxyLogger logger)
         {
+            List<ProcessorDescription> processors = new List<ProcessorDescription>();
+
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, processors);
+            _tasks[contextGuid] = task;
+
             lock (Writer)
             {
                 WriteMsg(ProxyMsgType.GetProcessors);
+                WriteGuid(contextGuid);
                 Writer.Flush();
             }
 
-            List<ProcessorDescription> processors = new List<ProcessorDescription>();
-            for (ProcessorDescription processor; (processor = ReadProcessor()) != null; )
-            {
-                processors.Add(processor);
-            }
-            return processors;
+            return task;
         }
-
-        private ImporterDescription ReadImporter()
-        {
-            var msg = ReadMsg();
-            if (msg == ProxyMsgType.End)
-                return null;
-            if (msg != ProxyMsgType.Importer)
-                throw new InvalidOperationException();
-
-            ImporterDescription importer = new ImporterDescription(Reader);
-            return importer;
-        }
-
-        private ProcessorDescription ReadProcessor()
-        {
-            var msg = ReadMsg();
-            if (msg == ProxyMsgType.End)
-                return null;
-            if (msg != ProxyMsgType.Processor)
-                throw new InvalidOperationException();
-
-            var processor = new ProcessorDescription(Reader);
-            return processor;
-        }
-
 
         public void SetRebuild()
         {
@@ -358,7 +379,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
         public PipelineAsyncTask Copy(IProxyLogger logger, string originalPath, string destinationPath)
         {
             var contextGuid = Guid.NewGuid();
-            _tasks[contextGuid] = new PipelineAsyncTask(contextGuid, logger);
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            _tasks[contextGuid] = task;
 
             lock (Writer)
             {
@@ -369,58 +391,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            for (ProxyMsgType msg = ReadMsg(); ; msg = ReadMsg())
-            {
-                switch (msg)
-                {
-                    case ProxyMsgType.LogMessage:
-                        {
-                            var guid = ReadGuid();
-                            LogMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogImportantMessage:
-                        {
-                            var guid = ReadGuid();
-                            LogImportantMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogWarning:
-                        {
-                            var guid = ReadGuid();
-                            LogWarning(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogError:
-                        {
-                            var guid = ReadGuid();
-                            LogError(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.TaskEnd:
-                        {
-                            var guid = ReadGuid();
-                            var taskResult = ReadTaskResult();
-                            var task = _tasks[guid];
-                            _tasks.TryRemove(guid, out task);
-                            task.OnCompleted(taskResult);
-                            return task;
-                        }
-
-                    default:
-                        throw new Exception("Unknown Message");
-                }
-            }
+            return task;
         }
 
         public PipelineAsyncTask Build(IProxyLogger logger, string originalPath, string destinationPath)
         {
             var contextGuid = Guid.NewGuid();
-            _tasks[contextGuid] = new PipelineAsyncTask(contextGuid, logger);
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            _tasks[contextGuid] = task;
 
             lock (Writer)
             {
@@ -431,52 +409,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            for (ProxyMsgType msg = ReadMsg(); ; msg = ReadMsg())
-            {
-                switch (msg)
-                {
-                    case ProxyMsgType.LogMessage:
-                        {
-                            Guid guid = ReadGuid();
-                            LogMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogImportantMessage:
-                        {
-                            Guid guid = ReadGuid();
-                            LogImportantMessage(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogWarning:
-                        {
-                            Guid guid = ReadGuid();
-                            LogWarning(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.LogError:
-                        {
-                            Guid guid = ReadGuid();
-                            LogError(guid);
-                        }
-                        break;
-
-                    case ProxyMsgType.TaskEnd:
-                        {
-                            Guid guid = ReadGuid();
-                            TaskResult taskResult = ReadTaskResult();
-                            PipelineAsyncTask task = _tasks[guid];
-                            _tasks.TryRemove(guid, out task);
-                            task.OnCompleted(taskResult);
-                            return task;
-                        }
-
-                    default:
-                        throw new Exception("Unknown Message");
-                }
-            }
+            return task;
         }
 
         private void LogError(Guid guid)

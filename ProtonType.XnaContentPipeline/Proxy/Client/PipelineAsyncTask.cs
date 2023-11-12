@@ -26,13 +26,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
         public readonly Guid Guid;
         public readonly IProxyLogger Logger;
 
-        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger)
+        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger, object state)
         {
             AsyncWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
             IsCompleted = false;
 
             this.Guid = contextGuid;
             this.Logger = logger;
+            this.AsyncState = state;
         }
 
         public object AsyncState { get; private set; }

@@ -131,7 +131,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 switch (msg)
                 {
                     case ProxyMsgType.Terminate:
-                        break;
+                        Terminate();
+                        return;
                     case ProxyMsgType.BaseDirectory:
                         SetBaseDirectory();
                         break;                    
@@ -194,6 +195,15 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
+        private void Terminate()
+        {
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.Terminate);
+                Writer.Flush();
+            }
+        }
+
         private void SetBaseDirectory()
         {
             string baseDirectory = Reader.ReadString();
@@ -237,28 +247,43 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void GetImporters()
         {
+            Guid contextGuid = ReadGuid();
+
             lock (Writer)
             {
                 for (IEnumerator<ImporterDescription> e = _assembliesMgr.GetImporters(); e.MoveNext(); )
                 {
                     WriteMsg(ProxyMsgType.Importer);
+                    WriteGuid(contextGuid);
                     e.Current.Write(Writer);
                 }
-                WriteMsg(ProxyMsgType.End);
+
+                TaskResult taskResult = TaskResult.SUCCEEDED;
+
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
                 Writer.Flush();
             }
         }
         
         private void GetProcessors()
         {
+            Guid contextGuid = ReadGuid();
+
             lock (Writer)
             {
                 for (IEnumerator<ProcessorDescription> e = _assembliesMgr.GetProcessors(); e.MoveNext(); )
                 {
                     WriteMsg(ProxyMsgType.Processor);
+                    WriteGuid(contextGuid);
                     e.Current.Write(Writer);
                 }
-                WriteMsg(ProxyMsgType.End);
+                TaskResult taskResult = TaskResult.SUCCEEDED;
+
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
                 Writer.Flush();
             }           
         }

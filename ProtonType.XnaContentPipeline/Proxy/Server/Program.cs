@@ -34,6 +34,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             {
                 Console.WriteLine("IPCServer");
             }
+
+            return;
         }
     }
 }
