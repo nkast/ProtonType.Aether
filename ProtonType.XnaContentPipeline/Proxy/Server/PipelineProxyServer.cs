@@ -532,14 +532,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             
             try
             {
-                PipelineBuildEvent buildEvent = _manager.CreateBuildEvent(c.SourceFile,
+                BuildEvent buildEvent = _manager.CreateBuildEvent(c.SourceFile,
                                       c.OutputFile,
                                       c.Importer,
                                       c.Processor,
                                       c.ProcessorParams
                                       );
 
-                PipelineBuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
+                BuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
                 _manager.BuildContent(buildEvent, logger, cachedBuildEvent, buildEvent.DestFile);
 
                 newFileCollection.AddFile(c.SourceFile, c.OutputFile);

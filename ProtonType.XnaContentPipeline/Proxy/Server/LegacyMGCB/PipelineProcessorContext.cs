@@ -24,13 +24,13 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
-    class LegacyPipelineProcessorContext : ContentProcessorContext
+    class ProcessorContext : ContentProcessorContext
     {
         private readonly PipelineManager _manager;
         private readonly ContentBuildLogger _logger;
-        private readonly PipelineBuildEvent _buildEvent;
+        private readonly BuildEvent _buildEvent;
 
-        public LegacyPipelineProcessorContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent buildEvent)
+        public ProcessorContext(PipelineManager manager, ContentBuildLogger logger, BuildEvent buildEvent)
         {
             _manager = manager;
             _logger = logger;
@@ -68,7 +68,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             var processorInfo = _manager._assembliesMgr.GetProcessorInfo(processorName);
             var processor = _manager._assembliesMgr.CreateProcessor(processorInfo, processorParameters);
-            var processContext = new LegacyPipelineProcessorContext(_manager, _logger, new PipelineBuildEvent { ProcessorParams = processorParameters });
+            var processContext = new ProcessorContext(_manager, _logger, new BuildEvent { ProcessorParams = processorParameters });
             var processedObject = processor.Process(input, processContext);
            
             // Add its dependencies and built assets to ours.
@@ -100,7 +100,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool processAsset = !string.IsNullOrEmpty(processorName);
             _manager._assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
-            PipelineBuildEvent buildEvent = new PipelineBuildEvent
+            BuildEvent buildEvent = new BuildEvent
             { 
                 SourceFile = sourceFilepath,
                 Importer = importerName,
@@ -129,10 +129,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
 
             // Build the content.
-            PipelineBuildEvent buildEvent = _manager.CreateBuildEvent(sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
+            BuildEvent buildEvent = _manager.CreateBuildEvent(sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
 
             // Load the previous content event if it exists.
-            PipelineBuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
+            BuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
             _manager.BuildContent(buildEvent, _logger, cachedBuildEvent, buildEvent.DestFile);
 
             // Record that we built this dependent asset.

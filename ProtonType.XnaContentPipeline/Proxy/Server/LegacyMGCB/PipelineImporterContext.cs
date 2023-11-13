@@ -23,13 +23,13 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
-    class LegacyPipelineImporterContext : ContentImporterContext
+    class ImporterContext : ContentImporterContext
     {
         private readonly PipelineManager _manager;
         private readonly ContentBuildLogger _logger;
-        private readonly PipelineBuildEvent _buildEvent;
+        private readonly BuildEvent _buildEvent;
 
-        public LegacyPipelineImporterContext(PipelineManager manager, ContentBuildLogger logger, PipelineBuildEvent buildEvent)
+        public ImporterContext(PipelineManager manager, ContentBuildLogger logger, BuildEvent buildEvent)
         {
             _manager = manager;
             _logger = logger;

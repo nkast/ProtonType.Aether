@@ -350,10 +350,10 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             string projectFilename = Path.GetFileName(_project.OriginalPath);
             string sourceName = Path.GetFileNameWithoutExtension(pipelineItem.Filename);
-            string intermediateEventPath = Path.Combine(intermediatePath, Path.GetFileNameWithoutExtension(projectFilename), pipelineItem.Location, sourceName + PipelineBuildEvent.Extension);
+            string intermediateEventPath = Path.Combine(intermediatePath, Path.GetFileNameWithoutExtension(projectFilename), pipelineItem.Location, sourceName + BuildEvent.Extension);
             intermediateEventPath = intermediateEventPath.Replace("\\", "/");
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
-            PipelineBuildEvent buildEvent = PipelineBuildEvent.LoadBinary(intermediateEventPath);
+            BuildEvent buildEvent = BuildEvent.LoadBinary(intermediateEventPath);
 
             if (buildEvent != null)
             {

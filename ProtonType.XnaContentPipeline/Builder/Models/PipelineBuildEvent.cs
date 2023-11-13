@@ -28,13 +28,13 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 
 namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 {
-    public class PipelineBuildEvent
+    public class BuildEvent
     {
         public const string Extension = ".kniContent";
 
         private static readonly OpaqueDataDictionary EmptyParameters = new OpaqueDataDictionary();
 
-        public PipelineBuildEvent()
+        public BuildEvent()
         {
             SourceFile = string.Empty;
             DestFile = string.Empty;
@@ -133,14 +133,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             }
         }
 
-        public static PipelineBuildEvent LoadBinary(string filePath)
+        public static BuildEvent LoadBinary(string filePath)
         {
             try
             {
                 using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
                 using (var writer = new PipelineBuildEventBinaryReader(stream))
                 {
-                    PipelineBuildEvent result = new PipelineBuildEvent();
+                    BuildEvent result = new BuildEvent();
                     writer.Read(result);
                     return result;
                 }
@@ -313,7 +313,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             {
             }
 
-            internal void Write(PipelineBuildEvent value)
+            internal void Write(BuildEvent value)
             {
                 Write(Header.ToCharArray());
                 Write((Int16)MajorVersion);
@@ -393,7 +393,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             {
             }
 
-            internal void Read(PipelineBuildEvent value)
+            internal void Read(BuildEvent value)
             {
                 if (ReadByte() != Header[0]
                 ||  ReadByte() != Header[1]
