@@ -40,11 +40,11 @@
     <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
     <Compile Include="Server\BuildLogger.cs" />
     <Compile Include="Server\IPCServer.cs" />
+    <Compile Include="Server\LegacyMGCB\BuildEvent.cs" />
+    <Compile Include="Server\LegacyMGCB\ImporterContext.cs" />
     <Compile Include="Server\LegacyMGCB\PathHelper.cs" />
-    <Compile Include="Server\LegacyMGCB\PipelineBuildEvent.cs" />
-    <Compile Include="Server\LegacyMGCB\PipelineImporterContext.cs" />
     <Compile Include="Server\LegacyMGCB\PipelineManager.cs" />
-    <Compile Include="Server\LegacyMGCB\PipelineProcessorContext.cs" />
+    <Compile Include="Server\LegacyMGCB\ProcessorContext.cs" />
     <Compile Include="Server\LegacyMGCB\SourceFileCollection.cs" />
     <Compile Include="Server\ParametersContext.cs" />
     <Compile Include="Server\PipelineProxyServer.cs" />
