@@ -100,7 +100,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool processAsset = !string.IsNullOrEmpty(processorName);
             _manager._assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
-            PipelineBuildEvent buildEvent = new PipelineBuildEvent 
+            PipelineBuildEvent buildEvent = new PipelineBuildEvent
             { 
                 SourceFile = sourceFilepath,
                 Importer = importerName,
@@ -120,14 +120,20 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public override ExternalReference<TOutput> BuildAsset<TInput, TOutput>(ExternalReference<TInput> sourceAsset,
                                                                                 string processorName,
                                                                                 OpaqueDataDictionary processorParameters,
-                                                                                string importerName, 
+                                                                                string importerName,
                                                                                 string assetName)
         {
             if (string.IsNullOrEmpty(assetName))
-                assetName = _manager.GetAssetName(_logger, sourceAsset.Filename, importerName, processorName, processorParameters);
+                assetName = _manager.GetAssetName(sourceAsset.Filename, importerName, processorName, processorParameters, _logger);
+
+
 
             // Build the content.
-            var buildEvent = _manager.BuildContent(_logger, sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
+            PipelineBuildEvent buildEvent = _manager.CreateBuildEvent(sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
+
+            // Load the previous content event if it exists.
+            PipelineBuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
+            _manager.BuildContent(buildEvent, _logger, cachedBuildEvent, buildEvent.DestFile);
 
             // Record that we built this dependent asset.
             if (!_buildEvent.BuildAsset.Contains(buildEvent.DestFile))

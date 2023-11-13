@@ -136,10 +136,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                 return null;
 
             // Find the abstract base class ContentImporter<T>.
-            var importerBaseType = importerType.BaseType;
+            Type importerBaseType = importerType.BaseType;
             while (!importerBaseType.IsAbstract)
                 importerBaseType = importerBaseType.BaseType;
-            var outputType = importerBaseType.GetGenericArguments()[0];
+            Type outputType = importerBaseType.GetGenericArguments()[0];
 
             // find all output base type
             List<string> outputBaseTypesFullName = new List<string>();
@@ -155,7 +155,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             ImporterInfo importerInfo = null;
 
             // find ContentImporterAttribute
-            var attributes = importerType.GetCustomAttributes(typeof(ContentImporterAttribute), false);
+            object[] attributes = importerType.GetCustomAttributes(typeof(ContentImporterAttribute), false);
             ContentImporterAttribute importerAttribute = null;
             if (attributes.Length != 0)
             {
@@ -169,7 +169,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                 importerAttribute.DisplayName = importerType.Name;
             }
 
-            var importerDesc = new ImporterDescription(
+            ImporterDescription importerDesc = new ImporterDescription(
                 assemblyPath,
                 importerType.Name,
                 importerType.FullName,
@@ -238,7 +238,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             if (attributes.Length != 0)
             {
                 ContentProcessorAttribute processorAttribute = attributes[0] as ContentProcessorAttribute;
-                var processorDesc = new ProcessorDescription(
+                ProcessorDescription processorDesc = new ProcessorDescription(
                     assemblyPath,
                     processorType.Name,
                     processorType.FullName,
