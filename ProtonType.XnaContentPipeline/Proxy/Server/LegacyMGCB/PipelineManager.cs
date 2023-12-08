@@ -73,16 +73,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// </summary>
         public bool CompressContent { get; set; }
 
-        /// <summary>        
-        /// If true exceptions thrown from within an importer or processor are caught and then 
-        /// thrown from the context. Default value is true.
-        /// </summary>
-        public bool RethrowExceptions { get; set; }
-
         public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr)
         {
             _buildEventsMap = new Dictionary<string, List<BuildEvent>>();
-            RethrowExceptions = true;
 
             Logger = null;
 
@@ -308,30 +301,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // Try importing the content.
             object importedObject;
-            if (RethrowExceptions)
+            try
             {
-                try
-                {
-                    ImporterContext importContext = new ImporterContext(this, logger, buildEvent);
-                    importedObject = importer.Import(buildEvent.SourceFile, importContext);
-                }
-                catch (PipelineException)
-                {
-                    throw;
-                }
-                catch (InvalidContentException)
-                {
-                    throw;
-                }
-                catch (Exception inner)
-                {
-                    throw new PipelineException(string.Format("Importer '{0}' had unexpected failure.", buildEvent.Importer), inner);
-                }
-            }
-            else
-            {
-                ContentImporterContext importContext = new ImporterContext(this, logger, buildEvent);
+                ImporterContext importContext = new ImporterContext(this, logger, buildEvent);
                 importedObject = importer.Import(buildEvent.SourceFile, importContext);
+            }
+            catch (PipelineException)
+            {
+                throw;
+            }
+            catch (InvalidContentException)
+            {
+                throw;
+            }
+            catch (Exception inner)
+            {
+                throw new PipelineException(string.Format("Importer '{0}' had unexpected failure.", buildEvent.Importer), inner);
             }
 
             // The pipelineEvent.Processor can be null or empty. In this case the
@@ -357,32 +342,23 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
 
             // Process the imported object.
-
             object processedObject;
-            if (RethrowExceptions)
+            try
             {
-                try
-                {
-                    var processContext = new ProcessorContext(this, logger, buildEvent);
-                    processedObject = processor.Process(importedObject, processContext);
-                }
-                catch (PipelineException)
-                {
-                    throw;
-                }
-                catch (InvalidContentException)
-                {
-                    throw;
-                }
-                catch (Exception inner)
-                {
-                    throw new PipelineException(string.Format("Processor '{0}' had unexpected failure.", buildEvent.Processor), inner);
-                }
-            }
-            else
-            {
-                ContentProcessorContext processContext = new ProcessorContext(this, logger, buildEvent);
+                var processContext = new ProcessorContext(this, logger, buildEvent);
                 processedObject = processor.Process(importedObject, processContext);
+            }
+            catch (PipelineException)
+            {
+                throw;
+            }
+            catch (InvalidContentException)
+            {
+                throw;
+            }
+            catch (Exception inner)
+            {
+                throw new PipelineException(string.Format("Processor '{0}' had unexpected failure.", buildEvent.Processor), inner);
             }
 
             return processedObject;
