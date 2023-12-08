@@ -153,7 +153,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             
             try
             {
-                Project = PipelineProjectReader.LoadProject(projectFilePath, _logger);
+                PipelineProjectReader reader = new PipelineProjectReader();
+                Project = reader.LoadProject(projectFilePath, _logger);
                 this._references.Load();
 
                 CreateItems();

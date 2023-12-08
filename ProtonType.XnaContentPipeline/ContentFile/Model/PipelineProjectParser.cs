@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
@@ -34,223 +35,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
     internal class PipelineProjectReader
     {
-        private class PipelineProjectParserContext
+        // project context
+        private string _importer;
+        private string _processor;
+        private readonly IDictionary<string, string> _processorParams = new Dictionary<string, string>();
+
+        internal PipelineProject LoadProject(string projectFilePath, IPipelineLogger logger)
         {
-            #region Other Data
+            _importer = null;
+            _processor = null;
+            _processorParams.Clear();
 
-            private readonly PipelineProject _project;
-            private readonly IDictionary<string, string> _processorParams = new Dictionary<string, string>();
-        
-            private string _processor;
-            private string _importer;
-        
-            #endregion
-
-            #region CommandLineParameters
-        
-            [CommandLineParameter(
-                Name = "outputDir",
-                ValueName = "directoryPath",
-                Description = "The directory where all content is written.")]
-            public string OutputDir { set { _project.OutputDir = value; } }
-
-            [CommandLineParameter(
-                Name = "intermediateDir",
-                ValueName = "directoryPath",
-                Description = "The directory where all intermediate files are written.")]
-            public string IntermediateDir { set { _project.IntermediateDir = value; } }
-
-            [CommandLineParameter(
-                Name = "reference",
-                ValueName = "assemblyNameOrFile",
-                Description = "Adds an assembly reference for resolving content importers, processors, and writers.")]
-            public List<string> References 
-            {
-                set { _project.References = value; }
-                get { return _project.References; }
-            }
-
-            [CommandLineParameter(
-                Name = "platform",
-                ValueName = "targetPlatform",
-                Description = "Set the target platform for this build.  Defaults to Windows.")]
-            public ProxyTargetPlatform Platform { set { _project.Platform = value; } }
-
-            [CommandLineParameter(
-                Name = "profile",
-                ValueName = "graphicsProfile",
-                Description = "Set the target graphics profile for this build.  Defaults to HiDef.")]
-            public ProxyGraphicsProfile Profile { set { _project.Profile = value; } }
-
-            [CommandLineParameter(
-                Name = "config",
-                ValueName = "string",
-                Description = "The optional build config string from the build system.")]
-            public string Config { set { _project.Config = value; } }
-
-            // Allow a MGCB file containing the /rebuild parameter to be imported without error
-            [CommandLineParameter(
-                Name = "rebuild",
-                ValueName = "bool",
-                Description = "Forces a rebuild of the project.")]
-            public bool Rebuild { set { _rebuild = value; } }
-            private bool _rebuild;
-
-            // Allow a MGCB file containing the /clean parameter to be imported without error
-            [CommandLineParameter(
-                Name = "clean",
-                ValueName = "bool",
-                Description = "Removes intermediate and output files.")]
-            public bool Clean { set { _clean = value; } }
-            private bool _clean;
-
-            [CommandLineParameter(
-                Name = "compress",
-                ValueName = "bool",
-                Description = "Content files can be compressed for smaller file sizes.")]
-            public bool Compress { set { _project.Compress = value; } }
-
-            [CommandLineParameter(
-                Name = "importer",
-                ValueName = "className",
-                Description = "Defines the class name of the content importer for reading source content.")]
-            public string Importer
-            {
-                get { return _importer; }
-                set
-                {
-                    _importer = value;
-                }
-            }
-
-            [CommandLineParameter(
-                Name = "processor",
-                ValueName = "className",
-                Description = "Defines the class name of the content processor for processing imported content.")]
-            public string Processor
-            {
-                get { return _processor; }
-                set
-                {
-                    _processor = value;
-                    _processorParams.Clear();
-                }
-            }
-
-            [CommandLineParameter(
-                Name = "processorParam",
-                ValueName = "name=value",
-                Description = "Defines a parameter name and value to set on a content processor.")]
-            public void AddProcessorParam(string nameAndValue)
-            {
-                var keyAndValue = nameAndValue.Split('=');
-                if (keyAndValue.Length != 2)
-                {
-                    // Do we error out or something?
-                    return;
-                }
-
-                _processorParams.Remove(keyAndValue[0]);
-                _processorParams.Add(keyAndValue[0], keyAndValue[1]);
-            }
-
-            [CommandLineParameter(
-                Name = "build",
-                ValueName = "sourceFile",
-                Description = "Build the content source file using the previously set switches and options.")]
-            public void OnBuild(string sourceFile)
-            {
-                AddContent(sourceFile);
-            }
-
-            public void AddContent(string sourceFile)
-            {
-                // Split sourceFile;destinationPath
-                string destinationPath = null;
-                if (sourceFile.Contains(";"))
-                {
-                    var split = sourceFile.Split(';');
-                    sourceFile = split[0];
-                    destinationPath = split[1];
-                }
-
-                // Make sure the source file is relative to the project.
-                var projectDir = _project.Location + Path.DirectorySeparatorChar;
-                sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
-
-                // check duplicates.
-                var previous = _project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
-                if (previous != null)
-                    throw new Exception("sourceFile allready added.");
-
-                // Create the item for processing later.
-                var item = new PipelineItem()
-                {
-                    BuildAction = BuildAction.Build,
-                    OriginalPath = sourceFile,
-                    DestinationPath = string.IsNullOrEmpty(destinationPath) ? sourceFile : destinationPath,
-                    Importer = Importer,
-                    Processor = Processor,
-                };
-                _project.AddItem(item);
-
-                // Copy the current processor parameters blind as we
-                // will validate and remove invalid parameters during
-                // the build process later.
-                foreach (var pair in _processorParams)
-                    item.ProcessorParams.Add(pair.Key, pair.Value);
-            }
-
-            [CommandLineParameter(
-                Name = "copy",
-                ValueName = "sourceFile",
-                Description = "Copy the content source file verbatim to the output directory.")]
-            public void OnCopy(string sourceFile)
-            {
-                // Split sourceFile;destinationPath
-                string destinationPath = null;
-                if (sourceFile.Contains(";"))
-                {
-                    var split = sourceFile.Split(';');
-                    sourceFile = split[0];
-                    destinationPath = split[1];
-                }
-
-                // Make sure the source file is relative to the project.
-                var projectDir = _project.Location + Path.DirectorySeparatorChar;
-                sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
-
-                // check duplicates.
-                var previous = _project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
-                if (previous != null)
-                    throw new Exception("sourceFile allready added.");
-
-                // Create the item for processing later.
-                var item = new PipelineItem()
-                {
-                    BuildAction = BuildAction.Copy,
-                    OriginalPath = sourceFile,
-                    DestinationPath = string.IsNullOrEmpty(destinationPath) ? sourceFile : destinationPath,
-                };
-                _project.AddItem(item);
-
-                // Copy the current processor parameters blind as we
-                // will validate and remove invalid parameters during
-                // the build process later.
-                foreach (var pair in _processorParams)
-                    item.ProcessorParams.Add(pair.Key, pair.Value);
-            }
-
-            #endregion
-        
-            public PipelineProjectParserContext(PipelineProject project)
-            {
-                _project = project;
-            }
-        }
-
-        internal static PipelineProject LoadProject(string projectFilePath, IPipelineLogger logger)
-        {
             PipelineProject project = new PipelineProject();
 
             project.ClearItems();
@@ -258,13 +53,234 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             // Store the file name for saving later.
             project.OriginalPath = projectFilePath;
 
-            var parserContext = new PipelineProjectParserContext(project);
-            var parser = new CommandLineParser(parserContext);
-            parser.OnError += (msg) => logger.LogMessage(Path.GetFileName(projectFilePath) + ": " + msg);
+            CommandLineParser parser = new CommandLineParser();
+            IEnumerable<string> commands = ReadFile(projectFilePath);
+            commands = CommandLineParser.Preprocess(commands);
 
-            parser.ParseFile(projectFilePath);
+
+            foreach (string option in commands)
+            {
+                if (!ParseOption(option, project, logger))
+                    break;
+            }
 
             return project;
+        }
+
+        private static List<string> ReadFile(string file)
+        {
+            string[] commands = File.ReadAllLines(file);
+
+            List<string> lines = new List<string>();
+
+            for (int j = 0; j < commands.Length; j++)
+            {
+                string line = commands[j];
+
+                if (string.IsNullOrEmpty(line))
+                    continue;
+
+                if (line.StartsWith("#"))
+                    continue;
+
+                lines.Add(line);
+            }
+
+            return lines;
+        }
+
+        private bool ParseOption(string line, PipelineProject project, IPipelineLogger logger)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                return true;
+
+            if (line.StartsWith("#"))
+                return true;
+
+            if (line[0] == '/')
+            {
+                string optionName;
+                string optionValue;
+
+                int optionEnd = line.IndexOf(':');
+                if (optionEnd != -1)
+                {
+                    optionName  = line.Substring(1, optionEnd-1);
+                    optionValue = line.Substring(optionEnd+1, line.Length-(optionEnd+1));
+                }
+                else
+                {
+                    optionName = line.Substring(1);
+                    optionValue = String.Empty;
+                }
+
+                return ParseOption(optionName, optionValue, project);
+            }
+            else
+            {
+                logger.LogMessage(Path.GetFileName(project.OriginalPath) + ": Invalid line.");
+                return false;
+            }
+        }
+
+        private bool ParseOption(string optionName, string optionValue, PipelineProject project)
+        {
+            if (String.Compare(optionName, "outputDir", true) == 0)
+            {
+                project.OutputDir = optionValue;
+                return true;
+            }
+            if (String.Compare(optionName, "intermediateDir", true) == 0)
+            {
+                project.IntermediateDir = optionValue;
+                return true;
+            }
+            if (String.Compare(optionName, "platform", true) == 0)
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(ProxyTargetPlatform));
+                ProxyTargetPlatform objValue = (ProxyTargetPlatform)converter.ConvertFromInvariantString(optionValue);
+                project.Platform = objValue;
+                return true;
+            }
+            if (String.Compare(optionName, "profile", true) == 0)
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(ProxyGraphicsProfile));
+                ProxyGraphicsProfile objValue = (ProxyGraphicsProfile)converter.ConvertFromInvariantString(optionValue);
+                project.Profile = objValue;
+                return true;
+            }
+            if (String.Compare(optionName, "config", true) == 0)
+            {
+                project.Config = optionValue;
+                return true;
+            }
+            if (String.Compare(optionName, "compress", true) == 0)
+            {
+                if (optionValue == String.Empty)
+                    optionValue = "True";
+
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(Boolean));
+                Boolean objValue = (Boolean)converter.ConvertFromInvariantString(optionValue);
+                project.Compress = objValue;
+                return true;
+            }
+            if (String.Compare(optionName, "reference", true) == 0)
+            {
+                project.References.Add(optionValue);
+                return true;
+            }
+
+            if (String.Compare(optionName, "importer", true) == 0)
+            {
+                _importer = optionValue;
+                return true;
+            }
+            if (String.Compare(optionName, "processor", true) == 0)
+            {
+                _processor = optionValue;
+                return true;
+            }
+            if (String.Compare(optionName, "processorParam", true) == 0)
+            {
+                AddProcessorParam(optionValue);
+                return true;
+            }
+            if (String.Compare(optionName, "build", true) == 0)
+            {
+                OnBuild(optionValue, project);
+                return true;
+            }
+            if (String.Compare(optionName, "copy", true) == 0)
+            {
+                OnCopy(optionValue, project);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void AddProcessorParam(string nameAndValue)
+        {
+            var keyAndValue = nameAndValue.Split('=');
+            if (keyAndValue.Length != 2)
+            {
+                // Do we error out or something?
+                return;
+            }
+
+            _processorParams.Remove(keyAndValue[0]);
+            _processorParams.Add(keyAndValue[0], keyAndValue[1]);
+        }
+
+        public void OnBuild(string sourceFile, PipelineProject project)
+        {
+            // Split sourceFile;destinationPath
+            string destinationPath = null;
+            if (sourceFile.Contains(";"))
+            {
+                var split = sourceFile.Split(';');
+                sourceFile = split[0];
+                destinationPath = split[1];
+            }
+
+            // Make sure the source file is relative to the project.
+            var projectDir = project.Location + Path.DirectorySeparatorChar;
+            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+
+            // check duplicates.
+            var previous = project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            if (previous != null)
+                throw new Exception("sourceFile allready added.");
+
+            // Create the item for processing later.
+            var item = new PipelineItem()
+            {
+                BuildAction = BuildAction.Build,
+                OriginalPath = sourceFile,
+                DestinationPath = string.IsNullOrEmpty(destinationPath) ? sourceFile : destinationPath,
+                Importer = _importer,
+                Processor = _processor,
+            };
+            project.AddItem(item);
+
+            foreach (var pair in _processorParams)
+                item.ProcessorParams.Add(pair.Key, pair.Value);
+        }
+                        
+        public void OnCopy(string sourceFile, PipelineProject project)
+        {
+            // Split sourceFile;destinationPath
+            string destinationPath = null;
+            if (sourceFile.Contains(";"))
+            {
+                string[] split = sourceFile.Split(';');
+                sourceFile = split[0];
+                destinationPath = split[1];
+            }
+
+            // Make sure the source file is relative to the project.
+            string projectDir = project.Location + Path.DirectorySeparatorChar;
+            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+
+            // check duplicates.
+            PipelineItem previous = project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            if (previous != null)
+                throw new Exception("sourceFile allready added.");
+
+            // Create the item for processing later.
+            PipelineItem item = new PipelineItem()
+            {
+                BuildAction = BuildAction.Copy,
+                OriginalPath = sourceFile,
+                DestinationPath = string.IsNullOrEmpty(destinationPath) ? sourceFile : destinationPath,
+            };
+            project.AddItem(item);
+
+            // Copy the current processor parameters blind as we
+            // will validate and remove invalid parameters during
+            // the build process later.
+            foreach (var pair in _processorParams)
+                item.ProcessorParams.Add(pair.Key, pair.Value);
         }
     }
 
@@ -278,7 +294,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
             string tmpFilename = Path.Combine(path, fileName + fileExtension + "~tmp");
 
-            using (var io = File.CreateText(tmpFilename))
+            using (StreamWriter io = File.CreateText(tmpFilename))
                 SaveProject(_project, io, pipelineItems);
 
             if (File.Exists(filePath))
@@ -290,105 +306,78 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         {
             const string lineFormat = "/{0}:{1}";
             const string processorParamFormat = "{0}={1}";
-            string line;
 
-            line = FormatDivider("Global Properties");
-            io.WriteLine(line);
+            io.WriteLine(FormatDivider("Global Properties"));
 
-            line = string.Format(lineFormat, "outputDir", project.OutputDir);
-            io.WriteLine(line);
+            io.WriteLine(String.Format(lineFormat, "outputDir", project.OutputDir));
+            io.WriteLine(String.Format(lineFormat, "intermediateDir", project.IntermediateDir));
+            io.WriteLine(String.Format(lineFormat, "platform", project.Platform));
+            io.WriteLine(String.Format(lineFormat, "config", project.Config));
+            io.WriteLine(String.Format(lineFormat, "profile", project.Profile));
+            io.WriteLine(String.Format(lineFormat, "compress", project.Compress));
 
-            line = string.Format(lineFormat, "intermediateDir", project.IntermediateDir);
-            io.WriteLine(line);
+            io.WriteLine(FormatDivider("References"));
 
-            line = string.Format(lineFormat, "platform", project.Platform);
-            io.WriteLine(line);
-
-            line = string.Format(lineFormat, "config", project.Config);
-            io.WriteLine(line);
-
-            line = string.Format(lineFormat, "profile", project.Profile);
-            io.WriteLine(line);
-
-            line = string.Format(lineFormat, "compress", project.Compress);
-            io.WriteLine(line);
-
-            line = FormatDivider("References");
-            io.WriteLine(line);
-
-            foreach (var i in project.References)
+            foreach (string i in project.References)
             {
-                line = string.Format(lineFormat, "reference", i);
-                io.WriteLine(line);
+                io.WriteLine(String.Format(lineFormat, "reference", i));
             }
 
-            line = FormatDivider("Content");
-            io.WriteLine(line);
+            io.WriteLine(FormatDivider("Content"));
                         
             if (pipelineItems == null)
                 pipelineItems = project.PipelineItems;
 
-            foreach (var i in pipelineItems)
+            foreach (PipelineItem i in pipelineItems)
             {
                 // Wrap content item lines with a begin comment line
                 // to make them more cohesive (for version control).                  
-                line = string.Format("#begin {0}", i.OriginalPath);
-                io.WriteLine(line);
+                io.WriteLine(String.Format("#begin {0}", i.OriginalPath));
 
                 if (i.BuildAction == BuildAction.Copy)
                 {
                     string path = i.OriginalPath;
                     if (i.OriginalPath != i.DestinationPath)
                         path += ";" + i.DestinationPath;
-                    line = string.Format(lineFormat, "copy", path);
-                    io.WriteLine(line);
+                    io.WriteLine(String.Format(lineFormat, "copy", path));
                     io.WriteLine();
                 }
                 else
                 {
 
                     // Write importer.
-                    {
-                        line = string.Format(lineFormat, "importer", i.Importer);
-                        io.WriteLine(line);
-                    }
+                    io.WriteLine(String.Format(lineFormat, "importer", i.Importer));
 
                     // Write processor.
-                    {
-                        line = string.Format(lineFormat, "processor", i.Processor);
-                        io.WriteLine(line);
-                    }
+                    io.WriteLine(String.Format(lineFormat, "processor", i.Processor));
 
                     // Write processor parameters.
                     if (i.Processor == null)
                     {
                         // Could still be missing the real processor.
                         // If so, write the string parameters from import.
-                        foreach (var jName in i.ProcessorParams.Keys)
+                        foreach (string jName in i.ProcessorParams.Keys)
                         {
                             string valueStr = i.ProcessorParams[jName];
-                            var processorParam = string.Format(processorParamFormat, jName, valueStr);
-                            line = string.Format(lineFormat, "processorParam", processorParam);
-                            io.WriteLine(line);
+                            string processorParam = string.Format(processorParamFormat, jName, valueStr);
+                            io.WriteLine(String.Format(lineFormat, "processorParam", processorParam));
                         }
                     }
                     else
                     {
                         // Otherwise, write only values which are defined by the real processor.
-                        foreach (var jName in i.ProcessorParams.Keys)
+                        foreach (string jName in i.ProcessorParams.Keys)
                         {
-                            var valueStr = i.ProcessorParams[jName];
-                            var processorParam = string.Format(processorParamFormat, jName, valueStr);
-                            line = string.Format(lineFormat, "processorParam", processorParam);
-                            io.WriteLine(line);
+                            string valueStr = i.ProcessorParams[jName];
+                            string processorParam = string.Format(processorParamFormat, jName, valueStr);
+                            io.WriteLine(String.Format(lineFormat, "processorParam", processorParam));
                         }
                     }
 
                     string buildValue = i.OriginalPath;
                     if (i.OriginalPath != i.DestinationPath)
                         buildValue += ";" + i.DestinationPath;
-                    line = string.Format(lineFormat, "build", buildValue);
-                    io.WriteLine(line);
+                    io.WriteLine(String.Format(lineFormat, "build", buildValue));
                     io.WriteLine();
                 }
             }
@@ -396,11 +385,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
         private static string FormatDivider(string label)
         {
-            var commentFormat = Environment.NewLine + "#----------------------------------------------------------------------------#" + Environment.NewLine;
+            string commentFormat = Environment.NewLine + "#----------------------------------------------------------------------------#" + Environment.NewLine;
 
             label = " " + label + " ";
-            var src = commentFormat.Length / 2 - label.Length / 2;
-            var dst = src + label.Length;
+            int src = commentFormat.Length / 2 - label.Length / 2;
+            int dst = src + label.Length;
 
             return commentFormat.Substring(0, src) + label + commentFormat.Substring(dst);
         }
