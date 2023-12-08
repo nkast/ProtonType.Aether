@@ -41,18 +41,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="Xna.Framework">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoGame.Framework">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\MonoGame.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Xna.Framework.Content.Pipeline">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.Content.Pipeline.dll</HintPath>
-    </Reference>
+    <PackageReference Include="nkast.Xna.Framework" Version="3.10.9001" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.10.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="3.10.9001" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\BuildEvent.cs" />

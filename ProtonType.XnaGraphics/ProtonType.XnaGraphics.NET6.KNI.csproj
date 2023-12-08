@@ -17,13 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Reference Include="Xna.Framework">
-	  <SpecificVersion>False</SpecificVersion>
-	  <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Framework\netstandard2.0\Xna.Framework.dll</HintPath>
-	</Reference>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\MonoGame.Framework.dll</HintPath>
-    </Reference>
+    <PackageReference Include="nkast.Xna.Framework" Version="3.10.9001" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.10.9001" />
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\net6.0-windows\SharpDX.dll</HintPath>
     </Reference>
