@@ -169,6 +169,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                 project.References.Add(optionValue);
                 return true;
             }
+            if (String.Compare(optionName, "packageReference", true) == 0)
+            {
+                project.PackageReferences.Add(optionValue);
+                return true;
+            }
 
             if (String.Compare(optionName, "importer", true) == 0)
             {
@@ -321,6 +326,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             foreach (string i in project.References)
             {
                 io.WriteLine(String.Format(lineFormat, "reference", i));
+            }
+
+            foreach (string i in project.PackageReferences)
+            {
+                io.WriteLine(string.Format(lineFormat, "packageReference", i));
             }
 
             io.WriteLine(FormatDivider("Content"));
