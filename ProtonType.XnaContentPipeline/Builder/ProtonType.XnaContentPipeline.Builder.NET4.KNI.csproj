@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="Models\BuildEvent.cs" />
     <Compile Include="Models\PipelineProjectBuilder.cs" />
-    <Compile Include="Models\SourceFileCollection.cs" />
     <Compile Include="ViewModels\PipelineBuilderStatusBarItemViewModel.cs" />
     <Compile Include="ViewModels\PipelineBuilderViewModel.cs" />
     <Compile Include="ViewModels\PipelineBuildItemViewModel.cs" />
