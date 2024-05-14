@@ -8,9 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nkast.Xna.Framework" Version="3.10.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Design" Version="3.10.9001" />
-    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.10.9001" />
+    <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Game" Version="3.12.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Design" Version="3.12.9001" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.12.9001" />
   </ItemGroup>
   
   <ItemGroup>
