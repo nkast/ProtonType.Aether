@@ -1,39 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net45</TargetFramework>
     <ProjectGuid>{7DA58252-12F5-4811-8CEB-8321CBB42088}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ContentFile</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ContentFile</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net4\</OutputPath>
+    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>$(SolutionDir)bin\Debug\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)bin\Release\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
@@ -48,6 +30,7 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Commands\AssemblyAddCmd.cs" />
     <Compile Include="Commands\AssemblyRemoveCmd.cs" />
@@ -78,14 +61,16 @@
     <Compile Include="ViewModels\PipelineProjectViewModel.cs" />
     <Compile Include="ViewModels\ProcessorParamsViewModel.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI.csproj">
       <Project>{82c354d3-8d37-4b2b-9046-0d36a98ee450}</Project>
       <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

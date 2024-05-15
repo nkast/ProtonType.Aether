@@ -1,45 +1,28 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net45</TargetFramework>
     <ProjectGuid>{18ABBFE2-2243-4A2F-A6AD-4A00982FCE47}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.Builder</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.Builder</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net4\</OutputPath>
+    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>$(SolutionDir)bin\Debug\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)bin\Release\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="3.12.9001" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Models\BuildEvent.cs" />
     <Compile Include="Models\PipelineProjectBuilder.cs" />
@@ -53,9 +36,11 @@
       <DependentUpon>PipelineBuilderView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <Reference Include="ProtonType.Framework">
       <HintPath>$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll</HintPath>
@@ -69,6 +54,7 @@
       <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI</Name>
     </ProjectReference>
   </ItemGroup>
+
   <ItemGroup>
     <Page Include="Views\PipelineBuilderStatusBarItemView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -79,5 +65,5 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

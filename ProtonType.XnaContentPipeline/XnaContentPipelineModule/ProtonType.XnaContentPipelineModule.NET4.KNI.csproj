@@ -1,37 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>net45</TargetFramework>
     <ProjectGuid>{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipelineModule</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net4\</OutputPath>
+    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>$(SolutionDir)bin\Debug\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)bin\Release\AnyCPU\net4\</OutputPath>
-    <DefineConstants>TRACE;WINDOWS;EDITOR KNI</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -67,6 +49,7 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Commands\DeselectBrowserItemCmd.cs" />
     <Compile Include="Commands\ExcludeBrowserItemCmd.cs" />
@@ -88,15 +71,18 @@
     <Compile Include="XnaContentPipelineModule.IModule.cs" />
     <Compile Include="XnaContentPipelineModule.IModuleFile.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <Page Include="Views\FileBrowserView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Builder\ProtonType.XnaContentPipeline.Builder.NET4.KNI.csproj">
       <Project>{18abbfe2-2243-4a2f-a6ad-4a00982fce47}</Project>
@@ -111,6 +97,7 @@
       <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI</Name>
     </ProjectReference>
   </ItemGroup>
+
   <ItemGroup>
     <Resource Include="Icons\BuildSolution_16x.png" />
     <Resource Include="Icons\BuildSelection_16x.png" />
@@ -126,5 +113,5 @@
     <Resource Include="Icons\PropertyGrid\SortAscending.png" />
     <Resource Include="Icons\CleanData_16x.png" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>
