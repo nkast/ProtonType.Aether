@@ -2,20 +2,23 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Game" Version="3.12.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Design" Version="3.12.9001" />
-    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.12.9001" />
+    <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001.*" />
+    <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001.*" />
+    <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001.*" />
+    <PackageReference Include="nkast.Xna.Framework.Input" Version="3.12.9001.*" />
+    <PackageReference Include="nkast.Xna.Framework.Game" Version="3.12.9001.*" />
+    <PackageReference Include="nkast.Xna.Framework.Design" Version="3.12.9001.*" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX.9000" Version="3.12.9001.*" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\ProtonType.XnaGraphics\ProtonType.XnaGraphics.NET6.KNI.csproj" />
+    <ProjectReference Include="..\..\ProtonType.XnaGraphics\ProtonType.XnaGraphics.NET8.KNI.csproj" />
   </ItemGroup>
 
 </Project>
