@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7DA58252-12F5-4811-8CEB-8321CBB42088}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -12,7 +8,6 @@
     <AssemblyName>ProtonType.XnaContentPipeline.ContentFile</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,13 +36,13 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="ProtonType.Framework">
-      <HintPath>$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll</HintPath>
-    </Reference>
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="3.12.9001" />
+    <Reference Include="ProtonType.Framework">
+      <HintPath>$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="tainicom.WpfPropertyGrid">
       <HintPath>..\..\3rdPartyLibraries\WpfPropertyGrid\Libraries\2010.11.10\net40\tainicom.WpfPropertyGrid.dll</HintPath>
       <Private>True</Private>
