@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <TargetFramework>net48</TargetFramework>
+    <ProjectGuid>{52767CCB-66BC-44A1-A100-E0470E21A24B}</ProjectGuid>
     <OutputType>Exe</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyServer</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyServer</AssemblyName>
-    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
-    <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net4\</OutputPath>
+    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="WindowsBase" />
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001" />
@@ -30,12 +30,12 @@
 
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
-    <Compile Include="Common\Converters\StringToColorConverter.cs" />
-    <Compile Include="Common\ImporterDescription.cs" />
-    <Compile Include="Common\ProcessorDescription.cs" />
-    <Compile Include="Common\ProcessorParamDescription.cs" />
-    <Compile Include="Common\ProxyMsgType.cs" />
-    <Compile Include="Common\TaskResult.cs" />
+    <Compile Include="..\Proxy\Common\Converters\StringToColorConverter.cs" />
+    <Compile Include="..\Proxy\Common\ImporterDescription.cs" />
+    <Compile Include="..\Proxy\Common\ProcessorDescription.cs" />
+    <Compile Include="..\Proxy\Common\ProcessorParamDescription.cs" />
+    <Compile Include="..\Proxy\Common\ProxyMsgType.cs" />
+    <Compile Include="..\Proxy\Common\TaskResult.cs" />
     <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />
     <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
@@ -51,5 +51,12 @@
     <Compile Include="Server\PipelineProxyServer.cs" />
     <Compile Include="Server\Program.cs" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
