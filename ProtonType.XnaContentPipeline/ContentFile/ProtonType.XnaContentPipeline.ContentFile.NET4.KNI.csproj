@@ -3,6 +3,7 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <TargetFramework>net45</TargetFramework>
+    <UseWPF>true</UseWPF>
     <ProjectGuid>{7DA58252-12F5-4811-8CEB-8321CBB42088}</ProjectGuid>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -14,10 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="WindowsBase" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001" />
@@ -71,6 +68,13 @@
       <Project>{82c354d3-8d37-4b2b-9046-0d36a98ee450}</Project>
       <Name>ProtonType.XnaContentPipeline.ProxyClient.NET4.KNI</Name>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

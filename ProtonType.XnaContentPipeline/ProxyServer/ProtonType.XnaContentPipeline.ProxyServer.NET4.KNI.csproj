@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
+	<UseWPF>true</UseWPF>
     <ProjectGuid>{52767CCB-66BC-44A1-A100-E0470E21A24B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -14,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="WindowsBase" />
     <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
     <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001" />
