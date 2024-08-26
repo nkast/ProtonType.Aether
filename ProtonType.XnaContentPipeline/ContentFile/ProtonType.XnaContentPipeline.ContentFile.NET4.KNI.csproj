@@ -15,10 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nkast.Xna.Framework" Version="3.12.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Content" Version="3.12.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.12.9001" />
-    <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="3.12.9001" />
+    <PackageReference Include="nkast.Xna.Framework" Version="3.13.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Content" Version="3.13.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Graphics" Version="3.13.9001" />
+    <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="3.13.9001" />
     <Reference Include="ProtonType.Framework">
       <HintPath>$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll</HintPath>
     </Reference>
