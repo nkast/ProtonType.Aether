@@ -102,7 +102,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             string absolutePath = FileBrowserEx.GetAbsolutePath(item.RelativePath);
             if (item is BrowserItem)            
             {
-                System.Diagnostics.Process.Start(absolutePath);
+                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+                startInfo.FileName = absolutePath;
+                startInfo.UseShellExecute = true;
+                System.Diagnostics.Process.Start(startInfo);
             }
             return;
         }
