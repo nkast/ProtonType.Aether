@@ -164,6 +164,16 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                 project.Compress = objValue;
                 return true;
             }
+            if (String.Compare(optionName, "compression", true) == 0)
+            {
+                if (optionValue == String.Empty)
+                    optionValue = "Default";
+
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(CompressionMethod));
+                CompressionMethod objValue = (CompressionMethod)converter.ConvertFromInvariantString(optionValue);
+                project.Compression = objValue;
+                return true;
+            }
             if (String.Compare(optionName, "reference", true) == 0)
             {
                 project.References.Add(optionValue);
@@ -320,6 +330,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             io.WriteLine(String.Format(lineFormat, "config", project.Config));
             io.WriteLine(String.Format(lineFormat, "profile", project.Profile));
             io.WriteLine(String.Format(lineFormat, "compress", project.Compress));
+            if (project.Compression != CompressionMethod.Default)
+                io.WriteLine(String.Format(lineFormat, "compression", project.Compression));
 
             io.WriteLine(FormatDivider("References"));
 

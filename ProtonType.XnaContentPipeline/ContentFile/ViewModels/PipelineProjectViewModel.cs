@@ -64,6 +64,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             set { Project.Compress = value; }
         }
 
+
+        [Category("Settings")]
+        public CompressionMethod Compression
+        {
+            get { return Project.Compression; }
+            set { Project.Compression = value; }
+        }
+
         [Category("Settings")]
         public ProxyTargetPlatform Platform 
         {

@@ -52,6 +52,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
         public bool Compress { get; set; }
 
+        /// <summary>
+        /// Gets or sets the compression method.
+        /// </summary>
+        public CompressionMethod Compression { get; set; }
+
         #region IPipelineItem
 
         public string Filename

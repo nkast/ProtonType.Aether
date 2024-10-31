@@ -33,6 +33,7 @@
     <Compile Include="Commands\AssemblyRemoveCmd.cs" />
     <Compile Include="Model\BuildAction.cs" />
     <Compile Include="Model\CommandLineParser.cs" />
+    <Compile Include="Model\CompressionMethod.cs" />
     <Compile Include="Model\ContentItemTemplate.cs" />
     <Compile Include="Model\IPipelineItem.cs" />
     <Compile Include="Model\IPipelineLogger.cs" />
