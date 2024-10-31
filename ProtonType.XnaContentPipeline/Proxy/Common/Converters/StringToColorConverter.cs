@@ -36,24 +36,25 @@ namespace nkast.ProtonType.XnaContentPipeline.Common.Converters
 
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType != typeof (string))            
+            if (destinationType != typeof(string))
                 return base.ConvertTo(context, culture, value, destinationType);
 
             Color color = (Color)value;
             return string.Format("{0},{1},{2},{3}", color.R, color.G, color.B, color.A);
         }
 
-		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof (string))
+			if (sourceType == typeof(string))
 				return true;
 
-			return base.CanConvertFrom (context, sourceType);
+			return base.CanConvertFrom(context, sourceType);
 		}
 
-		public override object ConvertFrom (ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
 		{
-			if (value.GetType () == typeof (string)) {
+			if (value.GetType() == typeof(string))
+            {
 				string[] values = ((string)value).Split(new char[] {','},StringSplitOptions.None);
                 if (values.Length == 4)
                 {
@@ -69,7 +70,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common.Converters
                 }
 			}
 
-			return base.ConvertFrom (context, culture, value);
+			return base.ConvertFrom(context, culture, value);
 		}
 	}
 }

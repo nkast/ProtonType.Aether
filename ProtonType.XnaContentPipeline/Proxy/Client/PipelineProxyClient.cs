@@ -344,7 +344,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
         }
-        
+
         public void SetImporter(string importer)
         {
             lock (Writer)

@@ -380,7 +380,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool compress = Reader.ReadBoolean();
             this._globalContext.Compress = compress;
         }
-        
+
         private void SetImporter()
         {
             string importer = ReadString();
