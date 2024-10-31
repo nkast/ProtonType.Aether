@@ -25,7 +25,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             if (args.Length >= 2 && args[0] == "IPCServer")
             {
-                using (var proxyClient = new PipelineProxyServer(args[1]))
+                using (IPCServer proxyClient = new PipelineProxyServer(args[1]))
                 {
                     proxyClient.Run();
                 }

@@ -39,7 +39,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common.Converters
             if (destinationType != typeof (string))            
                 return base.ConvertTo(context, culture, value, destinationType);
 
-            var color = (Color)value;
+            Color color = (Color)value;
             return string.Format("{0},{1},{2},{3}", color.R, color.G, color.B, color.A);
         }
 
@@ -57,10 +57,10 @@ namespace nkast.ProtonType.XnaContentPipeline.Common.Converters
 				string[] values = ((string)value).Split(new char[] {','},StringSplitOptions.None);
                 if (values.Length == 4)
                 {
-                    var r = int.Parse(values[0].Trim());
-                    var g = int.Parse(values[1].Trim());
-                    var b = int.Parse(values[2].Trim());
-                    var a = int.Parse(values[3].Trim());
+                    int r = int.Parse(values[0].Trim());
+                    int g = int.Parse(values[1].Trim());
+                    int b = int.Parse(values[2].Trim());
+                    int a = int.Parse(values[3].Trim());
                     return new Microsoft.Xna.Framework.Color(r, g, b, a);
                 }
                 else

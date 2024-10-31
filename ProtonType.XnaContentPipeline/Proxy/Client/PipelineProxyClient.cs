@@ -49,36 +49,36 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 {
                     case ProxyMsgType.LogMessage:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogMessage(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogImportantMessage:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogImportantMessage(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogWarning:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogWarning(guid);
                         }
                         break;
 
                     case ProxyMsgType.LogError:
                         {
-                            var guid = ReadGuid();
+                            Guid guid = ReadGuid();
                             LogError(guid);
                         }
                         break;
 
                     case ProxyMsgType.Importer:
                         {
-                            var guid = ReadGuid();
-                            var task = _tasks[guid];
+                            Guid guid = ReadGuid();
+                            PipelineAsyncTask task = _tasks[guid];
                             ImporterDescription importer = new ImporterDescription(Reader);
                             var importers = task.AsyncState as List<ImporterDescription>;
                             importers.Add(importer);
@@ -87,8 +87,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
                     case ProxyMsgType.Processor:
                         {
-                            var guid = ReadGuid();
-                            var task = _tasks[guid];
+                            Guid guid = ReadGuid();
+                            PipelineAsyncTask task = _tasks[guid];
                             ProcessorDescription importer = new ProcessorDescription(Reader);
                             var importers = task.AsyncState as List<ProcessorDescription>;
                             importers.Add(importer);
@@ -97,9 +97,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
                     case ProxyMsgType.TaskEnd:
                         {
-                            var guid = ReadGuid();
-                            var taskResult = ReadTaskResult();
-                            var task = _tasks[guid];
+                            Guid guid = ReadGuid();
+                            TaskResult taskResult = ReadTaskResult();
+                            PipelineAsyncTask task = _tasks[guid];
                             _tasks.TryRemove(guid, out task);
                             task.OnCompleted(taskResult);
                         }
@@ -180,9 +180,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             bool isNotNull = Reader.ReadBoolean();
             if (!isNotNull) return null;
 
-            var sourceFilename = ReadString();
-            var sourceTool = ReadString();
-            var fragmentIdentifier = ReadString();
+            string sourceFilename = ReadString();
+            string sourceTool = ReadString();
+            string fragmentIdentifier = ReadString();
 
             return new ContentIdentity(sourceFilename, sourceTool, fragmentIdentifier);
         }
@@ -378,7 +378,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         public PipelineAsyncTask Copy(IProxyLogger logger, string originalPath, string destinationPath)
         {
-            var contextGuid = Guid.NewGuid();
+            Guid contextGuid = Guid.NewGuid();
             PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
             _tasks[contextGuid] = task;
 
@@ -396,7 +396,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         public PipelineAsyncTask Build(IProxyLogger logger, string originalPath, string destinationPath)
         {
-            var contextGuid = Guid.NewGuid();
+            Guid contextGuid = Guid.NewGuid();
             PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
             _tasks[contextGuid] = task;
 
@@ -414,44 +414,44 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         private void LogError(Guid guid)
         {
-            var task = _tasks[guid];
-            var logger = task.Logger;
+            PipelineAsyncTask task = _tasks[guid];
+            IProxyLogger logger = task.Logger;
 
-            var filename = ReadString();
-            var contentIdentity = ReadContentIdentity();
-            var message = ReadString();
+            string filename = ReadString();
+            ContentIdentity contentIdentity = ReadContentIdentity();
+            string message = ReadString();
             logger.LogError(filename, contentIdentity, message);
         }
 
         private void LogWarning(Guid guid)
         {
-            var task = _tasks[guid];
-            var logger = task.Logger;
+            PipelineAsyncTask task = _tasks[guid];
+            IProxyLogger logger = task.Logger;
 
-            var filename = ReadString();
-            var helpLink = ReadString();
-            var contentIdentity = ReadContentIdentity();
-            var message = ReadString();
+            string filename = ReadString();
+            string helpLink = ReadString();
+            ContentIdentity contentIdentity = ReadContentIdentity();
+            string message = ReadString();
             logger.LogWarning(filename, helpLink, contentIdentity, message);
         }
 
         private void LogImportantMessage(Guid guid)
         {
-            var task = _tasks[guid];
-            var logger = task.Logger;
+            PipelineAsyncTask task = _tasks[guid];
+            IProxyLogger logger = task.Logger;
 
-            var filename = ReadString();
-            var message = ReadString();
+            string filename = ReadString();
+            string message = ReadString();
             logger.LogImportantMessage(filename, message);
         }
 
         private void LogMessage(Guid guid)
         {
-            var task = _tasks[guid];
-            var logger = task.Logger;
+            PipelineAsyncTask task = _tasks[guid];
+            IProxyLogger logger = task.Logger;
 
-            var filename = ReadString();
-            var message = ReadString();
+            string filename = ReadString();
+            string message = ReadString();
             logger.LogMessage(filename, message);
         }
                         
