@@ -19,6 +19,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
@@ -335,12 +336,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
         }
-        public void SetCompress(bool compress)
+        public void SetCompression(ContentCompression compression)
         {
             lock (Writer)
             {
-                WriteMsg(ProxyMsgType.ParamCompress);
-                Writer.Write(compress);
+                WriteMsg(ProxyMsgType.ParamCompression);
+                Writer.Write((Int32)compression);
                 Writer.Flush();
             }
         }
@@ -376,10 +377,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
-        public PipelineAsyncTask Copy(IProxyLogger logger, string originalPath, string destinationPath)
+        public PipelineAsyncTask Copy(IProxyLogger logger, string originalPath, string destinationPath, object state)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, state);
             _tasks[contextGuid] = task;
 
             lock (Writer)
@@ -394,10 +395,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             return task;
         }
 
-        public PipelineAsyncTask Build(IProxyLogger logger, string originalPath, string destinationPath)
+        public PipelineAsyncTask Build(IProxyLogger logger, string originalPath, string destinationPath, object state)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, state);
             _tasks[contextGuid] = task;
 
             lock (Writer)

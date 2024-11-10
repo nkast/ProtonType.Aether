@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using nkast.ProtonType.XnaContentPipeline.Common;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
@@ -171,12 +172,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     if (_buildTask != null)
                         throw new InvalidOperationException("_buildTask is not null");
 
-                    _buildTask = Task.Factory.StartNew(() => {
+                    _buildTask = Task.Factory.StartNew(() => 
+                    {
                         foreach (var pipelineItem in pipelineItems)
                         {
                             ProcessBuildQueueWorker(pipelineProxy);
                         }
                     });
+
                     _buildTask.ContinueWith((t) =>
                     {
                         lock (_buildTaskLocker)
@@ -245,13 +248,32 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             pipelineProxy.SetRebuild();
             pipelineProxy.SetIncremental();
 
+            ContentCompression compression = ContentCompression.Uncompressed;
+            if (_project.Compress)
+            {
+                switch (_project.Compression)
+                {
+                    case CompressionMethod.Default:
+                        compression = ContentCompression.LegacyLZ4;
+                        break;
+                    case CompressionMethod.LZ4:
+                        compression = ContentCompression.LZ4;
+                        break;
+                    case CompressionMethod.Brotli:
+                        compression = ContentCompression.Brotli;
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+
             // Set Global Settings
             pipelineProxy.SetOutputDir(_project.OutputDir);
             pipelineProxy.SetIntermediateDir(_project.IntermediateDir);
             pipelineProxy.SetPlatform(_project.Platform);
             pipelineProxy.SetConfig(_project.Config);
             pipelineProxy.SetProfile(_project.Profile);
-            pipelineProxy.SetCompress(_project.Compress);
+            pipelineProxy.SetCompression(compression);
 
             List<PipelineAsyncTask> tasks = new List<PipelineAsyncTask>();
 
@@ -277,19 +299,23 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
 
                 PipelineAsyncTask buildTask = ProcessbuildItem(pipelineProxy, _project, buildItem);
-                buildTask.AsyncWaitHandle.WaitOne();
-
-                switch (buildTask.Result)
+                buildTask.Completed += (sender, e) =>
                 {
-                    case TaskResult.FAILED:
-                        buildItem.Status = PipelineBuildItemStatus.Failed;
-                        break;
-                    case TaskResult.SUCCEEDED:
-                        buildItem.Status = PipelineBuildItemStatus.Build;
-                        break;
-                }
-                
-                OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, buildTask.Result));
+                    PipelineAsyncTask thisBuildTask = (PipelineAsyncTask)sender;
+                    var thisBuildItem = buildTask2.AsyncState as PipelineBuildItem;
+
+                    switch (thisBuildTask.Result)
+                    {
+                        case TaskResult.FAILED:
+                            thisBuildItem.Status = PipelineBuildItemStatus.Failed;
+                            break;
+                        case TaskResult.SUCCEEDED:
+                            thisBuildItem.Status = PipelineBuildItemStatus.Build;
+                            break;
+                    }
+                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(thisBuildItem, thisBuildTask.Result));
+                };
+                buildTask.AsyncWaitHandle.WaitOne();
             }
 
             return;
@@ -317,12 +343,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             if (item.BuildAction == BuildAction.Copy)
             {
-                PipelineAsyncTask buildTask = pipelineProxy.Copy(logger, originalPath, destinationPath);
+                PipelineAsyncTask buildTask = pipelineProxy.Copy(logger, originalPath, destinationPath, buildItem);
                 return buildTask;
             }
             if (item.BuildAction == BuildAction.Build)
             {
-                PipelineAsyncTask buildTask = pipelineProxy.Build(logger, originalPath, destinationPath);
+                PipelineAsyncTask buildTask = pipelineProxy.Build(logger, originalPath, destinationPath, buildItem);
                 return buildTask;
             }
 

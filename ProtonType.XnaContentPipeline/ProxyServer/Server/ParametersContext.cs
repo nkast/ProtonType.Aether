@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
@@ -29,7 +30,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public string IntermediateDir;
         public TargetPlatform Platform;
         public GraphicsProfile Profile;
-        public bool Compress;
+        public ContentCompression Compression;
         public string Config;
 
         public string Importer;
@@ -56,7 +57,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             context.IntermediateDir = this.IntermediateDir;
             context.Platform = this.Platform;
             context.Profile = this.Profile;
-            context.Compress = this.Compress;
+            context.Compression = this.Compression;
             context.Config = this.Config;
 
             context.Importer = this.Importer;

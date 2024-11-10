@@ -126,8 +126,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             if (string.IsNullOrEmpty(assetName))
                 assetName = _manager.GetAssetName(sourceAsset.Filename, importerName, processorName, processorParameters, _logger);
 
-
-
             // Build the content.
             BuildEvent buildEvent = _manager.CreateBuildEvent(sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
 

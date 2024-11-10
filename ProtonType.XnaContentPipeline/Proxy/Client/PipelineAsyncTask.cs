@@ -26,6 +26,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
         public readonly Guid Guid;
         public readonly IProxyLogger Logger;
 
+        public event EventHandler<EventArgs> Completed;
+
         public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger, object state)
         {
             AsyncWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -51,6 +53,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             IsCompleted = true;
             Result = taskResult;
             ((EventWaitHandle)AsyncWaitHandle).Set();
+
+            var handler = Completed;
+            if (handler != null)
+                handler(this, EventArgs.Empty);
         }
     }
 }

@@ -59,7 +59,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         }
 
         internal virtual void Run()
-        {          
+        {
         }
 
         #region Implement IDisposable

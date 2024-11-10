@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
@@ -33,6 +34,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public GraphicsProfile Profile { get; set; }
 
         public TargetPlatform Platform { get; set; }
+
+        public ContentCompression Compression { get; set; }
 
         public string Config { get; set; }
 
@@ -47,7 +50,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             DestFiles = new List<string>();
             Config = string.Empty;
         }
-
 
         public void SaveBinary(string filePath)
         {
@@ -104,8 +106,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         internal class SourceFileCollectionBinaryWriter : BinaryWriter
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const int DataType = 1; // SourceFileCollection data
 
 
@@ -127,6 +129,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
                 Write((Int32)value.Profile);
                 Write((Int32)value.Platform);
+                Write((Int32)value.Compression);
                 WriteStringOrNull(value.Config);
 
                 WritePackedInt(value.SourceFiles.Count);
@@ -162,8 +165,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         internal class SourceFileCollectionBinaryReader : BinaryReader
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const int DataType = 1; // SourceFileCollection data
 
 
@@ -192,6 +195,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
                 value.Profile = (GraphicsProfile)ReadInt32();
                 value.Platform = (TargetPlatform)ReadInt32();
+                value.Compression = (ContentCompression)ReadInt32();
                 value.Config = ReadStringOrNull();
 
                 int filesCount = ReadPackedInt();

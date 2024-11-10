@@ -152,7 +152,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         }
 
         /*
-        public bool NeedsRebuild(PipelineManager manager, PipelineBuildEvent cachedEvent)
+        internal bool NeedsRebuild(PipelineManager manager, BuildEvent cachedEvent)
         {
             // If we have no previously cached build event then we cannot
             // be sure that the state hasn't changed... force a rebuild.
@@ -185,8 +185,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             // This shouldn't happen...  but if the source or dest files changed
             // then force a rebuild.
-            if (cachedEvent.SourceFile != SourceFile ||
-                cachedEvent.DestFile != DestFile)
+            if (cachedEvent.SourceFile != SourceFile
+            ||  cachedEvent.DestFile != DestFile)
                 return true;
 
             // Did the importer change?
@@ -304,8 +304,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         internal class PipelineBuildEventBinaryWriter : BinaryWriter
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const short DataType = 2; // PipelineBuildEvent data
 
 
@@ -384,8 +384,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         internal class PipelineBuildEventBinaryReader : BinaryReader
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const int DataType = 2; // PipelineBuildEvent data
 
 

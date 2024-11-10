@@ -47,7 +47,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         ParamPlatform,
         ParamConfig,
         ParamProfile,
-        ParamCompress,
+        ParamCompression,
 
         // Item parameters
         ParamImporter,

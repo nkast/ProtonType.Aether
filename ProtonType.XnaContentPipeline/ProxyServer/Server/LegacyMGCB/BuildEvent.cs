@@ -163,8 +163,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         internal class PipelineBuildEventBinaryWriter : BinaryWriter
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const short DataType = 2; // PipelineBuildEvent data
 
 
@@ -243,8 +243,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         internal class PipelineBuildEventBinaryReader : BinaryReader
         {
             private const string Header = "KNIC"; // content db
-            private const short MajorVersion = 3;
-            private const short MinorVersion = 9;
+            private const short MajorVersion =  3;
+            private const short MinorVersion = 15;
             private const int DataType = 2; // PipelineBuildEvent data
 
 

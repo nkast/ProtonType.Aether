@@ -25,6 +25,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using nkast.ProtonType.XnaContentPipeline.Common;
 using nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
@@ -168,8 +169,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.ParamProfile:
                         SetProfile();
                         break;
-                    case ProxyMsgType.ParamCompress:
-                        SetCompress();
+                    case ProxyMsgType.ParamCompression:
+                        SetCompression();
                         break;
 
                     case ProxyMsgType.ParamImporter:
@@ -375,10 +376,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             this._globalContext.Profile = (GraphicsProfile)Reader.ReadInt32();
         }
 
-        private void SetCompress()
+        private void SetCompression()
         {
-            bool compress = Reader.ReadBoolean();
-            this._globalContext.Compress = compress;
+            ContentCompression compression = (ContentCompression)Reader.ReadInt32();
+            this._globalContext.Compression = compression;
         }
 
         private void SetImporter()
@@ -488,7 +489,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             string Config = itemContext.Config;
             TargetPlatform Platform = itemContext.Platform;
             GraphicsProfile Profile = itemContext.Profile;
-            bool CompressContent = itemContext.Compress;
+            ContentCompression Compression = itemContext.Compression;
 
             string _outputDir = itemContext.OutputDir;
             string _intermediateDir = itemContext.IntermediateDir;
@@ -506,7 +507,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             
             PipelineManager _manager;
             _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr);
-            _manager.CompressContent = CompressContent;
+            _manager.Compression = Compression;
             ContentBuildLogger logger = new BuildLogger(this, itemContext.Guid);
             _manager.Logger = logger;
 
@@ -518,15 +519,18 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // If the target changed in any way then we need to force
             // a full rebuild even under incremental builds.
-            bool targetChanged = previousFileCollection.Config != Config ||
-                                 previousFileCollection.Platform != Platform ||
-                                 previousFileCollection.Profile != Profile;
+            bool targetChanged = previousFileCollection.Config != Config
+                              || previousFileCollection.Platform != Platform
+                              || previousFileCollection.Profile != Profile
+                              || previousFileCollection.Compression != Compression
+                              ;
 
 
             SourceFileCollection newFileCollection = new SourceFileCollection
             {
                 Profile = _manager.Profile = Profile,
                 Platform = _manager.Platform = Platform,
+                Compression = _manager.Compression = Compression,
                 Config = _manager.Config = Config
             };
             
@@ -600,20 +604,32 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void DeleteFileCollection(string intermediatePath)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
+            string dbname = this.ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = PipelineManager.DefaultFileCollectionFilename;
+
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(dbname, SourceFileCollection.Extension));
             if (File.Exists(intermediateFileCollectionPath))
                 File.Delete(intermediateFileCollectionPath);
         }
 
         private void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
+            string dbname = this.ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = PipelineManager.DefaultFileCollectionFilename;
+
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(dbname, SourceFileCollection.Extension));
             fileCollection.SaveBinary(intermediateFileCollectionPath);
         }
 
         private SourceFileCollection LoadFileCollection(string intermediatePath)
         {
-            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(this.ProjectFilename, SourceFileCollection.Extension));
+            string dbname = this.ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = PipelineManager.DefaultFileCollectionFilename;
+
+            string intermediateFileCollectionPath = Path.Combine(intermediatePath, Path.ChangeExtension(dbname, SourceFileCollection.Extension));
             return SourceFileCollection.LoadBinary(intermediateFileCollectionPath);
         }
 
@@ -642,7 +658,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             string Config = itemContext.Config;
             TargetPlatform Platform = itemContext.Platform;
             GraphicsProfile Profile = itemContext.Profile;
-            bool CompressContent = itemContext.Compress;
+            ContentCompression Compression = itemContext.Compression;
 
             string _outputDir = itemContext.OutputDir;
             string _intermediateDir = itemContext.IntermediateDir;

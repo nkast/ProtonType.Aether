@@ -69,9 +69,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public string Config { get; set; }
 
         /// <summary>
-        /// Gets or sets if the content is compressed.
+        /// Gets or sets the compression method.
         /// </summary>
-        public bool CompressContent { get; set; }
+        public ContentCompression Compression { get; set; }
+
+        internal const String DefaultFileCollectionFilename = "assetsdb.kniContent";
 
         public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr)
         {
@@ -163,24 +165,36 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void DeleteBuildEvent(string destFile)
         {
+            string dbname = ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = DefaultFileCollectionFilename;
+
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, ProjectFilename, relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
             if (File.Exists(intermediateEventPath))
                 File.Delete(intermediateEventPath);
         }
 
         private void SaveBuildEvent(string destFile, BuildEvent buildEvent)
         {
+            string dbname = ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = DefaultFileCollectionFilename;
+
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, ProjectFilename, relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             buildEvent.SaveBinary(intermediateEventPath);
         }
 
         internal BuildEvent LoadBuildEvent(string destFile)
         {
+            string dbname = ProjectFilename;
+            if (dbname == String.Empty)
+                dbname = DefaultFileCollectionFilename;
+
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(ProjectFilename), relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             return BuildEvent.LoadBinary(intermediateEventPath);
         }
@@ -429,7 +443,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // Write the XNB.
             using (Stream stream = new FileStream(buildEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
-                _compiler.Compile(stream, content, Platform, Profile, CompressContent, OutputDirectory, outputFileDir);
+                _compiler.Compile(stream, content, Platform, Profile, Compression, OutputDirectory, outputFileDir);
 
             // Store the last write time of the output XNB here
             // so we can verify it hasn't been tampered with.
@@ -519,9 +533,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 string relativeDestFile = LegacyPathHelper.GetRelativePath(ProjectDirectory, fullDestFile);
                 relativeDestFile = LegacyPathHelper.Normalize(relativeDestFile);
 
-                if (existingBuildEventDestFile.Equals(relativeDestFile) &&
-                    existingBuildEvent.Importer  == importerName &&
-                    existingBuildEvent.Processor == processorName)
+                if (existingBuildEventDestFile.Equals(relativeDestFile)
+                &&  existingBuildEvent.Importer  == importerName
+                &&  existingBuildEvent.Processor == processorName)
                 {
                     OpaqueDataDictionary defaultValues = null;
                     ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
