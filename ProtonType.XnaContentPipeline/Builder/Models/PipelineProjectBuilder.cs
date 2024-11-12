@@ -302,7 +302,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 buildTask.Completed += (sender, e) =>
                 {
                     PipelineAsyncTask thisBuildTask = (PipelineAsyncTask)sender;
-                    var thisBuildItem = buildTask2.AsyncState as PipelineBuildItem;
+                    var thisBuildItem = thisBuildTask.AsyncState as PipelineBuildItem;
 
                     switch (thisBuildTask.Result)
                     {
