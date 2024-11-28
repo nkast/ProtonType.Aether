@@ -29,6 +29,7 @@
     <Compile Include="Common\ImporterDescription.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
     <Compile Include="Common\ProcessorParamDescription.cs" />
+    <Compile Include="Common\Package.cs" />
     <Compile Include="Common\ProxyMsgType.cs" />
     <Compile Include="Common\TaskResult.cs" />
     <Compile Include="Client\IPCClient.cs" />

@@ -181,7 +181,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             }
             if (String.Compare(optionName, "packageReference", true) == 0)
             {
-                project.PackageReferences.Add(optionValue);
+                project.PackageReferences.Add(Package.Parse(optionValue));
                 return true;
             }
 
@@ -340,9 +340,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                 io.WriteLine(String.Format(lineFormat, "reference", i));
             }
 
-            foreach (string i in project.PackageReferences)
+            foreach (Package i in project.PackageReferences)
             {
-                io.WriteLine(string.Format(lineFormat, "packageReference", i));
+                io.WriteLine(string.Format(lineFormat, "packageReference", i.ToString()));
             }
 
             io.WriteLine(FormatDivider("Content"));

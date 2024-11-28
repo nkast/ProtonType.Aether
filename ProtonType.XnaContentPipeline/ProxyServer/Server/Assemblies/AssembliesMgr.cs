@@ -22,6 +22,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 {
     partial class AssembliesMgr
     {
+        private readonly List<Package> _packages = new List<Package>();
         private readonly List<string> _assemblies = new List<string>();
         private ConcurrentBag<ImporterInfo> _importers = new ConcurrentBag<ImporterInfo>();
         private ConcurrentBag<ProcessorInfo> _processors = new ConcurrentBag<ProcessorInfo>();
@@ -42,6 +44,143 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
         public AssembliesMgr()
         {
+        }
+
+        internal void AddPackage(ContentBuildLogger logger, Package package)
+        {
+            foreach (var p in _packages)
+            {
+                if (p.Name == package.Name)
+                    return;
+            }
+
+            _packages.Add(package);
+        }
+
+        internal void ResolvePackages(ContentBuildLogger logger, string projFolder, string projectDirectory)
+        {
+            if (_packages.Count == 0)
+                return;
+
+            string intermediateFolder = "obj/";
+            intermediateFolder = Path.Combine(projectDirectory, intermediateFolder);
+            intermediateFolder = LegacyPathHelper.Normalize(intermediateFolder);
+            if (!Directory.Exists(intermediateFolder))
+                Directory.CreateDirectory(intermediateFolder);
+
+            const string packageReferencesProjFolder = ".Packages";
+            const string libraryName = "PackagesLibrary";
+
+            string fullPackageReferencesFolder = Path.Combine(intermediateFolder, packageReferencesProjFolder);
+            if (!Directory.Exists(fullPackageReferencesFolder))
+                Directory.CreateDirectory(fullPackageReferencesFolder);
+
+            string fullPackageReferencesProjFolder = Path.Combine(fullPackageReferencesFolder, projFolder);
+            fullPackageReferencesProjFolder = LegacyPathHelper.Normalize(fullPackageReferencesProjFolder);
+
+            string publishDir = "publish";
+
+            bool rebuild = false;
+
+            // load db
+            List<Package> packages = new List<Package>(_packages);
+            packages.Sort();
+            string intermediatePackageCollectionPath = Path.Combine(fullPackageReferencesProjFolder, Path.ChangeExtension(libraryName, PackageReferencesCollection.Extension));
+            PackageReferencesCollection previousPackageReferencesCollection = PackageReferencesCollection.LoadBinary(intermediatePackageCollectionPath);
+            if (previousPackageReferencesCollection != null
+            && previousPackageReferencesCollection.PackagesCount == packages.Count)
+            {
+                for (int i = 0; i < packages.Count; i++)
+                {
+                    if (packages[i].Name != previousPackageReferencesCollection.Packages[i].Name
+                    ||  packages[i].Version != previousPackageReferencesCollection.Packages[i].Version)
+                    {
+                        rebuild = true;
+                        break;
+                    }
+                }
+            }
+            else rebuild = true;
+
+            // build PackageReferencesLibrary
+            if (rebuild)
+            {
+                logger.LogMessage("Resolving packages.");
+
+                string framework = "netstandard2.0";
+#if NET8_0_OR_GREATER
+                framework = "net8.0";
+#endif
+                string newCmd = String.Format("new classlib --framework \"{0}\" -n {1} -o \"{2}\"", framework, libraryName, projFolder);
+                newCmd += " --force";
+                ExecuteDotnet(fullPackageReferencesFolder, newCmd);
+
+
+                foreach (Package package in _packages)
+                {
+                    string addCmd = String.Format("add {0}.csproj package {1} ", libraryName, package.Name);
+                    addCmd += " --no-restore";
+                    if (package.Version != String.Empty)
+                        addCmd += " --version " + package.Version;
+                    ExecuteDotnet(fullPackageReferencesProjFolder, addCmd);
+                }
+
+                string cleanCmd = String.Format("clean {0}.csproj --output {1}", libraryName, publishDir);
+                cleanCmd += " --nologo";
+                ExecuteDotnet(fullPackageReferencesProjFolder, cleanCmd);
+                string publishCmd = String.Format("publish {0}.csproj --output {1}", libraryName, publishDir);
+                publishCmd += " --nologo";
+                ExecuteDotnet(fullPackageReferencesProjFolder, publishCmd);
+
+                // save db
+                PackageReferencesCollection dbfile = new PackageReferencesCollection();
+                foreach (Package package in packages)
+                    dbfile.AddPackage(package);
+                dbfile.SaveBinary(intermediatePackageCollectionPath);
+            }
+
+            // load packages
+            string fullPublishDir = Path.Combine(fullPackageReferencesProjFolder, publishDir);
+            fullPublishDir = LegacyPathHelper.Normalize(fullPublishDir);
+
+            string[] references = Directory.GetFiles(fullPublishDir, "*.dll");
+
+            foreach (string assemblyFile in references)
+            {
+                string assemblyFileName = Path.GetFileNameWithoutExtension(assemblyFile);
+                // skip the empty project and known pipeline libraries.
+                if (assemblyFileName == libraryName)
+                    continue;
+                if (assemblyFileName.StartsWith("Xna.Framework"))
+                    continue;
+
+                this.AddAssembly(logger, String.Empty, assemblyFile);
+            }
+
+            return;
+        }
+
+        private void ExecuteDotnet(string workingDirectory, string args)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo("dotnet", args);
+            startInfo.CreateNoWindow = true;
+            startInfo.WorkingDirectory = workingDirectory;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = false;
+            startInfo.RedirectStandardError = false;
+
+            using (Process process = Process.Start(startInfo))
+            {
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                {
+                    string output = process.StandardOutput.ReadToEnd();
+                    Console.Write(output);
+                    string error = process.StandardError.ReadToEnd();
+                    Console.Write(error);
+                    throw new PipelineException(output + error);
+                }
+            }
         }
 
         internal void AddAssembly(ContentBuildLogger logger, string baseDirectory, string assemblyPath)
@@ -113,7 +252,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                     _processors.Add(processorInfo);
             }
         }
-        
+
+        internal IEnumerable<Package> GetPackages()
+        {
+            return _packages;
+        }
+
         internal IEnumerable<string> GetAssemblies()
         {
             return _assemblies;

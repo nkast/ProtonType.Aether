@@ -217,6 +217,40 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
+        public PipelineAsyncTask AddPackage(IProxyLogger logger, Package package)
+        {
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, package);
+            _tasks[contextGuid] = task;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.AddPackage);
+                WriteGuid(contextGuid);
+                Writer.Write(package.Name);
+                Writer.Write(package.Version);
+                Writer.Flush();
+            }
+
+            return task;
+        }
+
+        public PipelineAsyncTask ResolvePackages(IProxyLogger logger)
+        {
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger, null);
+            _tasks[contextGuid] = task;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.ResolvePackages);
+                WriteGuid(contextGuid);
+                Writer.Flush();
+            }
+
+            return task;
+        }
+
         public PipelineAsyncTask AddAssembly(IProxyLogger logger, string assemblyPath)
         {
             Guid contextGuid = Guid.NewGuid();

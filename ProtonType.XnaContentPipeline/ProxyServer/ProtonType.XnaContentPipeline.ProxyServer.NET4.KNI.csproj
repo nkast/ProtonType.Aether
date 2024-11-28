@@ -34,9 +34,11 @@
     <Compile Include="..\Proxy\Common\ImporterDescription.cs" />
     <Compile Include="..\Proxy\Common\ProcessorDescription.cs" />
     <Compile Include="..\Proxy\Common\ProcessorParamDescription.cs" />
+    <Compile Include="..\Proxy\Common\Package.cs" />
     <Compile Include="..\Proxy\Common\ProxyMsgType.cs" />
     <Compile Include="..\Proxy\Common\TaskResult.cs" />
     <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
+    <Compile Include="Server\Assemblies\PackageReferencesCollection.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />
     <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
     <Compile Include="Server\BuildLogger.cs" />

@@ -140,6 +140,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.ProjectFilename:
                         SetProjectFilename();
                         break;
+                    case ProxyMsgType.AddPackage:
+                        AddPackage();
+                        break;
+                    case ProxyMsgType.ResolvePackages:
+                        ResolvePackages();
+                        break;
                     case ProxyMsgType.AddAssembly:
                         AddAssembly();
                         break;
@@ -215,6 +221,62 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             string projectFilename = Reader.ReadString();
             this.ProjectFilename = projectFilename;
+        }
+
+        private void AddPackage()
+        {
+            Guid contextGuid = ReadGuid();
+            Package package;
+            package.Name = Reader.ReadString();
+            package.Version = Reader.ReadString();
+
+            AddPackage(contextGuid, package);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
+                Writer.Flush();
+            }
+        }
+
+        private void AddPackage(Guid contextGuid, Package package)
+        {
+            if (package.Name == null)
+                throw new ArgumentException("packageName cannot be null!");
+
+            ContentBuildLogger logger = new BuildLogger(this, contextGuid);
+            _assembliesMgr.AddPackage(logger, package);
+        }
+
+        private void ResolvePackages()
+        {
+            Guid contextGuid = ReadGuid();
+
+            ResolvePackages(contextGuid);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
+                Writer.Flush();
+            }
+        }
+
+        private void ResolvePackages(Guid contextGuid)
+        {
+            ContentBuildLogger logger = new BuildLogger(this, contextGuid);
+
+            string projectDirectory = this.BaseDirectory;
+            projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
+
+            string projFolder = Path.GetFileNameWithoutExtension(this.ProjectFilename);
+
+            _assembliesMgr.ResolvePackages(logger, projFolder, projectDirectory);
         }
 
         private void AddAssembly()

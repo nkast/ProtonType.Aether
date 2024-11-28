@@ -42,7 +42,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
         public List<string> References { get; set; }
 
-        public List<string> PackageReferences { get; set; }
+        public List<Package> PackageReferences { get; set; }
 
         public ProxyTargetPlatform Platform { get; set; }
 
@@ -90,7 +90,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             PipelineItems = new ReadOnlyCollection<PipelineItem>(_pipelineItems);
             
             References = new List<string>();
-            PackageReferences = new List<string>();
+            PackageReferences = new List<Package>();
 
             OutputDir = "../Content";
             IntermediateDir = "obj";

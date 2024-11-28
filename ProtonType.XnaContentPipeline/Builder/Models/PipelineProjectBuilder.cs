@@ -275,16 +275,27 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             pipelineProxy.SetProfile(_project.Profile);
             pipelineProxy.SetCompression(compression);
 
-            List<PipelineAsyncTask> tasks = new List<PipelineAsyncTask>();
-
             ProxyLogger logger = new ProxyLogger(_viewLogger);
+
+            List<PipelineAsyncTask> addPackageTasks = new List<PipelineAsyncTask>();
+            foreach (Package package in _project.PackageReferences)
+            {
+                PipelineAsyncTask task = pipelineProxy.AddPackage(logger, package);
+                addPackageTasks.Add(task);
+            }
+            foreach (PipelineAsyncTask task in addPackageTasks)
+                task.AsyncWaitHandle.WaitOne();
+            PipelineAsyncTask resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+            resolvePackagesTask.AsyncWaitHandle.WaitOne();
+
+            List<PipelineAsyncTask> addAssemblyTasks = new List<PipelineAsyncTask>();
             foreach (string assemblyPath in _project.References)
             {
                 PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assemblyPath);
-                tasks.Add(task);
+                addAssemblyTasks.Add(task);
             }
 
-            foreach (PipelineAsyncTask task in tasks)
+            foreach (PipelineAsyncTask task in addAssemblyTasks)
                 task.AsyncWaitHandle.WaitOne();
         }
 
