@@ -105,8 +105,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             // build PackageReferencesLibrary
             if (rebuild)
             {
-                logger.LogMessage("Resolving packages.");
-
                 string framework = "netstandard2.0";
 #if NET8_0_OR_GREATER
                 framework = "net8.0";

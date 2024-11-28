@@ -73,25 +73,46 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             pipelineProxy.BeginListening();
 
             pipelineProxy.SetBaseDirectory(this._project.Location);
+            pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.Project.OriginalPath));
 
-            List<PipelineAsyncTask> tasks = new List<PipelineAsyncTask>();
+            // Set Global Settings
+            pipelineProxy.SetOutputDir(_project.OutputDir);
+            pipelineProxy.SetIntermediateDir(_project.IntermediateDir);
+            pipelineProxy.SetPlatform(_project.Platform);
+            pipelineProxy.SetConfig(_project.Config); 
+            pipelineProxy.SetProfile(_project.Profile);
+
+
+            IProxyLogger logger = new ProxyLogger(this._project._logger);
+
+            List<PipelineAsyncTask> addPackageTasks = new List<PipelineAsyncTask>();
+            foreach (Package package in _project.Project.PackageReferences)
+            {
+                PipelineAsyncTask task = pipelineProxy.AddPackage(logger, package);
+                addPackageTasks.Add(task);
+            }
+            foreach (PipelineAsyncTask task in addPackageTasks)
+                task.AsyncWaitHandle.WaitOne();
+            PipelineAsyncTask resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+            resolvePackagesTask.AsyncWaitHandle.WaitOne();
 
             // load all types from references
+            List<PipelineAsyncTask> addAssemblyTasks = new List<PipelineAsyncTask>();
             foreach (string refPath in _project.Project.References)
             {
                 AssemblyViewModel assembly = CreateAssembly(refPath);
                 if (assembly == null)
                     continue;
 
-                IProxyLogger logger = new ProxyLogger(this._project._logger);
+                string assemblyPath = assembly.NormalizedAbsoluteFullPath;
 
-                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
-                tasks.Add(task);
+                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assemblyPath);
+                addAssemblyTasks.Add(task);
 
                 _assemblies.Add(assembly);
             }
 
-            foreach (PipelineAsyncTask task in tasks)
+            foreach (PipelineAsyncTask task in addAssemblyTasks)
                 task.AsyncWaitHandle.WaitOne();
 
             IProxyLogger logger2 = new ProxyLogger(this._project._logger);
