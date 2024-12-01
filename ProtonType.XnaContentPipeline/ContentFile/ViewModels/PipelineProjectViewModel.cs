@@ -36,6 +36,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private readonly ISiteViewModel _site;
 
         internal readonly ReferencesViewModel _references;
+        internal readonly PackagesViewModel _packages;
 
         internal readonly PipelineTypes PipelineTypes = new PipelineTypes();
 
@@ -54,23 +55,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         public string Location { get { return Project.Location; } }
 
         public string ProjectName { get { return Path.GetFileNameWithoutExtension(Project.OriginalPath); } }
-        
 
 
-        [Category("Settings")]
-        public bool Compress
-        {
-            get { return Project.Compress; }
-            set { Project.Compress = value; }
-        }
-
-
-        [Category("Settings")]
-        public CompressionMethod Compression
-        {
-            get { return Project.Compression; }
-            set { Project.Compression = value; }
-        }
 
         [Category("Settings")]
         public ProxyTargetPlatform Platform 
@@ -85,12 +71,26 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             get { return Project.Profile; }
             set { Project.Profile = value; }
         }
-                    
+
         [Category("Settings")]
         public string Config
         {
             get { return Project.Config; }
             set { Project.Config = value; }
+        }
+
+        [Category("Settings")]
+        public bool Compress
+        {
+            get { return Project.Compress; }
+            set { Project.Compress = value; }
+        }
+
+        [Category("Settings")]
+        public CompressionMethod Compression
+        {
+            get { return Project.Compression; }
+            set { Project.Compression = value; }
         }
 
         [Category("Settings")]
@@ -106,7 +106,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             get { return Project.IntermediateDir; }
             set { Project.IntermediateDir = value; }
         }
-        
+
+        [Category("Settings")]
+        public PackagesViewModel Packages
+        {
+            get { return _packages; }
+            set { }
+        }
+
         [Category("Settings")]
         public ReferencesViewModel References
         {
@@ -123,6 +130,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             this._site = site;
 
             this._references = new ReferencesViewModel(_site, this);
+            this._packages = new PackagesViewModel(_site, this);
+
             _templateItems = new List<ContentItemTemplate>();
             LoadTemplates(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Templates"));
 
@@ -138,7 +147,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
 
+            this._packages.Load();
             this._references.Load();
+
             Project.PipelineItemPropertyChanged += project_PipelineItemPropertyChanged;
             
             // Save the new project.
@@ -163,6 +174,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             {
                 PipelineProjectReader reader = new PipelineProjectReader();
                 Project = reader.LoadProject(projectFilePath, _logger);
+
+                this._packages.Load();
                 this._references.Load();
 
                 CreateItems();

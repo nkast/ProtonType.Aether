@@ -18,7 +18,7 @@ using System;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
-    public struct Package
+    public struct Package : IComparable<Package>
     {
         public string Name;
         public string Version;
@@ -48,6 +48,19 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                 result += " " + this.Version;
 
             return result;
+        }
+
+        int IComparable<Package>.CompareTo(Package other)
+        {
+            int compName = this.Name.CompareTo(other.Name);
+            if (compName != 0)
+                return compName;
+
+            int compVersion = this.Version.CompareTo(other.Version);
+            if (compVersion != 0)
+                return compVersion;
+
+            return 0;
         }
     }
 }

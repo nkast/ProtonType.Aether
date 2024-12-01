@@ -66,7 +66,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             AddCollectionItemCommand = new RelayCommand(AddCollectionItem);
             RemoveCollectionItemCommand = new RelayCommand(RemoveCollectionItem);
         }
-        
+
         internal void Load()
         {
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();

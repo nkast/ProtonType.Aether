@@ -57,6 +57,8 @@
   <ItemGroup>
     <Compile Include="Commands\AssemblyAddCmd.cs" />
     <Compile Include="Commands\AssemblyRemoveCmd.cs" />
+    <Compile Include="Commands\PackageAddCmd.cs" />
+    <Compile Include="Commands\PackageRemoveCmd.cs" />
     <Compile Include="Model\BuildAction.cs" />
     <Compile Include="Model\CommandLineParser.cs" />
     <Compile Include="Model\CompressionMethod.cs" />
@@ -74,6 +76,8 @@
     <Compile Include="Model\ProxyLogger.cs" />
     <Compile Include="ViewModels\AssemblyViewModel.cs" />
     <Compile Include="Converters\UnkownParamStandardValuesConverter.cs" />
+    <Compile Include="ViewModels\PackagesViewModel.cs" />
+    <Compile Include="ViewModels\PackageViewModel.cs" />
     <Compile Include="ViewModels\PipelineItemViewModel.ProcessorParamPropertyDescriptor.cs" />
     <Compile Include="ViewModels\ReferencesViewModel.cs" />
     <Compile Include="ViewModels\IPipelineItemViewModel.cs" />
