@@ -139,10 +139,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     return null;
 
                 using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
-                using (var writer = new PipelineBuildEventBinaryReader(stream))
+                using (var reader = new PipelineBuildEventBinaryReader(stream))
                 {
                     BuildEvent result = new BuildEvent();
-                    writer.Read(result);
+                    reader.Read(result);
                     return result;
                 }
             }
