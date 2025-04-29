@@ -73,7 +73,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         }
 
 
-        internal void Write(BinaryWriter writer)
+        public void Write(BinaryWriter writer)
         {
             WriteString(writer, AssemblyPath);
             WriteString(writer, TypeName);

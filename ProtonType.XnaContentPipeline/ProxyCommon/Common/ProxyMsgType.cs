@@ -18,7 +18,7 @@ using System;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
-    internal enum ProxyMsgType : int
+    public enum ProxyMsgType : int
     {
         Undefined,
         BaseDirectory,

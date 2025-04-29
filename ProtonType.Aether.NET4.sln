@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipelineModule.NET4.KNI", "ProtonType.XnaContentPipeline\XnaContentPipelineModule\ProtonType.XnaContentPipelineModule.NET4.KNI.csproj", "{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI", "ProtonType.XnaContentPipeline\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj", "{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +63,7 @@ Global
 		{82C354D3-8D37-4B2B-9046-0D36A98EE450} = {27530753-40D6-43A7-A448-D0806FCB4FA3}
 		{52767CCB-66BC-44A1-A100-E0470E21A24B} = {27530753-40D6-43A7-A448-D0806FCB4FA3}
 		{2AA622A6-BCFE-445B-AFC1-A6AF361A777E} = {27530753-40D6-43A7-A448-D0806FCB4FA3}
+		{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC} = {27530753-40D6-43A7-A448-D0806FCB4FA3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3905608E-40DC-4C2E-B7EF-15B706B99855}

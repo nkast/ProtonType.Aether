@@ -76,7 +76,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             this.DisplayName = displayName;
         }
         
-        internal void Write(BinaryWriter writer)
+        public void Write(BinaryWriter writer)
         {
             WriteString(writer, AssemblyPath);
             WriteString(writer, TypeName);
