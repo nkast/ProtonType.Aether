@@ -64,6 +64,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         {
             try
             {
+                if (!File.Exists(filePath))
+                    return null;
+
                 using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
                 using (var writer = new SourceFileCollectionBinaryReader(stream))
                 {
