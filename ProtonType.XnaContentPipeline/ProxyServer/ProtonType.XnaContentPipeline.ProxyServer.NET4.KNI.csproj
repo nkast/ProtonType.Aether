@@ -30,13 +30,13 @@
 
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
-    <Compile Include="..\Proxy\Common\Converters\StringToColorConverter.cs" />
-    <Compile Include="..\Proxy\Common\ImporterDescription.cs" />
-    <Compile Include="..\Proxy\Common\ProcessorDescription.cs" />
-    <Compile Include="..\Proxy\Common\ProcessorParamDescription.cs" />
-    <Compile Include="..\Proxy\Common\Package.cs" />
-    <Compile Include="..\Proxy\Common\ProxyMsgType.cs" />
-    <Compile Include="..\Proxy\Common\TaskResult.cs" />
+    <Compile Include="..\ProxyCommon\Common\Converters\StringToColorConverter.cs" />
+    <Compile Include="..\ProxyCommon\Common\ImporterDescription.cs" />
+    <Compile Include="..\ProxyCommon\Common\ProcessorDescription.cs" />
+    <Compile Include="..\ProxyCommon\Common\ProcessorParamDescription.cs" />
+    <Compile Include="..\ProxyCommon\Common\Package.cs" />
+    <Compile Include="..\ProxyCommon\Common\ProxyMsgType.cs" />
+    <Compile Include="..\ProxyCommon\Common\TaskResult.cs" />
     <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
     <Compile Include="Server\Assemblies\PackageReferencesCollection.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />
