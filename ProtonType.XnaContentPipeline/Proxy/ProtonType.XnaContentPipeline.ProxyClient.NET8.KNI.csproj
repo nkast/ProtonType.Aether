@@ -21,20 +21,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.ProxyClient.cs" />
+    <Compile Include="Client\IPCClient.cs" />
     <Compile Include="Client\IProxyLogger.cs" />
+    <Compile Include="Client\PipelineAsyncTask.cs" />
+    <Compile Include="Client\PipelineAsyncTaskImporters.cs" />
+    <Compile Include="Client\PipelineAsyncTaskProcessors.cs" />
+    <Compile Include="Client\PipelineProxyClient.cs" />
     <Compile Include="Client\ProxyGraphicsProfile.cs" />
     <Compile Include="Client\ProxyTargetPlatform.cs" />
-    <Compile Include="..\ProxyCommon\Common\Converters\StringToColorConverter.cs" />
-    <Compile Include="..\ProxyCommon\Common\ImporterDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorParamDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\Package.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProxyMsgType.cs" />
-    <Compile Include="..\ProxyCommon\Common\TaskResult.cs" />
-    <Compile Include="Client\IPCClient.cs" />
-    <Compile Include="Client\PipelineAsyncTask.cs" />
-    <Compile Include="Client\PipelineProxyClient.cs" />
+    <Compile Include="Properties\AssemblyInfo.ProxyClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET8.KNI.csproj" />
   </ItemGroup>
   
 </Project>

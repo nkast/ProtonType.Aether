@@ -26,17 +26,11 @@
       <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.Content.Pipeline.Graphics.MojoProcessor.dll</HintPath>
     </Reference>
     <PackageReference Include="nkast.Kni.Platform.WinForms.DX11" Version="4.1.9001" />
+    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.ProxyServer.cs" />
-    <Compile Include="..\ProxyCommon\Common\Converters\StringToColorConverter.cs" />
-    <Compile Include="..\ProxyCommon\Common\ImporterDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorParamDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\Package.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProxyMsgType.cs" />
-    <Compile Include="..\ProxyCommon\Common\TaskResult.cs" />
     <Compile Include="Server\Assemblies\AssembliesMgr.cs" />
     <Compile Include="Server\Assemblies\PackageReferencesCollection.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />

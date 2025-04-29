@@ -21,13 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ProxyCommon\Common\Converters\StringToColorConverter.cs" />
-    <Compile Include="..\ProxyCommon\Common\ImporterDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProcessorParamDescription.cs" />
-    <Compile Include="..\ProxyCommon\Common\Package.cs" />
-    <Compile Include="..\ProxyCommon\Common\ProxyMsgType.cs" />
-    <Compile Include="..\ProxyCommon\Common\TaskResult.cs" />
     <Compile Include="Client\IPCClient.cs" />
     <Compile Include="Client\IProxyLogger.cs" />
     <Compile Include="Client\PipelineAsyncTask.cs" />
@@ -40,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj" />
   </ItemGroup>
 	
 </Project>
