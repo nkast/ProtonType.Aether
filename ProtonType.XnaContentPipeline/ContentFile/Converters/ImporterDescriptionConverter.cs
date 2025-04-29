@@ -89,7 +89,7 @@ namespace nkast.ProtonType.ContentLib.ViewModels.Converters
             var fileExt = Path.GetExtension(_pipelineItem.OriginalPath);
 
             var values = new List<ImporterDescription>();
-            foreach(var importer in _pipelineProject._references.FindImporters(fileExt))
+            foreach(var importer in _pipelineProject.FindImporters(fileExt))
                 values.Add(importer);
 
             return new StandardValuesCollection(values);

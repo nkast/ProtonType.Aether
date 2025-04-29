@@ -24,9 +24,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using nkast.ProtonType.Framework.Modules;
 using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
+using nkast.ProtonType.XnaContentPipeline.Common.Converters;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
 namespace nkast.ProtonType.XnaContentPipeline.ViewModels
@@ -43,13 +45,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private readonly List<ContentItemTemplate> _templateItems;
         internal readonly IPipelineLogger _logger;
 
-        
+
         internal IEnumerable<ContentItemTemplate> Templates { get { return _templateItems; } }
 
-        /*internal*/ public PipelineProject Project { get; private set; }
+        /*internal*/
+        public PipelineProject Project { get; private set; }
 
         public bool IsProjectOpen { get; private set; }
-        
+
         public bool IsProjectDirty { get; private set; }
 
         public string Location { get { return Project.Location; } }
@@ -59,7 +62,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
 
         [Category("Settings")]
-        public ProxyTargetPlatform Platform 
+        public ProxyTargetPlatform Platform
         {
             get { return Project.Platform; }
             set { Project.Platform = value; }
@@ -132,6 +135,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             this._references = new ReferencesViewModel(_site, this);
             this._packages = new PackagesViewModel(_site, this);
 
+            Importers = new ReadOnlyObservableCollection<ImporterDescription>(_importers);
+            Processors = new ReadOnlyObservableCollection<ProcessorDescription>(_processors);
+
             _templateItems = new List<ContentItemTemplate>();
             LoadTemplates(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Templates"));
 
@@ -141,17 +147,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             _pipelineItemsVM = new ObservableCollection<PipelineItemViewModel>();
             PipelineItemsVM = new ReadOnlyObservableCollection<PipelineItemViewModel>(_pipelineItemsVM);
         }
-        
+
         public void NewProject(string projectFilePath)
         {
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
 
-            this._packages.Load();
-            this._references.Load();
+            this.LoadProject();
 
             Project.PipelineItemPropertyChanged += project_PipelineItemPropertyChanged;
-            
+
             // Save the new project.
             Project.OriginalPath = projectFilePath;
             Project.Profile = ProxyGraphicsProfile.Reach;
@@ -169,19 +174,18 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             if (IsProjectOpen)
                 CloseProject();
-            
+
             try
             {
                 PipelineProjectReader reader = new PipelineProjectReader();
                 Project = reader.LoadProject(projectFilePath, _logger);
 
-                this._packages.Load();
-                this._references.Load();
+                this.LoadProject();
 
                 CreateItems();
 
                 LoadTemplates(Project.Location);
-                
+
                 IsProjectOpen = true;
                 IsProjectDirty = false;
             }
@@ -196,7 +200,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             }
             return;
         }
-                
+
         private void CreateItems()
         {
             foreach (var item in Project.PipelineItems)
@@ -205,7 +209,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 _pipelineItemsVM.Add(itemVM);
             }
         }
-        
+
         public void SaveProject(bool force = true)
         {
             IsProjectDirty = (IsProjectDirty || force);
@@ -232,7 +236,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             IsProjectDirty = false;
             Project = null;
         }
-        
+
         public void Add(PipelineItemViewModel pipelineItemVM)
         {
             int index = FindInsertIndex(pipelineItemVM);
@@ -246,10 +250,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         static PipelineItemPathComparer _pipelineItemPathComparer = new PipelineItemPathComparer();       
 
         private int FindInsertIndex(PipelineItemViewModel pipelineItemVM)
-        {   
+        {
             int index = Project.BinarySearch(pipelineItemVM.PipelineItem, _pipelineItemPathComparer);
             if (index < 0)
-                index  = index ^ (-1);
+                index = index ^ (-1);
             return index;
         }
 
@@ -263,7 +267,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         }
 
         public PipelineItemViewModel Include(string fileAbsolutePath)
-        {   
+        {
             // Root the path to the project.
             if (!Path.IsPathRooted(fileAbsolutePath))
                 fileAbsolutePath = Path.Combine(Location, fileAbsolutePath);
@@ -305,7 +309,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             return Project.ReplaceSymbols(parameter);
         }
-        
+
 
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemAdded;
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemRemoved;
@@ -317,13 +321,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             if (handler != null)
                 handler(this, e);
         }
+
         private void OnPipelineItemRemoved(PipelineItemViewModelEventArgs e)
         {
             var handler = PipelineItemRemoved;
             if (handler != null)
                 handler(this, e);
         }
-         
+
 
 
         internal void LoadTemplates(string path)
@@ -356,7 +361,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 _templateItems.Add(item);
             }
         }
-        
+
 
         internal IPipelineItem GetItem(string originalPath)
         {
@@ -390,6 +395,322 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         }
 
 
+        private readonly ObservableCollection<ImporterDescription> _importers = new ObservableCollection<ImporterDescription>();
+        private readonly ObservableCollection<ProcessorDescription> _processors = new ObservableCollection<ProcessorDescription>();
 
+        internal readonly IList<ImporterDescription> Importers;
+        internal readonly IList<ProcessorDescription> Processors;
+
+
+        internal TypeConverter FindConverter(Type type)
+        {
+            if (type == typeof(Microsoft.Xna.Framework.Color))
+                return new StringToColorConverter();
+
+            return TypeDescriptor.GetConverter(type);
+        }
+
+        internal void LoadProject()
+        {
+            // load packages
+            foreach (Package package in this.Project.PackageReferences)
+            {
+                PackageViewModel packageVM = this.CreatePackage(package);
+                if (packageVM == null)
+                    continue;
+
+                _packages._packages.Add(packageVM);
+            }
+
+            using (PipelineProxyClient pipelineProxy = new PipelineProxyClient())
+            {
+                pipelineProxy.BeginListening();
+
+                pipelineProxy.SetBaseDirectory(this.Location);
+                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+
+                // Set Global Settings
+                pipelineProxy.SetOutputDir(this.OutputDir);
+                pipelineProxy.SetIntermediateDir(this.IntermediateDir);
+                pipelineProxy.SetPlatform(this.Platform);
+                pipelineProxy.SetConfig(this.Config);
+                pipelineProxy.SetProfile(this.Profile);
+
+
+                IProxyLogger logger = new ProxyLogger(this._logger);
+
+                List<Task<TaskResult>> addPackageTasks = new List<Task<TaskResult>>();
+                foreach (Package package in this.Project.PackageReferences)
+                {
+                    Task<TaskResult> task = pipelineProxy.AddPackage(logger, package);
+                    addPackageTasks.Add(task);
+                }
+                Task.WaitAll(addPackageTasks.ToArray());
+
+                Task<TaskResult> resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+                resolvePackagesTask.Wait();
+
+                // load all types from references
+                List<Task<TaskResult>> addAssemblyTasks = new List<Task<TaskResult>>();
+                foreach (string refPath in this.Project.References)
+                {
+                    AssemblyViewModel assembly = this.CreateAssembly(refPath);
+                    if (assembly == null)
+                        continue;
+
+                    string assemblyPath = assembly.NormalizedAbsoluteFullPath;
+
+                    Task<TaskResult> task = pipelineProxy.AddAssembly(logger, assemblyPath);
+                    addAssemblyTasks.Add(task);
+
+                    _references._assemblies.Add(assembly);
+                }
+                Task.WaitAll(addAssemblyTasks.ToArray());
+
+                IProxyLogger logger2 = new ProxyLogger(this._logger);
+                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger2);
+                importersTask.Task.Wait();
+
+                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                    _importers.Add(importerDesc);
+
+                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger2);
+                processorsTask.Task.Wait();
+
+                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                    _processors.Add(processorDesc);
+            }
+        }
+
+        internal PackageViewModel CreatePackage(Package package)
+        {
+            string packageName = package.Name;
+
+            PackageViewModel packageVM = new PackageViewModel(this, _packages, package);
+
+            // check if assembly is allready added
+            foreach (PackageViewModel otherPackage in _packages)
+            {
+                if (otherPackage.PackageName == packageVM.PackageName
+                && otherPackage.PackageVersion == packageVM.PackageVersion)
+                    return null;
+            }
+
+            if (string.IsNullOrEmpty(packageVM.PackageName))
+            {
+                //throw new InvalidOperationException("Package.Name is null or empty.");
+                //TODO: log error
+                return null;
+            }
+
+            return packageVM;
+        }
+
+        internal AssemblyViewModel CreateAssembly(string refPath)
+        {
+            AssemblyViewModel assembly = new AssemblyViewModel(this, _references, refPath);
+
+            // check if assembly is allready added
+            foreach (AssemblyViewModel otherAssembly in _references.Assemblies)
+            {
+                if (otherAssembly.NormalizedAbsoluteFullPath == assembly.NormalizedAbsoluteFullPath)
+                    return null;
+            }
+
+            if (string.IsNullOrEmpty(assembly.AbsoluteFullPath))
+            {
+                //throw new InvalidOperationException("assembly.AbsoluteFullPath is null or empty.");
+                //TODO: log error
+                return null;
+            }
+            if (!Path.IsPathRooted(assembly.AbsoluteFullPath))
+            {
+                //throw new InvalidOperationException("assemblyFilePath is not rooted path.");
+                //TODO: log error
+                return null;
+            }
+
+            return assembly;
+        }
+
+        public IEnumerable<ImporterDescription> FindImporters(string fileExtension)
+        {
+            List<ImporterDescription> importers = new List<ImporterDescription>();
+
+            foreach (ImporterDescription importerDesc in Importers)
+            {
+                if (importerDesc.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
+                    importers.Add(importerDesc);
+            }
+
+            return importers;
+        }
+
+        public ImporterDescription FindImporter(string importerName, string fileExtension)
+        {
+            if (!string.IsNullOrEmpty(importerName))
+            {
+                foreach (ImporterDescription importerDesc in Importers)
+                {
+                    if (importerDesc.TypeName.Equals(importerName))
+                        return importerDesc;
+                }
+
+                foreach (ImporterDescription importerDesc in Importers)
+                {
+                    if (importerDesc.DisplayName.Equals(importerName))
+                        return importerDesc;
+                }
+
+                //Debug.Fail(string.Format("Importer not found! name={0}, ext={1}", name, fileExtension));
+                return null;
+            }
+
+            foreach (ImporterDescription importerDesc in Importers)
+            {
+                if (importerDesc.FileExtensions.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase))
+                    return importerDesc;
+            }
+
+            //Debug.Fail(string.Format("Importer not found! name={0}, ext={1}", name, fileExtension));
+            return null;
+        }
+
+        public List<ProcessorDescription> FindProcessors(ImporterDescription importerDesc)
+        {
+            if (importerDesc != null)
+            {
+                List<ProcessorDescription> processors = new List<ProcessorDescription>();
+
+                foreach (ProcessorDescription processorDesc in this.Processors)
+                {
+                    if (IsProcessorValid(importerDesc, processorDesc))
+                    {
+                        processors.Add(processorDesc);
+                    }
+                }
+
+                return processors;
+            }
+
+            //Debug.Fail(string.Format("Processor not found! name={0}, importer={1}", name, importer));
+            return null;
+
+        }
+
+        private bool IsProcessorValid(ImporterDescription importer, ProcessorDescription processor)
+        {
+            if (processor.TypeName.Equals(importer.DefaultProcessor))
+                return true;
+            if (processor.InputTypeFullName == importer.OutputTypeFullName)
+                return true;
+            if (processor.InputBaseTypesFullName.Contains(importer.OutputTypeFullName))
+                return true;
+            if (importer.OutputBaseTypesFullName.Contains(processor.InputTypeFullName))
+                return true;
+
+            return false;
+
+
+        }
+
+        public ProcessorDescription FindProcessor(string processorName, ImporterDescription importerDesc)
+        {
+            if (!string.IsNullOrEmpty(processorName))
+            {
+                foreach (ProcessorDescription processorDesc in Processors)
+                {
+                    if (processorDesc.TypeName.Equals(processorName))
+                        return processorDesc;
+                }
+
+                //Debug.Fail(string.Format("Processor not found! name={0}, importer={1}", name, importer));
+                return null;
+            }
+
+            if (importerDesc != null)
+            {
+                foreach (ProcessorDescription processorDesc in Processors)
+                {
+                    if (processorDesc.TypeName.Equals(importerDesc.DefaultProcessor))
+                        return processorDesc;
+                }
+            }
+
+            //Debug.Fail(string.Format("Processor not found! name={0}, importer={1}", name, importer));
+            return null;
+        }
+
+        internal void AddReference(AssemblyViewModel assembly)
+        {
+            using (PipelineProxyClient pipelineProxy = new PipelineProxyClient())
+            {
+                pipelineProxy.BeginListening();
+
+                pipelineProxy.SetBaseDirectory(this.Location);
+                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+
+                IProxyLogger logger = new ProxyLogger(this._logger);
+                Task<TaskResult> task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
+                Task.WaitAll(new[] { task });
+
+                _references._assemblies.Add(assembly);
+                this.Project.References.Add(assembly.OriginalPath); // update model
+
+                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger);
+                importersTask.Task.Wait();
+
+                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                    if (importerDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
+                        _importers.Add(importerDesc);
+
+                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger);
+                processorsTask.Task.Wait();
+
+                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                    if (processorDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
+                        _processors.Add(processorDesc);
+            }
+        }
+
+        internal void AddPackage(PackageViewModel packageVM)
+        {
+            using (PipelineProxyClient pipelineProxy = new PipelineProxyClient())
+            {
+                pipelineProxy.BeginListening();
+
+                pipelineProxy.SetBaseDirectory(this.Location);
+                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+
+                IProxyLogger logger = new ProxyLogger(this._logger);
+                Task<TaskResult> task = pipelineProxy.AddPackage(logger, packageVM.Package);
+                Task.WaitAll(new[] { task });
+
+                Task<TaskResult> resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+                resolvePackagesTask.Wait();
+
+                _packages._packages.Add(packageVM);
+                this.Project.PackageReferences.Add(packageVM.Package); // update model
+
+                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger);
+                importersTask.Task.Wait();
+
+
+                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                {
+                    if (!_importers.Select((i)=> i.TypeFullName).Contains(importerDesc.TypeFullName))
+                        _importers.Add(importerDesc);
+                }
+
+                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger);
+                processorsTask.Task.Wait();
+
+                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                {
+                    if (!_processors.Select((i) => i.TypeFullName).Contains(processorDesc.TypeFullName))
+                        _processors.Add(processorDesc);
+                }
+            }
+        }
     }
 }

@@ -99,7 +99,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                     else
                     {
                         var pipelineProject = _pipelineItemVM.PipelineProject;
-                        converter = pipelineProject._references.FindConverter(PropertyType);
+                        converter = pipelineProject.FindConverter(PropertyType);
                     }
 
                     return converter;

@@ -55,6 +55,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         ParamImporter,
         ParamProcessor,
         ParamProcessorParam,
+        AddItem,
+
+        // Build action
         Copy,
         Build,
     }

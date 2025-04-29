@@ -39,6 +39,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         public string OriginalPath;
         public string DestinationPath;
 
+        public bool isCopy;
+
         public ParametersContext()
         {
             Guid = Guid.Empty;
@@ -49,7 +51,29 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             this.Guid = guid;
         }
 
-        internal ParametersContext CreateContext(Guid guid)
+        public ParametersContext(Guid guid, ParametersContext clone)
+        {
+            this.Guid = guid;
+
+            this.OutputDir = clone.OutputDir;
+            this.IntermediateDir = clone.IntermediateDir;
+            this.Platform = clone.Platform;
+            this.Profile = clone.Profile;
+            this.Compression = clone.Compression;
+            this.Config = clone.Config;
+
+            this.Importer = clone.Importer;
+            this.Processor = clone.Processor;
+            foreach (var processorParam in clone.ProcessorParams)
+                this.ProcessorParams.Add(processorParam.Key, processorParam.Value);
+
+            this.OriginalPath = clone.OriginalPath;
+            this.DestinationPath = clone.DestinationPath;
+
+            this.isCopy = clone.isCopy;
+        }
+
+        internal ParametersContext CreateContext(Guid guid, bool isCopy)
         {
             ParametersContext context = new ParametersContext(guid);
             
@@ -64,8 +88,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             context.Processor = this.Processor;
             foreach(var processorParam in this.ProcessorParams)
                 context.ProcessorParams.Add(processorParam.Key, processorParam.Value);
+
             context.OriginalPath = this.OriginalPath;
             context.DestinationPath = this.DestinationPath;
+
+            context.isCopy = isCopy;
 
             return context;
         }

@@ -88,7 +88,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels.Converters
             
             //var processors = _pipelineProject.PipelineTypes.Processors;
             // TODO: we need to include the existing processor even if it doesn't match
-            var processors = _pipelineProject._references.FindProcessors(_pipelineItem.Importer);
+            var processors = _pipelineProject.FindProcessors(_pipelineItem.Importer);
             
 
 

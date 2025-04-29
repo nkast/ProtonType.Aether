@@ -101,7 +101,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 if ((_processor == null || _processor.InputTypeFullName != _importerDesc.OutputTypeFullName) &&
                     _processor != PipelineTypes.MissingProcessor)
                 {
-                    Processor = PipelineProject._references.FindProcessor(_importerDesc.DefaultProcessor, _importerDesc);
+                    Processor = PipelineProject.FindProcessor(_importerDesc.DefaultProcessor, _importerDesc);
                 }
             }
         }
@@ -161,7 +161,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             //if (BuildAction == BuildAction.Copy)
             //    return null;
 
-            var importerDesc = PipelineProject._references.FindImporter(importerName, Path.GetExtension(OriginalPath));
+            var importerDesc = PipelineProject.FindImporter(importerName, Path.GetExtension(OriginalPath));
             if (importerDesc == null)
             {
                 // TODO: create a virtual importer
@@ -179,7 +179,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             //if (BuildAction == BuildAction.Copy)
             //    return null;
 
-            var processorDesc = PipelineProject._references.FindProcessor(processorName, _importerDesc);
+            var processorDesc = PipelineProject.FindProcessor(processorName, _importerDesc);
             if (processorDesc == null)
             {
                 // TODO: create a virtual importer

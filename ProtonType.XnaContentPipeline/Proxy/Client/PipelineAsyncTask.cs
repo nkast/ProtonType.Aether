@@ -17,46 +17,46 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
-    public class PipelineAsyncTask : IAsyncResult
+    public class PipelineAsyncTask
     {
         public readonly Guid Guid;
         public readonly IProxyLogger Logger;
+                
+        private readonly TaskCompletionSource<TaskResult> _taskCompletionSource;
 
-        public event EventHandler<EventArgs> Completed;
+        public Task<TaskResult> Task { get; private set; }
 
-        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger, object state)
+        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger)
         {
-            AsyncWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-            IsCompleted = false;
-
             this.Guid = contextGuid;
             this.Logger = logger;
-            this.AsyncState = state;
+
+            _taskCompletionSource = new TaskCompletionSource<TaskResult>();
+            Task = _taskCompletionSource.Task;
         }
-
-        public object AsyncState { get; private set; }
-
-        public TaskResult Result { get; private set; }
-
-        public System.Threading.WaitHandle AsyncWaitHandle { get; private set; }
-
-        public bool CompletedSynchronously { get { return false; } }
-
-        public bool IsCompleted { get; private set; }
 
         internal void OnCompleted(TaskResult taskResult)
         {
-            IsCompleted = true;
-            Result = taskResult;
-            ((EventWaitHandle)AsyncWaitHandle).Set();
+            switch (taskResult)
+            {
+                case TaskResult.SUCCEEDED:
+                    _taskCompletionSource.SetResult(taskResult);
+                    break;
 
-            var handler = Completed;
-            if (handler != null)
-                handler(this, EventArgs.Empty);
+                case TaskResult.FAILED:
+                    _taskCompletionSource.SetException(new Exception("Task failed."));
+                    break;
+
+                default:
+                    //_taskCompletionSource.SetCanceled();
+                    _taskCompletionSource.SetException(new InvalidOperationException("Task unknown state."));
+                    break;
+            }
         }
     }
 }

@@ -83,7 +83,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal void AddObject(string name, string str, Type paramType)
         {
-            var converter = _pipelineProject._references.FindConverter(paramType);
+            var converter = _pipelineProject.FindConverter(paramType);
             object obj = converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, str);
             
             _pipelineItem.PipelineItem.ProcessorParams.Add(name, str);
@@ -92,7 +92,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal void SetObject(string name, string str, Type paramType)
         {
-            var converter = _pipelineProject._references.FindConverter(paramType);
+            var converter = _pipelineProject.FindConverter(paramType);
             object obj = converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, str);
 
             _pipelineItem.PipelineItem.ProcessorParams[name] = str;
@@ -101,7 +101,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal void SetObject(string name, object obj, Type paramType)
         {
-            var converter = _pipelineProject._references.FindConverter(paramType);
+            var converter = _pipelineProject.FindConverter(paramType);
             string str = (string)converter.ConvertTo(null, System.Globalization.CultureInfo.InvariantCulture, obj, typeof(string));
 
             _pipelineItem.PipelineItem.ProcessorParams[name] = str;

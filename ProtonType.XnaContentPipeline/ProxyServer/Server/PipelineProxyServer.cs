@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
@@ -37,6 +38,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private readonly ParametersContext _globalContext = new ParametersContext();
         private readonly ContentBuildLogger _globalLogger;
         private readonly AssembliesMgr _assembliesMgr;
+        private readonly Dictionary<Guid, ParametersContext> _items = new Dictionary<Guid, ParametersContext>();
         
         public PipelineProxyServer(string uid) : base(uid)
         {
@@ -187,6 +189,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                         break;
                     case ProxyMsgType.ParamProcessorParam:
                         AddProcessorParam();
+                        break;
+                    case ProxyMsgType.AddItem:
+                        AddItem();
                         break;
                         
                     case ProxyMsgType.Copy:
@@ -463,16 +468,42 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             this._globalContext.ProcessorParams.Add(processorParam, processorParamValue);
         }
 
-        private void Copy()
+        private void AddItem()
         {
             Guid contextGuid = ReadGuid();
 
             this._globalContext.OriginalPath = Reader.ReadString();
             this._globalContext.DestinationPath = ReadString();
+            bool isCopy = Reader.ReadBoolean();
 
-            ParametersContext itemContext = this._globalContext.CreateContext(contextGuid);
+            ParametersContext itemContext = this._globalContext.CreateContext(contextGuid
+                , isCopy
+                );
+            _items.Add(contextGuid, itemContext);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
+                Writer.Flush();
+            }
+        }
+
+        private void Copy()
+        {
+            Guid contextGuid = ReadGuid();
             
-            TaskResult taskResult = Copy(itemContext);
+            Guid itemContextGuid = ReadGuid();
+
+            ParametersContext itemContext = _items[itemContextGuid];
+            Debug.Assert(itemContext.isCopy == true);
+
+            ParametersContext itemContext2 = new ParametersContext(contextGuid, itemContext);
+            _items.Remove(itemContext.Guid);
+
+            TaskResult taskResult = Copy(itemContext2);
 
             lock (Writer)
             {
@@ -487,12 +518,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private void Build()
         {
             Guid contextGuid = ReadGuid();
-            this._globalContext.OriginalPath = Reader.ReadString();
-            this._globalContext.DestinationPath = ReadString();
 
-            ParametersContext itemContext = this._globalContext.CreateContext(contextGuid);
+            Guid itemContextGuid = ReadGuid();
 
-            TaskResult taskResult = Build(itemContext);
+            ParametersContext itemContext = _items[itemContextGuid];
+            Debug.Assert(itemContext.isCopy == false);
+
+            ParametersContext itemContext2 = new ParametersContext(contextGuid, itemContext);
+            _items.Remove(itemContext.Guid);
+
+            TaskResult taskResult = Build(itemContext2);
             
             lock (Writer)
             {

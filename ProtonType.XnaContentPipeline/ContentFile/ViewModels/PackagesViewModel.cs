@@ -39,7 +39,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private readonly ISiteViewModel _site;
         private PipelineProjectViewModel _project;
 
-        private readonly ObservableCollection<PackageViewModel> _packages;
+        internal readonly ObservableCollection<PackageViewModel> _packages;
         
         internal readonly IList<PackageViewModel> Packages;
         
@@ -58,41 +58,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             RemoveCollectionItemCommand = new RelayCommand(RemoveCollectionItem);
         }
 
-        internal void Load()
-        {
-            foreach (Package package in _project.Project.PackageReferences)
-            {
-                PackageViewModel packageVM = CreatePackage(package);
-                if (packageVM == null)
-                    continue;
-
-                _packages.Add(packageVM);
-            }
-        }
-
-        private PackageViewModel CreatePackage(Package package)
-        {
-            string packageName = package.Name;
-
-            PackageViewModel packageVM = new PackageViewModel(_project, this, package);
-
-            // check if assembly is allready added
-            foreach (PackageViewModel otherPackage in _packages)
-            {
-                if (otherPackage.PackageName == packageVM.PackageName
-                &&  otherPackage.PackageVersion == packageVM.PackageVersion)
-                    return null;
-            }
-
-            if (string.IsNullOrEmpty(packageVM.PackageName))
-            {
-                //throw new InvalidOperationException("Package.Name is null or empty.");
-                //TODO: log error
-                return null;
-            }
-
-            return packageVM;
-        }
         
         private void AddCollectionItem(object parameter)
         {
@@ -121,7 +86,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                         package.Version = match.Groups["VersionNumber"].Value;
                 }
 
-                PackageViewModel packageVM = CreatePackage(package);
+                PackageViewModel packageVM = _project.CreatePackage(package);
                 if (packageVM == null)
                     return;
 
@@ -159,8 +124,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             PackageViewModel packageVM = (PackageViewModel)value;
             int newIndex = _packages.Count;
 
-            _packages.Add(packageVM);
-            _project.Project.PackageReferences.Add(packageVM.Package); // update model
+            _project.AddPackage(packageVM);
 
             var handler = CollectionChanged;
             if (handler!=null)
@@ -253,7 +217,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         #endregion
 
 
-        #region implement IList
+        #region implement INotifyCollectionChanged
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         #endregion
         

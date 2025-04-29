@@ -92,7 +92,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
         {
             ProcessedCount = 0;
             FailedCount = 0;
-            RaisePropertyChanged(()=>ProcessedCount);
+            RaisePropertyChanged(() => ProcessedCount);
             RaisePropertyChanged(() => FailedCount);
         }
 
@@ -126,13 +126,19 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
             if (e.Result == Common.TaskResult.SUCCEEDED)
             {
+                this.Dispatcher.Invoke(() =>
+                {
                 ProcessedCount++;
                 RaisePropertyChanged(() => ProcessedCount);
+                });
             }
             if (e.Result == Common.TaskResult.FAILED)
             {
+                this.Dispatcher.Invoke(() =>
+                {
                 FailedCount++;
-                RaisePropertyChanged( ()=> FailedCount);
+                    RaisePropertyChanged(() => FailedCount);
+                });
             }
 
             OnPipelineItemBuildCompleted(new PipelineItemViewModelBuildCompletedEventArgs(pipelineItemVM, e.Result));
@@ -158,12 +164,15 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
                 items.Add(pipelineItemVM.PipelineItem);
 
             _pipelineBuilder.BuildAll(items, rebuild);
-
         }
 
-        public void BuildItem(PipelineItemViewModel pipelineItemVM, bool rebuild)
+        public void BuildItem(PipelineItemViewModel buildPipelineItemVM, bool rebuild)
         {
-            _pipelineBuilder.BuildItem(pipelineItemVM.PipelineItem, rebuild);
+            List<PipelineItem> items = new List<PipelineItem>();
+            foreach (var pipelineItemVM in _projectVM.PipelineItemsVM)
+                items.Add(pipelineItemVM.PipelineItem);
+
+            _pipelineBuilder.BuildItem(buildPipelineItemVM.PipelineItem, items, rebuild);
         }
 
         public void CleanAll()

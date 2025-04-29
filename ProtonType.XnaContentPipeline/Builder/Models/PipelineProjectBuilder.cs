@@ -42,6 +42,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             public readonly bool Rebuild;
 
             private PipelineBuildItemStatus _status = PipelineBuildItemStatus.Queued;
+            internal PipelineAsyncTask addItemTask;
                         
             public event EventHandler<EventArgs> StatusChanged;
 
@@ -158,17 +159,25 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     {
                         _buildItems.Clear();
                     }
-                    foreach (var pipelineItem in pipelineItems)
+
+                    Dictionary<PipelineItem, PipelineAsyncTask> addItemTasks = new Dictionary<PipelineItem, PipelineAsyncTask>();
+                    foreach (PipelineItem pipelineItem in pipelineItems)
                     {
-                        var buildItem = new PipelineBuildItem(pipelineItem, rebuild);
+                        PipelineAsyncTask addItemTask = AddPipelineItem(pipelineProxy, pipelineItem);
+                        addItemTasks.Add(pipelineItem, addItemTask);
+                    }
+                    // TODO: register all items
+
+                    foreach (PipelineItem pipelineItem in pipelineItems)
+                    {
+                        PipelineBuildItem buildItem = new PipelineBuildItem(pipelineItem, rebuild);
+                        buildItem.addItemTask = addItemTasks[pipelineItem];
                         _buildItems.Add(buildItem);
                         _queuedItems.Enqueue(buildItem);
+
                         OnBuildQueueItemAdded(new PipelineBuildItemEventArgs(buildItem));
                     }
-                }
 
-                lock (_buildTaskLocker)
-                {
                     if (_buildTask != null)
                         throw new InvalidOperationException("_buildTask is not null");
 
@@ -194,7 +203,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             return;
         }
 
-        internal void BuildItem(PipelineItem pipelineItem, bool rebuild)
+        internal void BuildItem(PipelineItem buildPipelineItem, List<PipelineItem> pipelineItems, bool rebuild)
         {
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             {
@@ -202,22 +211,29 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
                 InitProxy(pipelineProxy);
 
-                {
-                    var buildItem = new PipelineBuildItem(pipelineItem, rebuild);
-
                     lock (_buildTaskLocker)
                     {
                         if (_buildTask == null)
                         {
                             _buildItems.Clear();
                         }
+
+                    Dictionary<PipelineItem, PipelineAsyncTask> addItemTasks = new Dictionary<PipelineItem, PipelineAsyncTask>();
+                    foreach (PipelineItem pipelineItem in pipelineItems)
+                    {
+                        PipelineAsyncTask addItemTask = AddPipelineItem(pipelineProxy, pipelineItem);
+                        addItemTasks.Add(pipelineItem, addItemTask);
+                    }
+                    // TODO: register all items
+
+                    PipelineBuildItem buildItem = new PipelineBuildItem(buildPipelineItem, rebuild);
+                    buildItem.addItemTask = addItemTasks[buildPipelineItem];
+
                         _buildItems.Add(buildItem);
                         _queuedItems.Enqueue(buildItem);
-                    }
+
                     OnBuildQueueItemAdded(new PipelineBuildItemEventArgs(buildItem));
 
-                    lock (_buildTaskLocker)
-                    {
                         if (_buildTask != null)
                             throw new InvalidOperationException("_buildTask is not null");
 
@@ -236,8 +252,31 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                         OnBuildStarted(EventArgs.Empty);
                     }
                 }
-            }
             return;
+        }
+
+        private PipelineAsyncTask AddPipelineItem(PipelineProxyClient pipelineProxy, PipelineItem pipelineItem)
+        {
+            pipelineProxy.SetImporter(pipelineItem.Importer);
+
+            pipelineProxy.SetProcessor(pipelineItem.Processor);
+            foreach (var processorParamName in pipelineItem.ProcessorParams.Keys)
+            {
+                string processorParamValue = pipelineItem.ProcessorParams[processorParamName];
+                pipelineProxy.AddProcessorParam(processorParamName, processorParamValue);
+            }
+
+            string originalPath = pipelineItem.OriginalPath;
+            string destinationPath = pipelineItem.DestinationPath;
+            if (destinationPath == originalPath)
+                destinationPath = null;
+
+            IProxyLogger addItemlogger = new ProxyLogger(_viewLogger);
+
+            PipelineAsyncTask addItemTask = pipelineProxy.AddItem(addItemlogger, originalPath, destinationPath
+                , (pipelineItem.BuildAction == BuildAction.Copy)
+            );
+            return addItemTask;
         }
 
         private void InitProxy(PipelineProxyClient pipelineProxy)
@@ -277,26 +316,25 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             ProxyLogger logger = new ProxyLogger(_viewLogger);
 
-            List<PipelineAsyncTask> addPackageTasks = new List<PipelineAsyncTask>();
+            List<Task<TaskResult>> addPackageTasks = new List<Task<TaskResult>>();
             foreach (Package package in _project.PackageReferences)
             {
-                PipelineAsyncTask task = pipelineProxy.AddPackage(logger, package);
+                Task<TaskResult> task = pipelineProxy.AddPackage(logger, package);
                 addPackageTasks.Add(task);
             }
-            foreach (PipelineAsyncTask task in addPackageTasks)
-                task.AsyncWaitHandle.WaitOne();
-            PipelineAsyncTask resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
-            resolvePackagesTask.AsyncWaitHandle.WaitOne();
+            Task.WaitAll(addPackageTasks.ToArray());
 
-            List<PipelineAsyncTask> addAssemblyTasks = new List<PipelineAsyncTask>();
+            Task<TaskResult> resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+            resolvePackagesTask.Wait();
+
+            // load all types from references
+            List<Task<TaskResult>> addAssemblyTasks = new List<Task<TaskResult>>();
             foreach (string assemblyPath in _project.References)
             {
-                PipelineAsyncTask task = pipelineProxy.AddAssembly(logger, assemblyPath);
+                Task<TaskResult> task = pipelineProxy.AddAssembly(logger, assemblyPath);
                 addAssemblyTasks.Add(task);
             }
-
-            foreach (PipelineAsyncTask task in addAssemblyTasks)
-                task.AsyncWaitHandle.WaitOne();
+            Task.WaitAll(addAssemblyTasks.ToArray());
         }
 
         private void ProcessBuildQueueWorker(PipelineProxyClient pipelineProxy)
@@ -304,63 +342,45 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             if (Thread.CurrentThread.Name == null)
                 Thread.CurrentThread.Name = "ProcessBuildQueueWorker";
 
-            PipelineBuildItem buildItem;
-            while (_queuedItems.TryDequeue(out buildItem))
+            while (_queuedItems.TryDequeue(out PipelineBuildItem buildItem))
             {
                 OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
 
-                PipelineAsyncTask buildTask = ProcessbuildItem(pipelineProxy, _project, buildItem);
-                buildTask.Completed += (sender, e) =>
+                Task<TaskResult> buildTask = ProcessbuildItem(pipelineProxy, _project, buildItem);
+                buildTask.ContinueWith( (task) =>
                 {
-                    PipelineAsyncTask thisBuildTask = (PipelineAsyncTask)sender;
-                    var thisBuildItem = thisBuildTask.AsyncState as PipelineBuildItem;
-
-                    switch (thisBuildTask.Result)
+                    switch (task.Result)
                     {
                         case TaskResult.FAILED:
-                            thisBuildItem.Status = PipelineBuildItemStatus.Failed;
+                            buildItem.Status = PipelineBuildItemStatus.Failed;
                             break;
                         case TaskResult.SUCCEEDED:
-                            thisBuildItem.Status = PipelineBuildItemStatus.Build;
+                            buildItem.Status = PipelineBuildItemStatus.Build;
                             break;
                     }
-                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(thisBuildItem, thisBuildTask.Result));
-                };
-                buildTask.AsyncWaitHandle.WaitOne();
+                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, task.Result));
+                });
+                buildTask.Wait();
             }
 
             return;
         }
 
-        private PipelineAsyncTask ProcessbuildItem(PipelineProxyClient pipelineProxy, PipelineProject project, PipelineBuildItem buildItem)
+        private Task<TaskResult> ProcessbuildItem(PipelineProxyClient pipelineProxy, PipelineProject project, PipelineBuildItem buildItem)
         {
             PipelineItem item = buildItem.PipelineItem;
-
-            pipelineProxy.SetImporter(item.Importer);
-
-            pipelineProxy.SetProcessor(item.Processor);
-            foreach (var processorParamName in item.ProcessorParams.Keys)
-            {
-                string processorParamValue = item.ProcessorParams[processorParamName];
-                pipelineProxy.AddProcessorParam(processorParamName, processorParamValue);
-            }
-
-            string originalPath = item.OriginalPath;
-            string destinationPath = item.DestinationPath;
-            if (destinationPath == originalPath)
-                destinationPath = null;
 
             IProxyLogger logger = new ProxyLogger(_viewLogger);
 
             if (item.BuildAction == BuildAction.Copy)
             {
-                PipelineAsyncTask buildTask = pipelineProxy.Copy(logger, originalPath, destinationPath, buildItem);
-                return buildTask;
+                PipelineAsyncTask buildTask = pipelineProxy.Copy(logger, buildItem.addItemTask.Guid);
+                return buildTask.Task;
             }
             if (item.BuildAction == BuildAction.Build)
             {
-                PipelineAsyncTask buildTask = pipelineProxy.Build(logger, originalPath, destinationPath, buildItem);
-                return buildTask;
+                PipelineAsyncTask buildTask = pipelineProxy.Build(logger, buildItem.addItemTask.Guid);
+                return buildTask.Task;
             }
 
             return null;
