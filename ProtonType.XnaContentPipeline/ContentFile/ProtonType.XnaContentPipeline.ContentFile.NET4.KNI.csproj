@@ -39,9 +39,11 @@
     <Compile Include="Model\ContentItemTemplate.cs" />
     <Compile Include="Model\IPipelineItem.cs" />
     <Compile Include="Model\IPipelineLogger.cs" />
+    <Compile Include="Model\PathComparer.cs" />
     <Compile Include="Model\PathHelper.cs" />
     <Compile Include="Model\PipelineItem.cs" />
     <Compile Include="Model\PipelineItemEventArgs.cs" />
+    <Compile Include="Model\PipelineItemPathComparer.cs" />
     <Compile Include="Model\PipelineProject.cs" />
     <Compile Include="Model\PipelineProjectParser.cs" />
     <Compile Include="Model\PipelineTypes.cs" />

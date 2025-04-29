@@ -243,18 +243,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             OnPipelineItemAdded(new PipelineItemViewModelEventArgs(pipelineItemVM));
         }
 
-        static FilePathComparer _filePathComparer = new FilePathComparer();
-        class FilePathComparer : IComparer<PipelineItem>
-        {
-            int IComparer<PipelineItem>.Compare(PipelineItem x, PipelineItem y)
-            {
-                return x.OriginalPath.CompareTo(y.OriginalPath);
-            }
-        }
+        static PipelineItemPathComparer _pipelineItemPathComparer = new PipelineItemPathComparer();       
 
         private int FindInsertIndex(PipelineItemViewModel pipelineItemVM)
         {   
-            int index = Project.BinarySearch(pipelineItemVM.PipelineItem, _filePathComparer);
+            int index = Project.BinarySearch(pipelineItemVM.PipelineItem, _pipelineItemPathComparer);
             if (index < 0)
                 index  = index ^ (-1);
             return index;
