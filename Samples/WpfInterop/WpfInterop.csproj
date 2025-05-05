@@ -18,7 +18,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\ProtonType.XnaGraphics\ProtonType.XnaGraphics.NET8.KNI.csproj" />
+    <ProjectReference Include="..\..\ProtonType.XnaGraphics\ProtonType.XnaGraphics.KNI.csproj" />
   </ItemGroup>
 
 </Project>

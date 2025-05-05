@@ -2,16 +2,17 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net40</TargetFramework>
-	<UseWPF>true</UseWPF>
-	<UseWindowsForms>true</UseWindowsForms>
+    <TargetFrameworks>net40;net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <ProjectGuid>{52E94705-ECCE-4592-9D7C-145B9D8D248D}</ProjectGuid>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputType>Library</OutputType>
     <RootNamespace>nkast.ProtonType.XnaGraphics</RootNamespace>
     <AssemblyName>ProtonType.XnaGraphics</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <OutputPath>bin\$(Configuration)\KNI\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutputPath>
     <DefineConstants>KNI</DefineConstants>
   </PropertyGroup>
 
@@ -36,7 +37,6 @@
     <Compile Include="Graphics\XnaImageGraphicsDeviceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
