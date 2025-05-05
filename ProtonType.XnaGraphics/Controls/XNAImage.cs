@@ -100,7 +100,7 @@ namespace nkast.ProtonType.XnaGraphics.Controls
         protected override void OnGotFocus(RoutedEventArgs e)
         {
             Microsoft.Xna.Framework.Input.Mouse.WindowHandle = _hWindow.Handle;
-            //Microsoft.Xna.Framework.Input.Touch.TouchPanel.WindowHandle = this.EditorControl.Handle;
+            //Microsoft.Xna.Framework.Input.Touch.TouchPanel.WindowHandle = _hWindow.Handle;
         }
     }
 }
