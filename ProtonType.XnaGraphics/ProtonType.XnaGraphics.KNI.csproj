@@ -9,7 +9,7 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputType>Library</OutputType>
     <RootNamespace>nkast.ProtonType.XnaGraphics</RootNamespace>
-    <AssemblyName>ProtonType.XnaGraphics</AssemblyName>
+    <AssemblyName>nkast.ProtonType.XnaGraphics</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutputPath>

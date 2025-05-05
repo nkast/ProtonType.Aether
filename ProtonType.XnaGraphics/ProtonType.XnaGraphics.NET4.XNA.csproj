@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>nkast.ProtonType.XnaGraphics</RootNamespace>
-    <AssemblyName>ProtonType.XnaGraphics</AssemblyName>
+    <AssemblyName>nkast.ProtonType.XnaGraphics</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
