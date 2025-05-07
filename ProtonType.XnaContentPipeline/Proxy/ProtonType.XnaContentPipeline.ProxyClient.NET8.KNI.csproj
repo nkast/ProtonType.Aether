@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <OutputType>Library</OutputType>
@@ -10,7 +10,7 @@
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net6</OutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net8</OutputPath>
     <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
   </PropertyGroup>
 

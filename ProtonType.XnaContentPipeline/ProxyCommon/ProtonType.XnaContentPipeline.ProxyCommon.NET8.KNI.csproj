@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net8-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <ProjectGuid>{ECD3E602-5CA4-4381-A9FB-46AF1715C0F0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
