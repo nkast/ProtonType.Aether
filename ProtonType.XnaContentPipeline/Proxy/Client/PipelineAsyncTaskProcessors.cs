@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021 Kastellanos Nikolaos
+//   Copyright 2021-2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
-    public class PipelineAsyncTaskProcessors : PipelineAsyncTask
+    internal class PipelineAsyncTaskProcessors : PipelineAsyncTask<List<ProcessorDescription>>
     {
         List<ProcessorDescription> _processors = new List<ProcessorDescription>();
 
-        public List<ProcessorDescription> Processors
+        internal List<ProcessorDescription> Processors
         {
             get { return _processors; }
         }
@@ -36,5 +36,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
         {
         }
 
+        protected override void OnSucceeded()
+        {
+            base.TaskCompletionSource.SetResult(_processors);
+        }
     }
 }

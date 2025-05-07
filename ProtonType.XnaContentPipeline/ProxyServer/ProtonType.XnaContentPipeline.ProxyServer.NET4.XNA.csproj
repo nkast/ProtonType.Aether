@@ -57,6 +57,7 @@
     <Compile Include="Server\Assemblies\PackageReferencesCollection.cs" />
     <Compile Include="Server\Assemblies\ImporterInfo.cs" />
     <Compile Include="Server\Assemblies\ProcessorInfo.cs" />
+    <Compile Include="Server\AssertListener.cs" />
     <Compile Include="Server\BuildLogger.cs" />
     <Compile Include="Server\IPCServer.cs" />
     <Compile Include="Server\LegacyMGCB\BuildEvent.cs" />

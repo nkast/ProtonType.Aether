@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.Builder</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.Builder</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -47,7 +47,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\BuildEvent.cs" />
+    <Compile Include="Converters\StatusToImageConverter.cs" />
     <Compile Include="Models\PipelineProjectBuilder.cs" />
     <Compile Include="ViewModels\PipelineBuilderStatusBarItemViewModel.cs" />
     <Compile Include="ViewModels\PipelineBuilderViewModel.cs" />
@@ -61,6 +61,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\build_fail.png" />
+    <Resource Include="Icons\build_processing.png" />
+    <Resource Include="Icons\build_queued.png" />
+    <Resource Include="Icons\build_succeed.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(PROTONTYPE_PATH)\ProtonType.Framework\ProtonType.Framework.NET4.csproj">

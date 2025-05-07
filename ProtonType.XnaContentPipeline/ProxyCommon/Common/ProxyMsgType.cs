@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021 Kastellanos Nikolaos
+//   Copyright 2021-2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -57,8 +57,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         ParamProcessorParam,
         AddItem,
 
+        CleanItems,
+
         // Build action
-        Copy,
+        BuildBegin,
         Build,
+        BuildState,
+        BuildEnd,
     }
 }

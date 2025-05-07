@@ -19,8 +19,9 @@
 #endregion
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
@@ -100,15 +101,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool processAsset = !string.IsNullOrEmpty(processorName);
             _manager._assembliesMgr.ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
+            // Make sure the source file is absolute.
+            string sourceFile = sourceAsset.Filename;
+            if (!Path.IsPathRooted(sourceFile))
+                sourceFile = Path.Combine(_manager.ProjectDirectory, sourceFile);
+            sourceFile = LegacyPathHelper.Normalize(sourceFile);
+
             BuildEvent buildEvent = new BuildEvent
             { 
-                SourceFile = sourceFilepath,
+                SourceFile = sourceFile,
                 Importer = importerName,
                 Processor = processAsset ? processorName : null,
                 ProcessorParams = _manager.ValidateProcessorParameters(processorName, processorParameters),
             };
 
-            var processedObject = _manager.ProcessContent(buildEvent, _logger);
+            object importedObject = _manager.ImportContent(buildEvent, _logger);
+            object processedObject = _manager.ProcessContent(buildEvent, _logger, importedObject);
 
             // Record that we processed this dependent asset.
             if (!_buildEvent.Dependencies.Contains(sourceFilepath))
@@ -126,12 +134,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             if (string.IsNullOrEmpty(assetName))
                 assetName = _manager.GetAssetName(sourceAsset.Filename, importerName, processorName, processorParameters, _logger);
 
+            // Make sure the source file is absolute.
+            string sourceFile = sourceAsset.Filename;
+            if (!Path.IsPathRooted(sourceFile))
+                sourceFile = Path.Combine(_manager.ProjectDirectory, sourceFile);
+            sourceFile = LegacyPathHelper.Normalize(sourceFile);
+
             // Build the content.
-            BuildEvent buildEvent = _manager.CreateBuildEvent(sourceAsset.Filename, assetName, importerName, processorName, processorParameters);
+            BuildEvent buildEvent = _manager.CreateBuildEvent(sourceFile, assetName, importerName, processorName, processorParameters);
 
             // Load the previous content event if it exists.
             BuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
-            _manager.BuildContent(buildEvent, _logger, cachedBuildEvent, buildEvent.DestFile);
+            _manager.BuildContent(buildEvent, _logger, cachedBuildEvent, buildEvent.DestFile,
+                null, null);
 
             // Record that we built this dependent asset.
             if (!_buildEvent.BuildAsset.Contains(buildEvent.DestFile))

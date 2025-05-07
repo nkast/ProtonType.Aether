@@ -108,7 +108,7 @@
                 <Button ToolTip="Build All" ToolBar.OverflowMode="Never" Command="{Binding BuildAllCommand}" >
                     <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/BuildSolution_16x.png" SnapsToDevicePixels="True" ></Image>
                 </Button>
-                <Button ToolTip="Clean All" ToolBar.OverflowMode="Never" Command="{Binding CleanAllCommand}" IsEnabled="False">
+                <Button ToolTip="Clean All" ToolBar.OverflowMode="Never" Command="{Binding CleanAllCommand}" >
                     <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/CleanData_16x.png" SnapsToDevicePixels="True" ></Image>
                 </Button>
             </ToolBar>

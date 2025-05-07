@@ -39,14 +39,20 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
 
         private readonly ObservableCollection<PipelineBuildItemViewModel> _buildItems =  new ObservableCollection<PipelineBuildItemViewModel>();
-        public ReadOnlyObservableCollection<PipelineBuildItemViewModel> _readOnlyBuildItems;
-        public IList<PipelineBuildItemViewModel> BuildItems
+
+        private readonly ObservableCollection<PipelineBuildItemViewModel> _queuedItems =  new ObservableCollection<PipelineBuildItemViewModel>();
+
+        public IEnumerable<PipelineBuildItemViewModel> BuildItems
         {
             get
             {
-                if (_readOnlyBuildItems == null)
-                    _readOnlyBuildItems = new ReadOnlyObservableCollection<PipelineBuildItemViewModel>(_buildItems);
-                return _readOnlyBuildItems;
+                IEnumerable<PipelineBuildItemViewModel> filtered 
+                    = _buildItems.Where((item) => (IsQueuedSelected && item.Status    == PipelineBuildItemStatus.Queued)
+                                               || (IsBuildingSelected && item.Status  == PipelineBuildItemStatus.Building)
+                                               || (IsProcessedSelected && item.Status == PipelineBuildItemStatus.Build)
+                                               || (IsFailedSelected && item.Status    == PipelineBuildItemStatus.Failed)
+                                               );
+                return filtered;
             }
         }
 
@@ -61,13 +67,118 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             get { return _projectVM.Project.OriginalPath; }
         }
 
-        public int QueuedCount
+        bool _isQueuedSelected;
+        bool _isBuildingSelected;
+        bool _isProcessedSelected;
+        bool _isFailedSelected;
+
+        public bool IsQueuedSelected
         {
-            get { return _buildItems.Count; }
+            get { return _isQueuedSelected; }
+            set
+            {
+                if (_isQueuedSelected != value)
+                {
+                    _isQueuedSelected = value;
+                    RaisePropertyChanged(() => IsQueuedSelected);
+                    RaisePropertyChanged(() => BuildItems);
+                }
+            }
+        }
+        public bool IsBuildingSelected
+        {
+            get { return _isBuildingSelected; }
+            set
+            {
+                if (_isBuildingSelected != value)
+                {
+                    _isBuildingSelected = value;
+                    RaisePropertyChanged(() => IsBuildingSelected);
+                    RaisePropertyChanged(() => BuildItems);
+                }
+            }
+        }
+        public bool IsProcessedSelected
+        {
+            get { return _isProcessedSelected; }
+            set
+            {
+                if (_isProcessedSelected != value)
+                {
+                    _isProcessedSelected = value;
+                    RaisePropertyChanged(() => IsProcessedSelected);
+                    RaisePropertyChanged(() => BuildItems);
+                }
+            }
+        }
+        public bool IsFailedSelected
+        {
+            get { return _isFailedSelected; }
+            set
+            {
+                if (_isFailedSelected != value)
+                {
+                    _isFailedSelected = value;
+                    RaisePropertyChanged(() => IsFailedSelected);
+                    RaisePropertyChanged(() => BuildItems);
+                }
+            }
         }
 
-        public int ProcessedCount { get; private set; }
-        public int FailedCount { get; private set; }
+        int _queuedCount;
+        int _buildingCount;
+        int _processedCount;
+        int _failedCount;
+
+        public int QueuedCount
+        {
+            get { return _queuedCount; }
+            set
+            {
+                if (_queuedCount != value)
+                {
+                    _queuedCount = value;
+                    RaisePropertyChanged(() => QueuedCount);
+                }
+            }
+        }
+        public int BuildingCount
+        {
+            get { return _buildingCount; }
+            set
+            {
+                if (_buildingCount != value)
+                {
+                    _buildingCount = value;
+                    RaisePropertyChanged(() => BuildingCount);
+                }
+            }
+        }
+        public int ProcessedCount
+        {
+            get { return _processedCount; }
+            set
+            {
+                if (_processedCount != value)
+                {
+                    _processedCount = value;
+                    RaisePropertyChanged(() => ProcessedCount);
+                }
+            }
+        }
+        public int FailedCount
+        {
+            get { return _failedCount; }
+            set
+            {
+                if (_failedCount != value)
+                {
+                    _failedCount = value;
+                    RaisePropertyChanged(() => FailedCount);
+                }
+            }
+        }
+
 
 
         public PipelineBuilderViewModel(PipelineProjectViewModel projectVM, IPipelineLogger viewLogger)
@@ -86,14 +197,19 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             _pipelineBuilder.BuildQueueItemAdded += _pipelineBuilder_BuildQueueAdded;
             _pipelineBuilder.BuildQueueItemRemoved += _pipelineBuilder_BuildQueueRemoved;
             _pipelineBuilder.PipelineItemBuildCompleted += _pipelineBuilder_PipelineItemBuildCompleted;
+
+            IsQueuedSelected = true;
+            IsBuildingSelected = true;
+            IsProcessedSelected = true;
+            IsFailedSelected = true;
         }
 
         void _pipelineBuilder_BuildStarted(object sender, EventArgs e)
         {
+            QueuedCount = _queuedItems.Count;
+            BuildingCount = 0;
             ProcessedCount = 0;
             FailedCount = 0;
-            RaisePropertyChanged(() => ProcessedCount);
-            RaisePropertyChanged(() => FailedCount);
         }
 
         void _pipelineBuilder_BuildQueueAdded(object sender, PipelineProjectBuilder.PipelineBuildItemEventArgs e)
@@ -102,7 +218,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             {
                 var builditemVM = new PipelineBuildItemViewModel(e.BuildItem);
                 _buildItems.Add(builditemVM);
-                RaisePropertyChanged(() => QueuedCount);
+                _queuedItems.Add(builditemVM);
+                QueuedCount = _queuedItems.Count;
+                RaisePropertyChanged(() => BuildItems);
             }));
         }
 
@@ -110,9 +228,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
         {
             this.Dispatcher.Invoke((Action)(() =>
             {
-                var buildItemVM = _buildItems.FirstOrDefault<PipelineBuildItemViewModel>((i) => { return (i.Builditem == e.BuildItem); });
-                _buildItems.Remove(buildItemVM);
-                RaisePropertyChanged(() => QueuedCount);
+                var buildItemVM = _queuedItems.FirstOrDefault<PipelineBuildItemViewModel>((i) => { return (i.Builditem == e.BuildItem); });
+                _queuedItems.Remove(buildItemVM);
+                QueuedCount = _queuedItems.Count;
+                BuildingCount++;
+                RaisePropertyChanged(() => BuildItems);
+
             }));
         }
 
@@ -120,27 +241,33 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
         {
             var buildItem = e.BuildItem;
 
-            // Find item view model
+            switch (buildItem.Status)
+            {
+                case PipelineBuildItemStatus.Build:
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        QueuedCount = _queuedItems.Count;
+                        BuildingCount--;
+                        ProcessedCount++;
+                        RaisePropertyChanged(() => BuildItems);
+                    });
+                    break;
+
+                case PipelineBuildItemStatus.Failed:
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        QueuedCount = _queuedItems.Count;
+                        BuildingCount--;
+                        FailedCount++;
+                        RaisePropertyChanged(() => BuildItems);
+                    });
+                    break;
+
+                default:
+                    break;
+            }
+
             var pipelineItemVM = FindPipelineItemVM(buildItem.PipelineItem);
-
-
-            if (e.Result == Common.TaskResult.SUCCEEDED)
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                ProcessedCount++;
-                RaisePropertyChanged(() => ProcessedCount);
-                });
-            }
-            if (e.Result == Common.TaskResult.FAILED)
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                FailedCount++;
-                    RaisePropertyChanged(() => FailedCount);
-                });
-            }
-
             OnPipelineItemBuildCompleted(new PipelineItemViewModelBuildCompletedEventArgs(pipelineItemVM, e.Result));
         }
 
@@ -163,7 +290,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             foreach (var pipelineItemVM in _projectVM.PipelineItemsVM)
                 items.Add(pipelineItemVM.PipelineItem);
 
-            _pipelineBuilder.BuildAll(items, rebuild);
+            List<PipelineItem> buildItems = items;
+
+            _pipelineBuilder.BuildItems(items, buildItems, rebuild);
         }
 
         public void BuildItem(PipelineItemViewModel buildPipelineItemVM, bool rebuild)
@@ -172,7 +301,10 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             foreach (var pipelineItemVM in _projectVM.PipelineItemsVM)
                 items.Add(pipelineItemVM.PipelineItem);
 
-            _pipelineBuilder.BuildItem(buildPipelineItemVM.PipelineItem, items, rebuild);
+            List<PipelineItem> buildItems = new List<PipelineItem>();
+            buildItems.Add(buildPipelineItemVM.PipelineItem);
+
+            _pipelineBuilder.BuildItems(items, buildItems, rebuild);
         }
 
         public void CleanAll()

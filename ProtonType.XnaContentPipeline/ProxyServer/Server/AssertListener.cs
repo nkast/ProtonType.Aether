@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021-2025 Kastellanos Nikolaos
+//   Copyright 2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,30 +16,31 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using nkast.ProtonType.XnaContentPipeline.Common;
 
-namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
+namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
-    internal class PipelineAsyncTaskImporters : PipelineAsyncTask<List<ImporterDescription>>
+    internal class AssertListener : DefaultTraceListener
     {
-        List<ImporterDescription> _importers = new List<ImporterDescription>();
-
-        internal List<ImporterDescription> Importers 
+        public override void Fail(string message)
         {
-            get { return _importers; }
+            if (message == null)
+                message = "";
+
+            throw new Exception("Debug assertion failed: " + message);
         }
 
-        public PipelineAsyncTaskImporters(Guid contextGuid, IProxyLogger logger)
-            : base(contextGuid, logger)
+        public override void Fail(string message, string detailMessage)
         {
+            if (message == null)
+                message = "";
+            if (detailMessage == null)
+                detailMessage = "";
 
-        }
-
-        protected override void OnSucceeded()
-        {
-            base.TaskCompletionSource.SetResult(_importers);
+            throw new Exception("Debug assertion failed: " + message + "\n" + detailMessage);
         }
     }
 }

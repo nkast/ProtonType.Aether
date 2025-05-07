@@ -29,16 +29,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using nkast.ProtonType.XnaContentPipeline.Common.Converters;
 using nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
     class PipelineManager
     {
-        // Keep track of all built assets. (Required to resolve automatic names "AssetName_n".)
-        //   Key = absolute, normalized path of source file
-        //   Value = list of build events
-        // (Note: When using external references, an asset may be built multiple times
-        // with different parameters.)
         private readonly Dictionary<string, List<BuildEvent>> _buildEventsMap;
 
         public string ProjectDirectory { get; private set; }
@@ -75,10 +71,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         internal const String DefaultFileCollectionFilename = "assetsdb.kniContent";
 
-        public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr)
+        public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr,
+            Dictionary<string, List<BuildEvent>> buildEventsMap)
         {
-            _buildEventsMap = new Dictionary<string, List<BuildEvent>>();
-
             Logger = null;
 
             ProjectDirectory = LegacyPathHelper.NormalizeDirectory(projectDir);
@@ -88,16 +83,17 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             IntermediateDirectory = LegacyPathHelper.NormalizeDirectory(intermediateDir);
 
             RegisterCustomConverters();
-            
+
+            _buildEventsMap = buildEventsMap;
             _assembliesMgr = assembliesMgr;
         }
 
-        public void AssignTypeConverter<TType, TTypeConverter> ()
+        public void AssignTypeConverter<TType, TTypeConverter>()
         {
             TypeDescriptor.AddAttributes (typeof (TType), new TypeConverterAttribute (typeof (TTypeConverter)));
         }
 
-        private void RegisterCustomConverters ()
+        private void RegisterCustomConverters()
         {
             AssignTypeConverter<Microsoft.Xna.Framework.Color, StringToColorConverter>();
         }
@@ -135,7 +131,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return result;
         }
 
-        private void ResolveOutputFilepath(string sourceFilepath, ref string outputFilepath)
+        internal void ResolveOutputFilepath(string sourceFilepath, ref string outputFilepath)
         {
             // If the output path is null... build it from the source file path.
             if (String.IsNullOrEmpty(outputFilepath))
@@ -217,7 +213,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return buildEvent;
         }
 
-        internal void BuildContent(BuildEvent buildEvent, ContentBuildLogger logger, BuildEvent cachedBuildEvent, string destFilePath)
+        internal void BuildContent(BuildEvent buildEvent, ContentBuildLogger logger, BuildEvent cachedBuildEvent, string destFilePath
+            , PipelineProxyServer pipelineProxy, ParametersContext itemContext
+            )
         {
             if (!File.Exists(buildEvent.SourceFile))
             {
@@ -227,14 +225,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             logger.PushFile(buildEvent.SourceFile);
 
-            // Keep track of all build events. (Required to resolve automatic names "AssetName_n".)
-            TrackBuildEvent(buildEvent);
+            ProcessorInfo processorInfo2 = _assembliesMgr.GetProcessorInfo(buildEvent.Processor);
+            OpaqueDataDictionary processorDefaultValues = (processorInfo2 != null) ? processorInfo2.DefaultValues : null;
 
-            bool rebuild = NeedsRebuild(_assembliesMgr, buildEvent, cachedBuildEvent);
+            // Keep track of all build events. (Required to resolve automatic names "AssetName_n".)
+            TrackBuildEvent(this._buildEventsMap, buildEvent, processorDefaultValues);
+
+            bool rebuild = NeedsRebuild(_assembliesMgr, buildEvent, cachedBuildEvent, processorDefaultValues);
             if (rebuild)
                 logger.LogMessage("{0}", buildEvent.SourceFile);
             else
+            {
                 logger.LogMessage("Skipping {0}", buildEvent.SourceFile);
+            }
 
             try
             {
@@ -262,8 +265,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                             ProcessorParams = assetCachedBuildEvent.ProcessorParams,
                         };
 
-                        // Give the asset a chance to rebuild.                   
-                        BuildContent(depBuildEvent, logger, assetCachedBuildEvent, asset);
+                        // Give the dependent asset a chance to rebuild.                   
+                        BuildContent(depBuildEvent, logger, assetCachedBuildEvent, asset,
+                            null, null);
                     }
                 }
 
@@ -273,9 +277,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     DateTime startTime = DateTime.UtcNow;
 
                     // Import and process the content.
-                    object processedObject = ProcessContent(buildEvent, logger);
+                    if (pipelineProxy != null) pipelineProxy.BuildState(itemContext, BuildState.Importing);
+                    object importedObject = ImportContent(buildEvent, logger); 
+                    if (pipelineProxy != null) pipelineProxy.BuildState(itemContext, BuildState.Processing);
+                    object processedObject = ProcessContent(buildEvent, logger, importedObject);
 
                     // Write the content to disk.
+                    if (pipelineProxy != null) pipelineProxy.BuildState(itemContext, BuildState.Writing);
                     WriteXnb(processedObject, buildEvent);
 
                     // Store the timestamp of the DLLs containing the importer and processor.
@@ -296,7 +304,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
-        public object ProcessContent(BuildEvent buildEvent, ContentBuildLogger logger)
+        public object ImportContent(BuildEvent buildEvent, ContentBuildLogger logger)
         {
             if (!File.Exists(buildEvent.SourceFile))
                 throw new PipelineException("The source file '{0}' does not exist.", buildEvent.SourceFile);
@@ -333,6 +341,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 throw new PipelineException(string.Format("Importer '{0}' had unexpected failure.", buildEvent.Importer), inner);
             }
 
+            return importedObject;
+        }
+
+        public object ProcessContent(BuildEvent buildEvent, ContentBuildLogger logger, object importedObject)
+        {
             // The pipelineEvent.Processor can be null or empty. In this case the
             // asset should be imported but not processed.
             if (string.IsNullOrEmpty(buildEvent.Processor))
@@ -378,57 +391,48 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return processedObject;
         }
 
-        public void CleanContent(ContentBuildLogger logger, string sourceFilepath, string outputFilepath)
+        public void CleanContent(ContentBuildLogger logger, string outputFilepath)
         {
             // First try to load the event file.
-            ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
             BuildEvent cachedBuildEvent = LoadBuildEvent(outputFilepath);
-
             if (cachedBuildEvent != null)
             {
+                // Remove related output files (non-XNB files) that were copied to the output folder.
+                foreach (var asset in cachedBuildEvent.BuildOutput)
+                {
+                    logger.LogMessage("Cleaning {0}", asset);
+                    // Remove file (non .xnb file) from output folder.
+                    if (File.Exists(asset))
+                        File.Delete(asset);
+                }
+
                 // Recursively clean additional (nested) assets.
                 foreach (string asset in cachedBuildEvent.BuildAsset)
                 {
                     BuildEvent assetCachedBuildEvent = LoadBuildEvent(asset);
-
-                    if (assetCachedBuildEvent == null)
+                    if (assetCachedBuildEvent != null)
                     {
-                        logger.LogMessage("Cleaning {0}", asset);
-
-                        // Remove asset (.xnb file) from output folder.
-                        if (File.Exists(asset))
-                            File.Delete(asset);
-
-                        // Remove event file (.mgcontent file) from intermediate folder.
-                        DeleteBuildEvent(asset);
+                        string assetOutputFilepath = asset;
+                        ResolveOutputFilepath(string.Empty, ref assetOutputFilepath);
+                        CleanContent(logger, assetOutputFilepath);
                         continue;
                     }
 
-                    CleanContent(logger, string.Empty, asset);
-                }
-
-                // Remove related output files (non-XNB files) that were copied to the output folder.
-                foreach (string asset in cachedBuildEvent.BuildOutput)
-                {
                     logger.LogMessage("Cleaning {0}", asset);
+                    // Remove asset (.xnb file) from output folder.
                     if (File.Exists(asset))
                         File.Delete(asset);
+                    // Remove event file (.kniContent file) from intermediate folder.
+                    DeleteBuildEvent(asset);
                 }
             }
 
             logger.LogMessage("Cleaning {0}", outputFilepath);
-
             // Remove asset (.xnb file) from output folder.
             if (File.Exists(outputFilepath))
                 File.Delete(outputFilepath);
-
-            // Remove event file (.mgcontent file) from intermediate folder.
+            // Remove event file (.kniContent file) from intermediate folder.
             DeleteBuildEvent(outputFilepath);
-
-            lock (_buildEventsMap)
-            {
-                _buildEventsMap.Remove(sourceFilepath);
-            }
         }
 
         private void WriteXnb(object content, BuildEvent buildEvent)
@@ -454,18 +458,17 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// Stores the pipeline build event (in memory) if no matching event is found.
         /// </summary>
         /// <param name="buildEvent">The pipeline build event.</param>
-        internal void TrackBuildEvent(BuildEvent buildEvent)
+        internal static void TrackBuildEvent(Dictionary<string, List<BuildEvent>> buildEventsMap, BuildEvent buildEvent, OpaqueDataDictionary processorDefaultValues)
         {
-            List<BuildEvent> buildEvents;
-            lock (_buildEventsMap)
+            lock (buildEventsMap)
             {
-                if (!_buildEventsMap.TryGetValue(buildEvent.SourceFile, out buildEvents))
+                if (!buildEventsMap.TryGetValue(buildEvent.SourceFile, out List<BuildEvent>  buildEvents))
                 {
                     buildEvents = new List<BuildEvent>(1);
-                    _buildEventsMap.Add(buildEvent.SourceFile, buildEvents);
+                    buildEventsMap.Add(buildEvent.SourceFile, buildEvents);
                 }
 
-                BuildEvent matchedBuildEvent = FindMatchingEvent(buildEvents, buildEvent.DestFile, buildEvent.Importer, buildEvent.Processor, buildEvent.ProcessorParams);
+                BuildEvent matchedBuildEvent = FindMatchingEvent(buildEvents, buildEvent.DestFile, buildEvent.Importer, buildEvent.Processor, buildEvent.ProcessorParams, processorDefaultValues);
                 if (matchedBuildEvent == null)
                     buildEvents.Add(buildEvent);
             }
@@ -481,7 +484,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// <returns>The asset name.</returns>
         public string GetAssetName(string sourceFileName, string importerName, string processorName, OpaqueDataDictionary processorParameters, ContentBuildLogger logger)
         {
-            Debug.Assert(Path.IsPathRooted(sourceFileName), "Absolute path expected.");
+            if (!Path.IsPathRooted(sourceFileName))
+                sourceFileName = Path.Combine(this.ProjectDirectory, sourceFileName);
 
             // Get source file name, which is used for lookup in _buildEventsMap.
             sourceFileName = LegacyPathHelper.Normalize(sourceFileName);
@@ -496,7 +500,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     // --> Compare pipeline build events.
                     _assembliesMgr.ResolveImporterAndProcessor(sourceFileName, ref importerName, ref processorName);
 
-                    BuildEvent matchedBuildEvent = FindMatchingEvent(buildEvents, null, importerName, processorName, processorParameters);
+                    ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
+                    OpaqueDataDictionary processorDefaultValues = (processorInfo != null) ? processorInfo.DefaultValues : null;
+
+                    BuildEvent matchedBuildEvent = FindMatchingEvent(buildEvents, null, importerName, processorName, processorParameters, processorDefaultValues);
                     if (matchedBuildEvent != null)
                     {
                         // Matching pipeline build event found.
@@ -511,7 +518,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
 
             // No pipeline build event with matching settings found.
-            // Get default asset name by searching the existing .mgcontent files.
+            // Get default asset name by searching the existing .kniContent files.
             string directoryName = Path.GetDirectoryName(relativeSourceFileName);
             string fileName = Path.GetFileNameWithoutExtension(relativeSourceFileName);
             string assetName = Path.Combine(directoryName, fileName);
@@ -537,11 +544,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 &&  existingBuildEvent.Importer  == importerName
                 &&  existingBuildEvent.Processor == processorName)
                 {
-                    OpaqueDataDictionary defaultValues = null;
                     ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
-                    if (processorInfo != null)
-                        defaultValues = processorInfo.DefaultValues;
-                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, defaultValues))
+                    OpaqueDataDictionary processorDefaultValues = (processorInfo != null) ? processorInfo.DefaultValues : null;
+                                        
+                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, processorDefaultValues))
                         return destFile;
                 }
             }
@@ -558,19 +564,15 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// <returns>
         /// The matching pipeline build event, or <see langword="null"/>.
         /// </returns>
-        private BuildEvent FindMatchingEvent(List<BuildEvent> pipelineBuildEvents, string destFile, string importerName, string processorName, OpaqueDataDictionary processorParameters)
+        private static BuildEvent FindMatchingEvent(List<BuildEvent> pipelineBuildEvents, string destFile, string importerName, string processorName, OpaqueDataDictionary processorParameters, OpaqueDataDictionary processorDefaultValues)
         {
             foreach (BuildEvent existingBuildEvent in pipelineBuildEvents)
             {
                 if ((destFile == null || existingBuildEvent.DestFile.Equals(destFile))
                 &&  existingBuildEvent.Importer == importerName
                 &&  existingBuildEvent.Processor == processorName)
-                {
-                    OpaqueDataDictionary defaultValues = null;
-                    ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(processorName);
-                    if (processorInfo != null)
-                        defaultValues = processorInfo.DefaultValues;
-                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, defaultValues))
+                {   
+                    if (AreParametersEqual(existingBuildEvent.ProcessorParams, processorParameters, processorDefaultValues))
                     {
                         return existingBuildEvent;
                     }
@@ -580,7 +582,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             return null;
         }
 
-        internal static bool NeedsRebuild(AssembliesMgr assembliesMgr, BuildEvent buildEvent, BuildEvent cachedbuildEvent)
+        internal static bool NeedsRebuild(AssembliesMgr assembliesMgr, BuildEvent buildEvent, BuildEvent cachedbuildEvent, OpaqueDataDictionary processorDefaultValues)
         {
             // If we have no previously cached build event then we cannot
             // be sure that the state hasn't changed... force a rebuild.
@@ -638,11 +640,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 return true;
 
             // Did the parameters change?
-            OpaqueDataDictionary defaultValues = null;
-            ProcessorInfo buildProcessorInfo = assembliesMgr.GetProcessorInfo(buildEvent.Processor);
-            if (buildProcessorInfo != null)
-                defaultValues = buildProcessorInfo.DefaultValues;
-            if (!AreParametersEqual(cachedbuildEvent.ProcessorParams, buildEvent.ProcessorParams, defaultValues))
+            if (!AreParametersEqual(cachedbuildEvent.ProcessorParams, buildEvent.ProcessorParams, processorDefaultValues))
                 return true;
 
             return false;
@@ -652,9 +650,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private static readonly OpaqueDataDictionary EmptyParameters = new OpaqueDataDictionary();
 
-        internal static bool AreParametersEqual(OpaqueDataDictionary parameters0, OpaqueDataDictionary parameters1, OpaqueDataDictionary defaultValues)
+        internal static bool AreParametersEqual(OpaqueDataDictionary parameters0, OpaqueDataDictionary parameters1, OpaqueDataDictionary processorDefaultValues)
         {
-            Debug.Assert(defaultValues != null, "defaultValues must not be empty.");
+            Debug.Assert(processorDefaultValues != null, "processorDefaultValues must not be empty.");
             Debug.Assert(EmptyParameters != null && EmptyParameters.Count == 0);
 
             // Same reference or both null?
@@ -679,28 +677,28 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 parameters1 = dummy;
             }
 
-            // Compare parameters0 with parameters1 or defaultValues.
+            // Compare parameters0 with parameters1 or processorDefaultValues.
             foreach (KeyValuePair<string, object> pair in parameters0)
             {
                 object value0 = pair.Value;
                 object value1;
 
                 // Search for matching parameter.
-                if (!parameters1.TryGetValue(pair.Key, out value1) && !defaultValues.TryGetValue(pair.Key, out value1))
+                if (!parameters1.TryGetValue(pair.Key, out value1) && !processorDefaultValues.TryGetValue(pair.Key, out value1))
                     return false;
 
                 if (!AreEqual(value0, value1))
                     return false;
             }
 
-            // Compare parameters which are only in parameters1 with defaultValues.
+            // Compare parameters which are only in parameters1 with processorDefaultValues.
             foreach (KeyValuePair<string, object> pair in parameters1)
             {
                 if (parameters0.ContainsKey(pair.Key))
                     continue;
 
                 object defaultValue;
-                if (!defaultValues.TryGetValue(pair.Key, out defaultValue))
+                if (!processorDefaultValues.TryGetValue(pair.Key, out defaultValue))
                     return false;
 
                 if (!AreEqual(pair.Value, defaultValue))

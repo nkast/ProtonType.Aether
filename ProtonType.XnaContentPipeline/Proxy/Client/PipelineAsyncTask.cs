@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021 Kastellanos Nikolaos
+//   Copyright 2021-2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,47 +16,98 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
-    public class PipelineAsyncTask
+    internal abstract class PipelineAsyncTaskBase
     {
         public readonly Guid Guid;
         public readonly IProxyLogger Logger;
-                
-        private readonly TaskCompletionSource<TaskResult> _taskCompletionSource;
 
-        public Task<TaskResult> Task { get; private set; }
-
-        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger)
+        public PipelineAsyncTaskBase(Guid contextGuid, IProxyLogger logger)
         {
             this.Guid = contextGuid;
             this.Logger = logger;
-
-            _taskCompletionSource = new TaskCompletionSource<TaskResult>();
-            Task = _taskCompletionSource.Task;
         }
 
-        internal void OnCompleted(TaskResult taskResult)
+        internal void InternalOnSucceeded()
         {
-            switch (taskResult)
-            {
-                case TaskResult.SUCCEEDED:
-                    _taskCompletionSource.SetResult(taskResult);
-                    break;
-
-                case TaskResult.FAILED:
-                    _taskCompletionSource.SetException(new Exception("Task failed."));
-                    break;
-
-                default:
-                    //_taskCompletionSource.SetCanceled();
-                    _taskCompletionSource.SetException(new InvalidOperationException("Task unknown state."));
-                    break;
-            }
+            OnSucceeded();
         }
+
+        internal void InternalOnFailed()
+        {
+            OnFailed();
+        }
+
+        protected abstract void OnSucceeded();
+        protected abstract void OnFailed();
+
+    }
+
+    internal abstract class PipelineAsyncTask<TResult> : PipelineAsyncTaskBase
+    {
+        private readonly TaskCompletionSource<TResult> _taskCompletionSource;
+
+        protected TaskCompletionSource<TResult> TaskCompletionSource
+        {
+            get { return _taskCompletionSource; }
+        }
+
+        public Task<TResult> Task
+        {
+            get { return _taskCompletionSource.Task; }
+        }
+
+        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger)
+            : base(contextGuid, logger)
+        {
+            this._taskCompletionSource = new TaskCompletionSource<TResult>();
+        }
+
+        protected override void OnFailed()
+        {
+            _taskCompletionSource.SetException(new Exception("Task failed."));
+        }
+    }
+
+    internal class PipelineAsyncTask : PipelineAsyncTaskBase
+    {
+#if NET8_0_OR_GREATER
+        private readonly TaskCompletionSource _taskCompletionSource;
+#else
+        private readonly TaskCompletionSource<object> _taskCompletionSource;
+#endif
+
+        public Task Task
+        {
+            get { return _taskCompletionSource.Task; }
+        }
+
+        public PipelineAsyncTask(Guid contextGuid, IProxyLogger logger)
+            : base(contextGuid, logger)
+        {
+#if NET8_0_OR_GREATER
+            this._taskCompletionSource = new TaskCompletionSource();
+#else
+            this._taskCompletionSource = new TaskCompletionSource<object>();
+#endif
+        }
+
+        protected override void OnSucceeded()
+        {
+#if NET8_0_OR_GREATER
+            this._taskCompletionSource.SetResult();
+#else
+            this._taskCompletionSource.SetResult(null);
+#endif
+        }
+
+        protected override void OnFailed()
+        {
+            _taskCompletionSource.SetException(new Exception("Task failed."));
+        }
+
     }
 }

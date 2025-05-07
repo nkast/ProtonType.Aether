@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:pg="http://schemas.tainicom.net/wpfpropertygrid"
-             xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
+             xmlns:converters="clr-namespace:nkast.ProtonType.XnaContentPipeline.Builder.Converters"
+             xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib" 
              mc:Ignorable="d"
              d:DesignWidth="250" d:DesignHeight="500"
              >
     
     <UserControl.Resources>
-
+        <converters:StatusToImageConverter x:Key="StatusToImageConverter" />
     </UserControl.Resources>
     
     <Grid  >
@@ -39,14 +40,33 @@
 
                 <Grid Grid.Column="0">
                     <StackPanel>
-                        <TextBlock Text="Queued" Padding="10 10 10 2" FontSize="12"></TextBlock>
-                        <TextBlock Text="{Binding QueuedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
-                    
-                        <TextBlock Text="Processed" Padding="10 10 10 2" FontSize="12"></TextBlock>
-                        <TextBlock Text="{Binding ProcessedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
+                        <ToggleButton Margin="10 10" IsChecked="{Binding IsQueuedSelected}" BorderThickness="0" >
+                            <StackPanel>
+                                <TextBlock Text="Queued" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                                <TextBlock Text="{Binding QueuedCount}" Padding="10 2 10 0" FontSize="24" TextAlignment="Right" HorizontalAlignment="Stretch"></TextBlock>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton Margin="10 10" IsChecked="{Binding IsBuildingSelected}" BorderThickness="0" >
+                            <StackPanel>
+                                <TextBlock Text="Building" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                                <TextBlock Text="{Binding BuildingCount}" Padding="10 2 10 0" FontSize="24" TextAlignment="Right" HorizontalAlignment="Stretch"></TextBlock>
+                            </StackPanel>
+                        </ToggleButton>
                         
-                        <TextBlock Text="Failed" Padding="10 10 10 2" FontSize="12"></TextBlock>
-                        <TextBlock Text="{Binding FailedCount}" Padding="10 2 10 0" FontSize="24"></TextBlock>
+                        <ToggleButton Margin="10 10" IsChecked="{Binding IsProcessedSelected}" BorderThickness="0" >
+                            <StackPanel>
+                                <TextBlock Text="Processed" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                                <TextBlock Text="{Binding ProcessedCount}" Padding="10 2 10 0" FontSize="24" TextAlignment="Right" HorizontalAlignment="Stretch"></TextBlock>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton Margin="10 10" IsChecked="{Binding IsFailedSelected}" BorderThickness="0">
+                            <StackPanel>
+                                <TextBlock Text="Failed" Padding="10 10 10 2" FontSize="12"></TextBlock>
+                                <TextBlock Text="{Binding FailedCount}" Padding="10 2 10 0" FontSize="24" TextAlignment="Right" HorizontalAlignment="Stretch"></TextBlock>
+                            </StackPanel>
+                        </ToggleButton>
                     </StackPanel>
                 </Grid>
 
@@ -79,7 +99,13 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Background="Transparent">
-                                            <TextBlock Text="{Binding Name}" Background="Transparent" Padding="2 2 2 2" />
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Width="16" Height="16" Margin="2,2,12,2" Stretch="Uniform"
+                                              Source="{Binding Status, Converter={StaticResource StatusToImageConverter}}" SnapsToDevicePixels="True" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Background="Transparent" Padding="2 2 2 2" />
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>

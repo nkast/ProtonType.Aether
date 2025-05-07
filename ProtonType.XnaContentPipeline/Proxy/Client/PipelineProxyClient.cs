@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021 Kastellanos Nikolaos
+//   Copyright 2021-2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
     public class PipelineProxyClient : IPCClient
     {
-        ConcurrentDictionary<Guid, PipelineAsyncTask> _tasks = new ConcurrentDictionary<Guid, PipelineAsyncTask>();
+        ConcurrentDictionary<Guid, PipelineAsyncTaskBase> _tasks = new ConcurrentDictionary<Guid, PipelineAsyncTaskBase>();
 
         public PipelineProxyClient() : base("ProtonType.XnaContentPipeline.ProxyServer.exe")
         {
@@ -95,13 +95,30 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                         }
                         break;
 
+                    case ProxyMsgType.BuildState:
+                        {
+                            Guid guid = ReadGuid();
+                            BuildState(guid);
+                        }
+                        break;
+
                     case ProxyMsgType.TaskEnd:
                         {
                             Guid guid = ReadGuid();
                             TaskResult taskResult = ReadTaskResult();
-                            PipelineAsyncTask task = _tasks[guid];
+                            PipelineAsyncTaskBase task = _tasks[guid];
                             _tasks.TryRemove(guid, out task);
-                            task.OnCompleted(taskResult);
+                            switch (taskResult)
+                            {
+                                case TaskResult.SUCCEEDED:
+                                    task.InternalOnSucceeded();
+                                    break;
+                                case TaskResult.FAILED:
+                                    task.InternalOnFailed();
+                                    break;
+                                default:
+                                    throw new InvalidOperationException("Task unknown state.");
+                            }
                         }
                         break;
 
@@ -216,7 +233,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
-        public Task<TaskResult> AddPackage(IProxyLogger logger, Package package)
+        public Task AddPackageAsync(IProxyLogger logger, Package package)
         {
             Guid contextGuid = Guid.NewGuid();
             PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
@@ -234,7 +251,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             return pipelineAsyncTask.Task;
         }
 
-        public Task<TaskResult> ResolvePackages(IProxyLogger logger)
+        public Task ResolvePackagesAsync(IProxyLogger logger)
         {
             Guid contextGuid = Guid.NewGuid();
             PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
@@ -250,7 +267,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             return pipelineAsyncTask.Task;
         }
 
-        public Task<TaskResult> AddAssembly(IProxyLogger logger, string assemblyPath)
+        public Task AddAssemblyAsync(IProxyLogger logger, string assemblyPath)
         {
             Guid contextGuid = Guid.NewGuid();
             PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
@@ -267,11 +284,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             return pipelineAsyncTask.Task;
         }
         
-        public PipelineAsyncTaskImporters GetImporters(IProxyLogger logger)
+        public Task<List<ImporterDescription>> GetImportersAsync(IProxyLogger logger)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTaskImporters task = new PipelineAsyncTaskImporters(contextGuid, logger);
-            _tasks[contextGuid] = task;
+            PipelineAsyncTaskImporters pipelineAsyncTask = new PipelineAsyncTaskImporters(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
 
             lock (Writer)
             {
@@ -280,14 +297,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            return task;
+            return pipelineAsyncTask.Task;
         }
 
-        public PipelineAsyncTaskProcessors GetProcessors(IProxyLogger logger)
+        public Task<List<ProcessorDescription>> GetProcessorsAsync(IProxyLogger logger)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTaskProcessors task = new PipelineAsyncTaskProcessors(contextGuid, logger);
-            _tasks[contextGuid] = task;
+            PipelineAsyncTaskProcessors pipelineAsyncTask = new PipelineAsyncTaskProcessors(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
 
             lock (Writer)
             {
@@ -296,7 +313,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            return task;
+            return pipelineAsyncTask.Task;
         }
 
         public void SetRebuild()
@@ -406,13 +423,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
-        public PipelineAsyncTask AddItem(IProxyLogger logger, string originalPath, string destinationPath
+        public Task<ProxyItem> AddItemAsync(IProxyLogger logger, string originalPath, string destinationPath
             , bool isCopy
             )
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger);
-            _tasks[contextGuid] = task;
+            PipelineAsyncTaskAddItem pipelineAsyncTask = new PipelineAsyncTaskAddItem(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
 
             lock (Writer)
             {
@@ -424,46 +441,86 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
                 Writer.Flush();
             }
 
-            return task;
+            return pipelineAsyncTask.Task;
         }
 
-        public PipelineAsyncTask Copy(IProxyLogger logger, Guid itemContextGuid)
+        public Task CleanItemsAsync(IProxyLogger logger)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger);
-            _tasks[contextGuid] = task;
+            PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
 
             lock (Writer)
             {
-                WriteMsg(ProxyMsgType.Copy);
+                WriteMsg(ProxyMsgType.CleanItems);
                 WriteGuid(contextGuid);
-                WriteGuid(itemContextGuid);
                 Writer.Flush();
             }
 
-            return task;
+            return pipelineAsyncTask.Task;
         }
 
-        public PipelineAsyncTask Build(IProxyLogger logger, Guid itemContextGuid)
+        public Task BuildBeginAsync(IProxyLogger logger)
         {
             Guid contextGuid = Guid.NewGuid();
-            PipelineAsyncTask task = new PipelineAsyncTask(contextGuid, logger);
-            _tasks[contextGuid] = task;
+            PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.BuildBegin);
+                WriteGuid(contextGuid);
+                Writer.Flush();
+            }
+
+            return pipelineAsyncTask.Task;
+        }
+
+        public Task<bool> BuildAsync(IProxyLogger logger, ProxyItem proxyItem)
+        {
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTaskBuild pipelineAsyncTask = new PipelineAsyncTaskBuild(contextGuid, logger, proxyItem);
+            _tasks[contextGuid] = pipelineAsyncTask;
 
             lock (Writer)
             {
                 WriteMsg(ProxyMsgType.Build);
                 WriteGuid(contextGuid);
-                WriteGuid(itemContextGuid);
+                WriteGuid(proxyItem.Guid);
                 Writer.Flush();
             }
 
-            return task;
+            return pipelineAsyncTask.Task;
+        }
+
+        private void BuildState(Guid guid)
+        {
+            PipelineAsyncTaskBase task = _tasks[guid];
+            BuildState buildSTate = (BuildState)Reader.ReadInt32();
+
+            PipelineAsyncTaskBuild buildTask = (PipelineAsyncTaskBuild)task;
+            buildTask.Item.State = buildSTate;
+        }
+
+        public Task BuildEndAsync(IProxyLogger logger)
+        {
+            Guid contextGuid = Guid.NewGuid();
+            PipelineAsyncTask pipelineAsyncTask = new PipelineAsyncTask(contextGuid, logger);
+            _tasks[contextGuid] = pipelineAsyncTask;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.BuildEnd);
+                WriteGuid(contextGuid);
+                Writer.Flush();
+            }
+
+            return pipelineAsyncTask.Task;
         }
 
         private void LogError(Guid guid)
         {
-            PipelineAsyncTask task = _tasks[guid];
+            PipelineAsyncTaskBase task = _tasks[guid];
             IProxyLogger logger = task.Logger;
 
             string filename = ReadString();
@@ -474,7 +531,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         private void LogWarning(Guid guid)
         {
-            PipelineAsyncTask task = _tasks[guid];
+            PipelineAsyncTaskBase task = _tasks[guid];
             IProxyLogger logger = task.Logger;
 
             string filename = ReadString();
@@ -486,7 +543,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         private void LogImportantMessage(Guid guid)
         {
-            PipelineAsyncTask task = _tasks[guid];
+            PipelineAsyncTaskBase task = _tasks[guid];
             IProxyLogger logger = task.Logger;
 
             string filename = ReadString();
@@ -496,14 +553,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 
         private void LogMessage(Guid guid)
         {
-            PipelineAsyncTask task = _tasks[guid];
+            PipelineAsyncTaskBase task = _tasks[guid];
             IProxyLogger logger = task.Logger;
 
             string filename = ReadString();
             string message = ReadString();
             logger.LogMessage(filename, message);
         }
-                        
+
 
         protected override void Dispose(bool disposing)
         {

@@ -439,19 +439,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
 
-                List<Task<TaskResult>> addPackageTasks = new List<Task<TaskResult>>();
+                List<Task> addPackageTasks = new List<Task>();
                 foreach (Package package in this.Project.PackageReferences)
                 {
-                    Task<TaskResult> task = pipelineProxy.AddPackage(logger, package);
+                    Task task = pipelineProxy.AddPackageAsync(logger, package);
                     addPackageTasks.Add(task);
                 }
                 Task.WaitAll(addPackageTasks.ToArray());
 
-                Task<TaskResult> resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+                Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
                 resolvePackagesTask.Wait();
 
                 // load all types from references
-                List<Task<TaskResult>> addAssemblyTasks = new List<Task<TaskResult>>();
+                List<Task> addAssemblyTasks = new List<Task>();
                 foreach (string refPath in this.Project.References)
                 {
                     AssemblyViewModel assembly = this.CreateAssembly(refPath);
@@ -460,7 +460,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
                     string assemblyPath = assembly.NormalizedAbsoluteFullPath;
 
-                    Task<TaskResult> task = pipelineProxy.AddAssembly(logger, assemblyPath);
+                    Task task = pipelineProxy.AddAssemblyAsync(logger, assemblyPath);
                     addAssemblyTasks.Add(task);
 
                     _references._assemblies.Add(assembly);
@@ -468,16 +468,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 Task.WaitAll(addAssemblyTasks.ToArray());
 
                 IProxyLogger logger2 = new ProxyLogger(this._logger);
-                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger2);
-                importersTask.Task.Wait();
-
-                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger2);
+                importersTask.Wait();
+                List<ImporterDescription> importers = importersTask.Result;
+                foreach (ImporterDescription importerDesc in importers)
                     _importers.Add(importerDesc);
 
-                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger2);
-                processorsTask.Task.Wait();
-
-                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger2);
+                processorsTask.Wait();
+                List<ProcessorDescription> processors = processorsTask.Result;
+                foreach (ProcessorDescription processorDesc in processors)
                     _processors.Add(processorDesc);
             }
         }
@@ -651,23 +651,23 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
-                Task<TaskResult> task = pipelineProxy.AddAssembly(logger, assembly.NormalizedAbsoluteFullPath);
+                Task task = pipelineProxy.AddAssemblyAsync(logger, assembly.NormalizedAbsoluteFullPath);
                 Task.WaitAll(new[] { task });
 
                 _references._assemblies.Add(assembly);
                 this.Project.References.Add(assembly.OriginalPath); // update model
 
-                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger);
-                importersTask.Task.Wait();
-
-                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger);
+                importersTask.Wait();
+                List<ImporterDescription> importers = importersTask.Result;
+                foreach (ImporterDescription importerDesc in importers)
                     if (importerDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
                         _importers.Add(importerDesc);
 
-                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger);
-                processorsTask.Task.Wait();
-
-                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger);
+                processorsTask.Wait();
+                List<ProcessorDescription> processors = processorsTask.Result;
+                foreach (ProcessorDescription processorDesc in processors)
                     if (processorDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
                         _processors.Add(processorDesc);
             }
@@ -683,29 +683,28 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
-                Task<TaskResult> task = pipelineProxy.AddPackage(logger, packageVM.Package);
+                Task task = pipelineProxy.AddPackageAsync(logger, packageVM.Package);
                 Task.WaitAll(new[] { task });
 
-                Task<TaskResult> resolvePackagesTask = pipelineProxy.ResolvePackages(logger);
+                Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
                 resolvePackagesTask.Wait();
 
                 _packages._packages.Add(packageVM);
                 this.Project.PackageReferences.Add(packageVM.Package); // update model
 
-                PipelineAsyncTaskImporters importersTask = pipelineProxy.GetImporters(logger);
-                importersTask.Task.Wait();
-
-
-                foreach (ImporterDescription importerDesc in importersTask.Importers)
+                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger);
+                importersTask.Wait();
+                List<ImporterDescription> importers = importersTask.Result;
+                foreach (ImporterDescription importerDesc in importers)
                 {
                     if (!_importers.Select((i)=> i.TypeFullName).Contains(importerDesc.TypeFullName))
                         _importers.Add(importerDesc);
                 }
 
-                PipelineAsyncTaskProcessors processorsTask = pipelineProxy.GetProcessors(logger);
-                processorsTask.Task.Wait();
-
-                foreach (ProcessorDescription processorDesc in processorsTask.Processors)
+                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger);
+                processorsTask.Wait();
+                List<ProcessorDescription> processors = processorsTask.Result;
+                foreach (ProcessorDescription processorDesc in processors)
                 {
                     if (!_processors.Select((i) => i.TypeFullName).Contains(processorDesc.TypeFullName))
                         _processors.Add(processorDesc);

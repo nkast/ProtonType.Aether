@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using nkast.ProtonType.XnaContentPipeline.Common;
@@ -40,11 +41,21 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private readonly AssembliesMgr _assembliesMgr;
         private readonly Dictionary<Guid, ParametersContext> _items = new Dictionary<Guid, ParametersContext>();
         
+        // Keep track of all built assets. (Required to resolve automatic names "AssetName_n".)
+        //   Key = absolute, normalized path of source file
+        //   Value = list of build events
+        // (Note: When using external references, an asset may be built multiple times
+        // with different parameters.)
+        private readonly Dictionary<string, List<BuildEvent>> _buildEventsMap;
+
         public PipelineProxyServer(string uid) : base(uid)
         {
+            AttachAssertListener(new AssertListener());
+
             _globalContext = new ParametersContext();
             _globalLogger = new BuildLogger(this, _globalContext.Guid);
             _assembliesMgr = new AssembliesMgr();
+            _buildEventsMap = new Dictionary<string, List<BuildEvent>>();
 
             // load build-in importers/processors
             AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.PassThroughProcessor).Assembly.Location); // Common
@@ -53,7 +64,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.TextureProcessor).Assembly.Location); // Graphics
             AddAssembly(_globalContext.Guid, typeof(Microsoft.Xna.Framework.Content.Pipeline.Processors.EffectProcessor).Assembly.Location); // Graphics Effects
         }
- 
+
+        [Conditional("DEBUG")]
+        public static void AttachAssertListener(TraceListener traceListener)
+        {
+            if (!Debugger.IsAttached
+            &&  Trace.Listeners.Count == 1
+            &&  Trace.Listeners[0].GetType() == typeof(DefaultTraceListener))
+            {
+                Trace.Listeners.Clear();
+                Trace.Listeners.Add(traceListener);
+            }
+        }
+
         private void WriteMsg(ProxyMsgType msgType)
         {
             Writer.Write((Int32)msgType);
@@ -136,6 +159,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.Terminate:
                         Terminate();
                         return;
+
                     case ProxyMsgType.BaseDirectory:
                         SetBaseDirectory();
                         break;                    
@@ -162,6 +186,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                         break;
                     case ProxyMsgType.ParamIncremental:
                         break;
+
                     case ProxyMsgType.ParamOutputDir:
                         SetOutputDir();
                         break;
@@ -193,12 +218,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.AddItem:
                         AddItem();
                         break;
-                        
-                    case ProxyMsgType.Copy:
-                        Copy();
+
+                    case ProxyMsgType.CleanItems:
+                        CleanItems();
+                        break;
+
+                    case ProxyMsgType.BuildBegin:
+                        BuildBegin();
                         break;
                     case ProxyMsgType.Build:
                         Build();
+                        break;
+                    case ProxyMsgType.BuildEnd:
+                        BuildEnd();
                         break;
 
                     default:
@@ -491,19 +523,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
-        private void Copy()
+        private void CleanItems()
         {
             Guid contextGuid = ReadGuid();
-            
-            Guid itemContextGuid = ReadGuid();
 
-            ParametersContext itemContext = _items[itemContextGuid];
-            Debug.Assert(itemContext.isCopy == true);
-
-            ParametersContext itemContext2 = new ParametersContext(contextGuid, itemContext);
-            _items.Remove(itemContext.Guid);
-
-            TaskResult taskResult = Copy(itemContext2);
+            CleanItems(contextGuid);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
 
             lock (Writer)
             {
@@ -514,26 +539,236 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             }
         }
 
+        private void CleanItems(Guid contextGuid)
+        {
+            ContentBuildLogger logger = new BuildLogger(this, contextGuid);
 
-        private void Build()
+            string Config = _globalContext.Config;
+            TargetPlatform Platform = _globalContext.Platform;
+            GraphicsProfile Profile = _globalContext.Profile;
+            ContentCompression Compression = _globalContext.Compression;
+
+            string _outputDir = _globalContext.OutputDir;
+            string _intermediateDir = _globalContext.IntermediateDir;
+
+            string projectDirectory = this.BaseDirectory;
+            projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
+
+            string outputPath = ReplaceSymbols(_outputDir);
+            if (!Path.IsPathRooted(outputPath))
+                outputPath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
+
+            string intermediatePath = ReplaceSymbols(_intermediateDir);
+            if (!Path.IsPathRooted(intermediatePath))
+                intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
+
+            SourceFileCollection previousFileCollection = LoadFileCollection(intermediatePath);
+            if (previousFileCollection != null)
+            {
+	            bool targetChanged = previousFileCollection.Config != Config
+	                              || previousFileCollection.Platform != Platform
+	                              || previousFileCollection.Profile != Profile
+	                              || previousFileCollection.Compression != Compression
+	                               ;
+
+                PipelineManager _manager;
+                _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
+                _manager.Compression = Compression;
+                _manager.Logger = logger;
+
+                CleanItems(previousFileCollection, targetChanged, 
+                    _manager);
+            }
+        }
+
+        private void CleanItems(SourceFileCollection previousFileCollection, bool targetChanged
+            , PipelineManager _manager)
+        {
+            bool cleanOrRebuild = true; // Clean || Rebuild;
+            bool incremental = false;
+
+            for (int i = 0; i < previousFileCollection.SourceFilesCount; i++)
+            {
+                string prevSourceFile = previousFileCollection.SourceFiles[i];
+
+                bool inContent = System.Linq.Enumerable.Any(_items.Values, (pc) => pc.OriginalPath == prevSourceFile);
+                bool cleanOldContent = !inContent && !incremental;
+                bool cleanRebuiltContent = inContent && cleanOrRebuild;
+                if (targetChanged || cleanRebuiltContent || cleanOldContent)
+                {
+                    string prevDestFile = previousFileCollection.DestFiles[i];
+                    _manager.ResolveOutputFilepath(prevSourceFile, ref prevDestFile);
+                    _manager.CleanContent(_manager.Logger, prevDestFile);
+                    lock (_buildEventsMap)
+                    {
+                        _buildEventsMap.Remove(prevSourceFile);
+                    }
+                }
+            }
+        }
+
+        private void BuildBegin()
         {
             Guid contextGuid = ReadGuid();
 
-            Guid itemContextGuid = ReadGuid();
+            BuildBegin(contextGuid);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
 
-            ParametersContext itemContext = _items[itemContextGuid];
-            Debug.Assert(itemContext.isCopy == false);
-
-            ParametersContext itemContext2 = new ParametersContext(contextGuid, itemContext);
-            _items.Remove(itemContext.Guid);
-
-            TaskResult taskResult = Build(itemContext2);
-            
             lock (Writer)
             {
                 WriteMsg(ProxyMsgType.TaskEnd);
                 WriteGuid(contextGuid);
                 WriteTaskResult(taskResult);
+                Writer.Flush();
+            }
+        }
+
+        private void BuildBegin(Guid contextGuid)
+        {
+            ContentBuildLogger logger = new BuildLogger(this, contextGuid);
+
+            // TODO: we shouldn't be building a new PipelineManager.
+            PipelineManager _manager;
+            {
+                string Config = _globalContext.Config;
+                TargetPlatform Platform = _globalContext.Platform;
+                GraphicsProfile Profile = _globalContext.Profile;
+                ContentCompression Compression = _globalContext.Compression;
+
+                string _outputDir = _globalContext.OutputDir;
+                string _intermediateDir = _globalContext.IntermediateDir;
+
+                string projectDirectory = this.BaseDirectory;
+                projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
+
+                string outputPath = ReplaceSymbols(_outputDir);
+                if (!Path.IsPathRooted(outputPath))
+                    outputPath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
+
+                string intermediatePath = ReplaceSymbols(_intermediateDir);
+                if (!Path.IsPathRooted(intermediatePath))
+                    intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
+
+                // TODO: we shouldn't be building a new PipelineManager.
+                _manager = new PipelineManager(
+                    projectDirectory,
+                    this.ProjectFilename,
+                    outputPath,
+                    intermediatePath,
+                    _assembliesMgr, _buildEventsMap);
+                _manager.Compression = Compression;
+            }
+
+            foreach (var itemPair in _items)
+            {
+                Guid itemGuid = itemPair.Key;
+                ParametersContext itemContext = itemPair.Value;
+
+                string sourceFile = itemContext.OriginalPath;
+                string link = itemContext.DestinationPath;
+
+                // Make sure the source file is absolute.
+                if (!Path.IsPathRooted(sourceFile))
+                    sourceFile = Path.Combine(this.BaseDirectory, sourceFile);
+
+                sourceFile = LegacyPathHelper.Normalize(sourceFile);
+
+                // Copy the current processor parameters blind as we
+                // will validate and remove invalid parameters during
+                // the build process later.
+                OpaqueDataDictionary processorParams = new OpaqueDataDictionary();
+                foreach (var pair in itemContext.ProcessorParams)
+                    processorParams.Add(pair.Key, pair.Value);
+
+                ProcessorInfo processorInfo = _assembliesMgr.GetProcessorInfo(itemContext.Processor);
+                OpaqueDataDictionary processorDefaultValues = (processorInfo != null) ? processorInfo.DefaultValues : null;
+
+                try
+                {
+                    BuildEvent buildEvent = _manager.CreateBuildEvent(
+                                          sourceFile,
+                                          link,
+                                          itemContext.Importer,
+                                          itemContext.Processor,
+                                          processorParams
+                                          );
+                    PipelineManager.TrackBuildEvent(this._buildEventsMap, buildEvent, processorDefaultValues);
+                }
+                catch { /* Ignore exception */ }
+            }
+
+            // Load the previously serialized list of built content.
+             _previousFileCollection = LoadFileCollection(_manager.IntermediateDirectory);
+            if (_previousFileCollection != null)
+            {
+                // If the target changed in any way then we need to force
+                // a full rebuild even under incremental builds.
+                _targetChanged = _previousFileCollection.Config != _globalContext.Config
+                              || _previousFileCollection.Platform != _globalContext.Platform
+                              || _previousFileCollection.Profile != _globalContext.Profile
+                              || _previousFileCollection.Compression != _globalContext.Compression
+                               ;
+            }
+
+            // Create new FileCollection
+            _newFileCollection = new SourceFileCollection
+            {
+                Profile = _manager.Profile = _globalContext.Profile,
+                Platform = _manager.Platform = _globalContext.Platform,
+                Compression = _manager.Compression = _globalContext.Compression,
+                Config = _manager.Config = _globalContext.Config
+            };
+
+        }
+
+        bool _targetChanged = false;
+        SourceFileCollection _previousFileCollection;
+        SourceFileCollection _newFileCollection;
+
+        private void Build()
+        {
+            Guid contextGuid = ReadGuid();
+            Guid itemContextGuid = ReadGuid();
+
+            ParametersContext itemContext = _items[itemContextGuid];
+            ParametersContext buildContext = new ParametersContext(contextGuid, itemContext);
+            _items.Remove(itemContext.Guid);
+            
+            Task.Run(() =>
+            {
+                BuildState(buildContext, Common.BuildState.Building);
+
+                TaskResult taskResult;
+                switch (buildContext.isCopy)
+                {
+                    case true:
+                        taskResult = Copy(buildContext);
+                        break;
+                    case false:
+                        taskResult = Build(buildContext);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException();
+                }
+
+                lock (Writer)
+                {
+                    WriteMsg(ProxyMsgType.TaskEnd);
+                    WriteGuid(contextGuid);
+                    WriteTaskResult(taskResult);
+                    Writer.Flush();
+                }
+            });
+        }
+
+        internal void BuildState(ParametersContext buildContext, BuildState buildState)
+        {
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.BuildState);
+                WriteGuid(buildContext.Guid);
+                Writer.Write((Int32)buildState);
                 Writer.Flush();
             }
         }
@@ -583,13 +818,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             bool Incremental = true;
             bool Rebuild = true;
 
-            string Config = itemContext.Config;
-            TargetPlatform Platform = itemContext.Platform;
+            string Config = _globalContext.Config;
+            TargetPlatform Platform = _globalContext.Platform;
             GraphicsProfile Profile = itemContext.Profile;
             ContentCompression Compression = itemContext.Compression;
 
-            string _outputDir = itemContext.OutputDir;
-            string _intermediateDir = itemContext.IntermediateDir;
+            string _outputDir = _globalContext.OutputDir;
+            string _intermediateDir = _globalContext.IntermediateDir;
 
             string projectDirectory = this.BaseDirectory;
             projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
@@ -601,36 +836,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             string intermediatePath = ReplaceSymbols(_intermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
-            
+
+            // TODO: we shouldn't be building a new PipelineManager.
             PipelineManager _manager;
-            _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr);
+            _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
             _manager.Compression = Compression;
             ContentBuildLogger logger = new BuildLogger(this, itemContext.Guid);
             _manager.Logger = logger;
 
-
-            // Load the previously serialized list of built content.
-            SourceFileCollection previousFileCollection = LoadFileCollection(intermediatePath);
-            if (previousFileCollection == null)
-                previousFileCollection = new SourceFileCollection();
-
-            // If the target changed in any way then we need to force
-            // a full rebuild even under incremental builds.
-            bool targetChanged = previousFileCollection.Config != Config
-                              || previousFileCollection.Platform != Platform
-                              || previousFileCollection.Profile != Profile
-                              || previousFileCollection.Compression != Compression
-                              ;
-
-
-            SourceFileCollection newFileCollection = new SourceFileCollection
-            {
-                Profile = _manager.Profile = Profile,
-                Platform = _manager.Platform = Platform,
-                Compression = _manager.Compression = Compression,
-                Config = _manager.Config = Config
-            };
-            
             try
             {
                 BuildEvent buildEvent = _manager.CreateBuildEvent(c.SourceFile,
@@ -641,9 +854,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                                       );
 
                 BuildEvent cachedBuildEvent = _manager.LoadBuildEvent(buildEvent.DestFile);
-                _manager.BuildContent(buildEvent, logger, cachedBuildEvent, buildEvent.DestFile);
+                _manager.BuildContent(buildEvent, logger, cachedBuildEvent, buildEvent.DestFile,
+                    this, itemContext);
 
-                newFileCollection.AddFile(c.SourceFile, c.OutputFile);
+                _newFileCollection.AddFile(c.SourceFile, c.OutputFile);
             }
             catch (InvalidContentException ex)
             {
@@ -682,19 +896,59 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 return TaskResult.FAILED;
             }
 
+            return TaskResult.SUCCEEDED;
+        }
+
+        private void BuildEnd()
+        {
+            Guid contextGuid = ReadGuid();
+
+            BuildEnd(contextGuid);
+            TaskResult taskResult = TaskResult.SUCCEEDED;
+
+            lock (Writer)
+            {
+                WriteMsg(ProxyMsgType.TaskEnd);
+                WriteGuid(contextGuid);
+                WriteTaskResult(taskResult);
+                Writer.Flush();
+            }
+        }
+
+        private TaskResult BuildEnd(Guid contextGuid)
+        {
+            bool Incremental = true;
+            bool Rebuild = true;
+
+            string _outputDir = _globalContext.OutputDir;
+            string _intermediateDir = _globalContext.IntermediateDir;
+
+            string projectDirectory = this.BaseDirectory;
+            projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
+
+            string outputPath = ReplaceSymbols(_outputDir);
+            if (!Path.IsPathRooted(outputPath))
+                outputPath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
+
+            string intermediatePath = ReplaceSymbols(_intermediateDir);
+            if (!Path.IsPathRooted(intermediatePath))
+                intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
+
             // If this is an incremental build we merge the list
             // of previous content with the new list.
-            if (Incremental && !targetChanged)
-            {
-                newFileCollection.Merge(previousFileCollection);
-            }
+            if (Incremental && !_targetChanged)
+                _newFileCollection.Merge(_previousFileCollection);
 
             // Delete the old file and write the new content 
             // list if we have any to serialize.
             DeleteFileCollection(intermediatePath);
 
-            if (newFileCollection.SourceFilesCount > 0)
-                SaveFileCollection(intermediatePath, newFileCollection);
+            if (_newFileCollection.SourceFilesCount > 0)
+                SaveFileCollection(intermediatePath, _newFileCollection);
+
+            _targetChanged = false;
+            _previousFileCollection = null;
+            _newFileCollection = null;
 
             return TaskResult.SUCCEEDED;
         }
@@ -801,6 +1055,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                         else
                             logger.LogMessage(String.Format("Skipping {0} => {1}", c.SourceFile, c.Link));
 
+                        BuildState(itemContext, Common.BuildState.Skipping);
+
                         return TaskResult.SUCCEEDED;
                     }
                 }
@@ -811,6 +1067,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                 string destPath = Path.GetDirectoryName(dest);
                 if (!Directory.Exists(destPath))
                     Directory.CreateDirectory(destPath);
+
+                BuildState(itemContext, Common.BuildState.Copying);
 
                 File.Copy(c.SourceFile, dest, true);
 

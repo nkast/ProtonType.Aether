@@ -79,6 +79,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             
             context.OutputDir = this.OutputDir;
             context.IntermediateDir = this.IntermediateDir;
+
             context.Platform = this.Platform;
             context.Profile = this.Profile;
             context.Compression = this.Compression;

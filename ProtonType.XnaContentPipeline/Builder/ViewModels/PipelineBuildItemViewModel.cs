@@ -15,6 +15,7 @@
 #endregion
 
 using nkast.ProtonType.Framework.ViewModels;
+using nkast.ProtonType.XnaContentPipeline.Builder.Models;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
@@ -22,32 +23,72 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
     public class PipelineBuildItemViewModel : BaseViewModel
     {
         private Models.PipelineProjectBuilder.PipelineBuildItem _builditem;
-
-        public TaskResult TaskResult;
+        private string _name;
 
         internal Models.PipelineProjectBuilder.PipelineBuildItem Builditem { get { return _builditem; } }
 
         public string Name
         { 
-            get 
+            get { return _name; }
+            private set 
             {
-                string name = System.IO.Path.GetFileNameWithoutExtension(_builditem.PipelineItem.DestinationPath);                
-                return name;
-            } 
+                if (value != _name)
+                {
+                    _name = value;
+                    RaisePropertyChanged(() => Name);
+                }
+            }
         }
 
-        public string Status { get { return _builditem.Status.ToString(); } }
+        public PipelineBuildItemStatus Status { get { return _builditem.Status; } }
+        public string StatusString { get { return _builditem.Status.ToString(); } }
 
 
         internal PipelineBuildItemViewModel(Models.PipelineProjectBuilder.PipelineBuildItem builditem)
         {
             this._builditem = builditem;
             this._builditem.StatusChanged += _builditem_StatusChanged;
+            this._name = System.IO.Path.GetFileNameWithoutExtension(_builditem.PipelineItem.DestinationPath);
+
+            Builditem.ProxyItem.StateChanged += ProxyItem_StateChanged;
         }
 
         void _builditem_StatusChanged(object sender, System.EventArgs e)
         {
+            var builditem = (Models.PipelineProjectBuilder.PipelineBuildItem)sender;
+
             RaisePropertyChanged(() => Status);
+
+            // restore name
+            string name = System.IO.Path.GetFileNameWithoutExtension(builditem.PipelineItem.DestinationPath);
+            this.Name = name;
+        }
+
+        private void ProxyItem_StateChanged(object sender, System.EventArgs e)
+        {
+            ProxyClient.ProxyItem proxyItem = (ProxyClient.ProxyItem)sender;
+            BuildState buildState = proxyItem.State;
+
+            // update name with ProxyItem substates
+            string name = System.IO.Path.GetFileNameWithoutExtension(_builditem.PipelineItem.DestinationPath);
+            if (Status == PipelineBuildItemStatus.Building)
+            {
+                switch (buildState)
+                {
+                    case BuildState.Building:
+                    // Building substates
+                    case BuildState.Importing:
+                        name = name + " [" + buildState.ToString() + "]";
+                        break;
+                    case BuildState.Processing:
+                    case BuildState.Writing:
+                    case BuildState.Copying:
+                    case BuildState.Skipping:
+                        name = name + " [" + buildState.ToString() + "]";
+                        break;
+                }
+            }
+            this.Name = name;
         }
     }
 }

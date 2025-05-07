@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Models\BuildEvent.cs" />
+    <Compile Include="Converters\StatusToImageConverter.cs" />
     <Compile Include="Models\PipelineProjectBuilder.cs" />
     <Compile Include="ViewModels\PipelineBuilderStatusBarItemViewModel.cs" />
     <Compile Include="ViewModels\PipelineBuilderViewModel.cs" />
@@ -36,6 +36,13 @@
 
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\build_fail.png" />
+    <Resource Include="Icons\build_processing.png" />
+    <Resource Include="Icons\build_queued.png" />
+    <Resource Include="Icons\build_succeed.png" />
   </ItemGroup>
 
   <ItemGroup>

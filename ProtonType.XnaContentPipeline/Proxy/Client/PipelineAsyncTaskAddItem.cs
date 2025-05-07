@@ -1,5 +1,5 @@
 ﻿#region License
-//   Copyright 2021-2025 Kastellanos Nikolaos
+//   Copyright 2025 Kastellanos Nikolaos
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,24 +22,18 @@ using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
-    internal class PipelineAsyncTaskImporters : PipelineAsyncTask<List<ImporterDescription>>
+    internal class PipelineAsyncTaskAddItem : PipelineAsyncTask<ProxyItem>
     {
-        List<ImporterDescription> _importers = new List<ImporterDescription>();
-
-        internal List<ImporterDescription> Importers 
-        {
-            get { return _importers; }
-        }
-
-        public PipelineAsyncTaskImporters(Guid contextGuid, IProxyLogger logger)
+        public PipelineAsyncTaskAddItem(Guid contextGuid, IProxyLogger logger)
             : base(contextGuid, logger)
         {
-
         }
 
         protected override void OnSucceeded()
         {
-            base.TaskCompletionSource.SetResult(_importers);
+            ProxyItem proxyItem = new ProxyItem(base.Guid);
+            base.TaskCompletionSource.SetResult(proxyItem);
         }
+
     }
 }

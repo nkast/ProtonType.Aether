@@ -392,8 +392,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                     processorAttribute.DisplayName
                 );
 
-                OpaqueDataDictionary defaultProcessorValues = CreateProcessorDefaultValues(processorInstance);
-                processorInfo = new ProcessorInfo(processorType, assemblyTimestamp, processorDesc, defaultProcessorValues);
+                OpaqueDataDictionary processorDefaultValues = CreateProcessorDefaultValues(processorInstance);
+                processorInfo = new ProcessorInfo(processorType, assemblyTimestamp, processorDesc, processorDefaultValues);
             }
 
             return processorInfo;
@@ -526,7 +526,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
         /// <returns></returns>
         private static OpaqueDataDictionary CreateProcessorDefaultValues(IContentProcessor processorInstance)
         {
-            OpaqueDataDictionary defaultValues = new OpaqueDataDictionary();
+            OpaqueDataDictionary processorDefaultValues = new OpaqueDataDictionary();
             try
             {
                 PropertyInfo[] properties = processorInstance.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
@@ -534,7 +534,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                 {
                     string propertyName = property.Name;
                     object propertyValue = property.GetValue(processorInstance, null);
-                    defaultValues.Add(propertyName, propertyValue);
+                    processorDefaultValues.Add(propertyName, propertyValue);
                 }
             }
             catch
@@ -542,7 +542,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                 // Ignore exception. Will be handled in ProcessContent.
             }
 
-            return defaultValues;
+            return processorDefaultValues;
         }
 
     }
