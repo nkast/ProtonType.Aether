@@ -3,13 +3,13 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <TargetFramework>net48</TargetFramework>
-	<UseWPF>true</UseWPF>
+    <UseWPF>true</UseWPF>
     <ProjectGuid>{52767CCB-66BC-44A1-A100-E0470E21A24B}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyServer</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyServer</AssemblyName>
-    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">

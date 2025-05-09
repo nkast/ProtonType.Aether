@@ -6,10 +6,10 @@
     <UseWPF>true</UseWPF>
     <ProjectGuid>{82C354D3-8D37-4B2B-9046-0D36A98EE450}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
-    <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,5 +36,5 @@
   <ItemGroup>
     <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj" />
   </ItemGroup>
-	
+
 </Project>
