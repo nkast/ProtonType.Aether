@@ -8,8 +8,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyCommon</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyCommon</AssemblyName>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net8\</OutputPath>
     <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
 

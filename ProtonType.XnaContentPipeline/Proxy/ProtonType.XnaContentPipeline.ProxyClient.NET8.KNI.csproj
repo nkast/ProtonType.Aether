@@ -9,8 +9,6 @@
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net8</OutputPath>
     <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
   </PropertyGroup>
 

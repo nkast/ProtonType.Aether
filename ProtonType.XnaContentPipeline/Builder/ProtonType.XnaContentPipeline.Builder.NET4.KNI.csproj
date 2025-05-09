@@ -9,8 +9,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.Builder</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.Builder</AssemblyName>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net4\</OutputPath>
     <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
 
