@@ -2,34 +2,42 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
 	<UseWPF>true</UseWPF>
     <ProjectGuid>{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipelineModule</AssemblyName>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net4\</OutputPath>
     <DefineConstants>WINDOWS;EDITOR;KNI</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net4\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net8\</OutputPath>
+  </PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="nkast.Xna.Framework" Version="4.1.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content" Version="4.1.9001" />
     <PackageReference Include="nkast.Xna.Framework.Content.Pipeline" Version="4.1.9001" />
     <Reference Include="$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.FileSystem.dll">
       <Project>{98E2187D-2831-419D-A90F-723AC645D9ED}</Project>
-      <Name>ProtonType.FileSystem.NET4</Name>
+      <Name>ProtonType.FileSystem</Name>
     </Reference>
     <Reference Include="$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll">
       <Project>{7ED07123-58DF-440E-BE73-FA37F48AF799}</Project>
-      <Name>ProtonType.Framework.NET4</Name>
+      <Name>ProtonType.Framework</Name>
       <Private>False</Private>
     </Reference>
     <Reference Include="$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.LoggerModule.dll">
       <Project>{c0862807-accb-4347-922d-7ff0d8560293}</Project>
-      <Name>ProtonType.Logger.NET4</Name>
+      <Name>ProtonType.Logger</Name>
     </Reference>
     <Reference Include="tainicom.WpfPropertyGrid">
       <HintPath>..\..\3rdPartyLibraries\WpfPropertyGrid\Libraries\2010.11.10\net40\tainicom.WpfPropertyGrid.dll</HintPath>

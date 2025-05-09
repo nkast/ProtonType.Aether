@@ -15,9 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyServer.KNI", "ProtonType.XnaContentPipeline\ProxyServer\ProtonType.XnaContentPipeline.ProxyServer.KNI.csproj", "{52767CCB-66BC-44A1-A100-E0470E21A24B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipelineModule.NET4.KNI", "ProtonType.XnaContentPipeline\XnaContentPipelineModule\ProtonType.XnaContentPipelineModule.NET4.KNI.csproj", "{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipelineModule.KNI", "ProtonType.XnaContentPipeline\XnaContentPipelineModule\ProtonType.XnaContentPipelineModule.KNI.csproj", "{2AA622A6-BCFE-445B-AFC1-A6AF361A777E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI", "ProtonType.XnaContentPipeline\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj", "{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyCommon.KNI", "ProtonType.XnaContentPipeline\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.KNI.csproj", "{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
