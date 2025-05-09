@@ -2,14 +2,20 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <ProjectGuid>{52767CCB-66BC-44A1-A100-E0470E21A24B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyServer</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyServer</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <DefineConstants>WINDOWS EDITOR KNI</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\AnyCPU\net4\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">

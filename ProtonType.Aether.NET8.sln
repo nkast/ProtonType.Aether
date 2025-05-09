@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProtonType.XnaGraphics.KNI"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProtonType.XnaContentPipeline.ProxyClient.NET8.KNI", "ProtonType.XnaContentPipeline\Proxy\ProtonType.XnaContentPipeline.ProxyClient.NET8.KNI.csproj", "{D0A363B6-C29A-4C72-B58A-EF72F5627021}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProtonType.XnaContentPipeline.ProxyServer.NET8.KNI", "ProtonType.XnaContentPipeline\ProxyServer\ProtonType.XnaContentPipeline.ProxyServer.NET8.KNI.csproj", "{1CC7FC75-AD14-48FD-B9F6-FCA34FB80B79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProtonType.XnaContentPipeline.ProxyServer.KNI", "ProtonType.XnaContentPipeline\ProxyServer\ProtonType.XnaContentPipeline.ProxyServer.KNI.csproj", "{1CC7FC75-AD14-48FD-B9F6-FCA34FB80B79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XnaContentPipeline", "XnaContentPipeline", "{F6B0E2B2-1143-498E-954D-28A948CDDDDD}"
 EndProject
