@@ -80,10 +80,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Builder\ProtonType.XnaContentPipeline.Builder.NET4.KNI.csproj">
-      <Project>{18abbfe2-2243-4a2f-a6ad-4a00982fce47}</Project>
-      <Name>ProtonType.XnaContentPipeline.Builder.NET4.KNI</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Builder\ProtonType.XnaContentPipeline.Builder.KNI.csproj" />
     <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.KNI.csproj" />
     <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.KNI.csproj" />
   </ItemGroup>
