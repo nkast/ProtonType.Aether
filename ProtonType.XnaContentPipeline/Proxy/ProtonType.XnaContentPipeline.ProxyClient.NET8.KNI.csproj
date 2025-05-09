@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFrameworks>net8.0-windows</TargetFrameworks>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>

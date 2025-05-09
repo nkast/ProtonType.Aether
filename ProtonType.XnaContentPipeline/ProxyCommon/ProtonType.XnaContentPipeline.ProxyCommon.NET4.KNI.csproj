@@ -3,7 +3,6 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <TargetFramework>net48</TargetFramework>
-	<UseWPF>true</UseWPF>
     <ProjectGuid>{397EEBDC-8F9F-4BE5-905B-E40D0BB7F1DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

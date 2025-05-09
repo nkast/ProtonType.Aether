@@ -3,7 +3,6 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <TargetFramework>net48</TargetFramework>
-    <UseWPF>true</UseWPF>
     <ProjectGuid>{82C354D3-8D37-4B2B-9046-0D36A98EE450}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
