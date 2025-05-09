@@ -84,10 +84,7 @@
       <Project>{18abbfe2-2243-4a2f-a6ad-4a00982fce47}</Project>
       <Name>ProtonType.XnaContentPipeline.Builder.NET4.KNI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.KNI.csproj">
-      <Project>{7da58252-12f5-4811-8ceb-8321cbb42088}</Project>
-      <Name>ProtonType.XnaContentPipeline.ContentFile.NET4.KNI</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.KNI.csproj" />
     <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.KNI.csproj" />
   </ItemGroup>
 

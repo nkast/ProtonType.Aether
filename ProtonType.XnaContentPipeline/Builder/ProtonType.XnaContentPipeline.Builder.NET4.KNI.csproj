@@ -47,10 +47,7 @@
     <Reference Include="ProtonType.Framework">
       <HintPath>$(PROTONTYPE_PATH)\bin\Release\AnyCPU\net4\ProtonType.Framework.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.NET4.KNI.csproj">
-      <Project>{7da58252-12f5-4811-8ceb-8321cbb42088}</Project>
-      <Name>ProtonType.XnaContentPipeline.ContentFile.NET4.KNI</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ContentFile\ProtonType.XnaContentPipeline.ContentFile.KNI.csproj" />
     <ProjectReference Include="..\Proxy\ProtonType.XnaContentPipeline.ProxyClient.KNI.csproj" />
   </ItemGroup>
 
