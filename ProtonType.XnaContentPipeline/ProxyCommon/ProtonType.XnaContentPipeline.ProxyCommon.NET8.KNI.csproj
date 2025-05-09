@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Common\BuildState.cs" />
     <Compile Include="Common\Converters\StringToColorConverter.cs" />
     <Compile Include="Common\ImporterDescription.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
