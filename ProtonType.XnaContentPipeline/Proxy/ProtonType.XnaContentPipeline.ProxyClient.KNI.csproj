@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <ProjectGuid>{82C354D3-8D37-4B2B-9046-0D36A98EE450}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>nkast.ProtonType.XnaContentPipeline.ProxyClient</RootNamespace>
     <AssemblyName>ProtonType.XnaContentPipeline.ProxyClient</AssemblyName>

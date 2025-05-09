@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProtonType.XnaContentPipeli
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XnaContentPipeline", "XnaContentPipeline", "{F6B0E2B2-1143-498E-954D-28A948CDDDDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyCommon.NET8.KNI", "ProtonType.XnaContentPipeline\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET8.KNI.csproj", "{ECD3E602-5CA4-4381-A9FB-46AF1715C0F0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtonType.XnaContentPipeline.ProxyCommon.KNI", "ProtonType.XnaContentPipeline\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.KNI.csproj", "{ECD3E602-5CA4-4381-A9FB-46AF1715C0F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
