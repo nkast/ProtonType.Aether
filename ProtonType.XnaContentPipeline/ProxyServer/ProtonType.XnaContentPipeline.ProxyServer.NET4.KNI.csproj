@@ -29,7 +29,7 @@
       <HintPath>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\Tools\Xna.Framework.Content.Pipeline.Graphics.MojoProcessor.dll</HintPath>
     </Reference>
     <PackageReference Include="nkast.Kni.Platform.WinForms.DX11" Version="4.1.9001" />
-    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET4.KNI.csproj" />
+    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.KNI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

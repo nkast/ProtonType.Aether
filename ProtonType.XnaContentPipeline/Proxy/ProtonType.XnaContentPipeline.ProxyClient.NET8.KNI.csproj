@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.NET8.KNI.csproj" />
+    <ProjectReference Include="..\ProxyCommon\ProtonType.XnaContentPipeline.ProxyCommon.KNI.csproj" />
   </ItemGroup>
 
 </Project>
