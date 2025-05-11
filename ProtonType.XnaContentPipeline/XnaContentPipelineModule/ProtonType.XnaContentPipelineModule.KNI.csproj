@@ -14,12 +14,14 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net4\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net48\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\$(Platform)\net48\</IntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net8\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\$(Configuration)\$(Platform)\net8.0\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\$(Platform)\net8.0\</IntermediateOutputPath>
   </PropertyGroup>
 	
   <ItemGroup>

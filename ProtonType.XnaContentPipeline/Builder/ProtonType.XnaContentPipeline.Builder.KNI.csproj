@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
 	<UseWPF>true</UseWPF>
     <ProjectGuid>{18ABBFE2-2243-4A2F-A6AD-4A00982FCE47}</ProjectGuid>
     <OutputType>Library</OutputType>
