@@ -251,29 +251,35 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     if (Thread.CurrentThread.Name == null)
                         Thread.CurrentThread.Name = "ProcessBuildQueueWorker";
 
-                    List<Task> buildTasks = new List<Task>();
-                    while (_queuedItems.TryDequeue(out PipelineBuildItem buildItem))
-                    {
-                        OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
-                        IProxyLogger itemLogger = new ProxyLogger(_viewLogger);
-                        Task<bool> buildTask = pipelineProxy.BuildAsync(itemLogger, buildItem.ProxyItem);
-                        buildTask.ContinueWith((task) =>
-                        {
-                            switch (task.Result)
-                            {
-                                case true:
-                                    buildItem.Status = PipelineBuildItemStatus.Build;
-                                    break;
-                                case false:
-                                    buildItem.Status = PipelineBuildItemStatus.Failed;
-                                    break;
-                            }
-                            OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, (task.Result)? TaskResult.SUCCEEDED:TaskResult.FAILED));
-                        });
-                        buildTasks.Add(buildTask);
-                    }
-                    Task.WaitAll(buildTasks.ToArray());
+                    int maxConcurrentTasks = Environment.ProcessorCount;
 
+                    List<Task<bool>> buildTasks = new List<Task<bool>>();
+                    {
+                        {
+                            while (_queuedItems.TryDequeue(out PipelineBuildItem buildItem))
+                            {
+                                OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
+                                IProxyLogger itemLogger = new ProxyLogger(_viewLogger);
+                                Task<bool> buildTask = pipelineProxy.BuildAsync(itemLogger, buildItem.ProxyItem);
+                                buildTask.ContinueWith((task) =>
+                                {
+                                    switch (task.Result)
+                                    {
+                                        case true:
+                                            buildItem.Status = PipelineBuildItemStatus.Build;
+                                            break;
+                                        case false:
+                                            buildItem.Status = PipelineBuildItemStatus.Failed;
+                                            break;
+                                    }
+                                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, (task.Result) ? TaskResult.SUCCEEDED : TaskResult.FAILED));
+                                });
+                                buildTasks.Add(buildTask);
+                            }
+                        }
+                        Task.WaitAll(buildTasks.ToArray());
+
+                    }
                 }).ContinueWith((t) =>
                     {
                         Task buildEndTask = pipelineProxy.BuildEndAsync(logger);
