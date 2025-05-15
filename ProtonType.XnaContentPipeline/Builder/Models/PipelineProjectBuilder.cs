@@ -254,9 +254,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     int maxConcurrentTasks = Environment.ProcessorCount;
 
                     List<Task<bool>> buildTasks = new List<Task<bool>>();
+                    while (_queuedItems.Count > 0 || buildTasks.Count > 0)
                     {
+                        while (_queuedItems.Count > 0 && buildTasks.Count < maxConcurrentTasks)
                         {
-                            while (_queuedItems.TryDequeue(out PipelineBuildItem buildItem))
+                            if (_queuedItems.TryDequeue(out PipelineBuildItem buildItem))
                             {
                                 OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
                                 IProxyLogger itemLogger = new ProxyLogger(_viewLogger);
@@ -277,8 +279,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                                 buildTasks.Add(buildTask);
                             }
                         }
-                        Task.WaitAll(buildTasks.ToArray());
+                        Task.WaitAny(buildTasks.ToArray());
 
+                        // Remove completed tasks.
+                        for (int i = buildTasks.Count - 1; i >= 0; i--)
+                        {
+                            Task<bool> task = buildTasks[i];
+                            if (task.IsCompleted || task.IsCanceled || task.IsFaulted)
+                            {
+                                buildTasks.RemoveAt(i);
+                            }
+                        }
                     }
                 }).ContinueWith((t) =>
                     {
