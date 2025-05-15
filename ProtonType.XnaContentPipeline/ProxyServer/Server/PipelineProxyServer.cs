@@ -936,7 +936,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // If this is an incremental build we merge the list
             // of previous content with the new list.
-            if (Incremental && !_targetChanged)
+            if (_previousFileCollection != null && Incremental && !_targetChanged)
                 _newFileCollection.Merge(_previousFileCollection);
 
             // Delete the old file and write the new content 
