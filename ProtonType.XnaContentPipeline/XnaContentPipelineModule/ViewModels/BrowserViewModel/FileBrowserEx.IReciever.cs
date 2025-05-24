@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using nkast.ProtonType.Framework.Commands;
 using nkast.ProtonType.ViewModels;
 
@@ -57,9 +58,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             if (pipelineItemVM == null)
             {
+                // Root the path to the project.
+                string documentDirectory = Path.GetDirectoryName(ContentPipelineViewModel.DocumentFile);
+                string fileAbsolutePath = Path.Combine(documentDirectory, item.RelativePath);
+                if (!File.Exists(fileAbsolutePath))
+                    throw new Exception("File not found. " + fileAbsolutePath);
+
                 // create new pipelineItem
-                string fileAbsolutePath = ContentPipelineViewModel.GetAbsolutePath(item.RelativePath);
-                pipelineItemVM = ContentPipelineViewModel.PipelineProjectViewModel.Include(fileAbsolutePath);
+                pipelineItemVM = ContentPipelineViewModel.PipelineProjectViewModel.Include(item.RelativePath);
                 this.ContentPipelineViewModel.AddItem(pipelineItemVM);
             }
             else

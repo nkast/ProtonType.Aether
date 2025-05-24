@@ -239,16 +239,16 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             }
 
             // Make sure the source file is relative to the project.
-            var projectDir = project.Location + Path.DirectorySeparatorChar;
-            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+            if (Path.IsPathRooted(sourceFile))
+                throw new InvalidOperationException("Relative path expected. "+ sourceFile);
 
             // check duplicates.
-            var previous = project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            PipelineItem previous = project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
             if (previous != null)
                 throw new Exception("sourceFile allready added.");
 
             // Create the item for processing later.
-            var item = new PipelineItem()
+            PipelineItem item = new PipelineItem()
             {
                 BuildAction = BuildAction.Build,
                 OriginalPath = sourceFile,
@@ -274,8 +274,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             }
 
             // Make sure the source file is relative to the project.
-            string projectDir = project.Location + Path.DirectorySeparatorChar;
-            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+            if (Path.IsPathRooted(sourceFile))
+                throw new InvalidOperationException("Relative path expected. " + sourceFile);
 
             // check duplicates.
             PipelineItem previous = project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));

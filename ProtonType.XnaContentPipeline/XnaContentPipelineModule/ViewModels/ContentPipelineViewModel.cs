@@ -46,7 +46,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         public PipelineProjectViewModel PipelineProjectViewModel { get; private set; }
 
         /// <remarks>full path + filename + .ext (.mgcb)</remarks>
-        public string DocumentFile { get;private set; }
+        public string DocumentFile
+        { 
+            get;
+            private set;
+        }
 
         public event EventHandler<PipelineItemViewModelAddedEventArgs> ItemAdded;
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemAdded;
@@ -69,40 +73,51 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             System.Diagnostics.Debug.Assert(Path.GetExtension(documentFile) == ".mgcb");
             System.Diagnostics.Debug.Assert(Path.IsPathRooted(documentFile));
 
+            PipelineProjectViewModel pipelineProjectVM = new PipelineProjectViewModel(this.Module.Site, this);
+
             this.DocumentFile = documentFile;
+            pipelineProjectVM.OpenProject(documentFile);
 
-            this.PipelineProjectViewModel = new PipelineProjectViewModel(this.Module.Site, this);
-
-            if (File.Exists(documentFile))
+            // UpdateTreeItems()
+            if (pipelineProjectVM.Project != null && !string.IsNullOrEmpty(pipelineProjectVM.Project.OriginalPath))
             {
-                PipelineProjectViewModel.OpenProject(documentFile);
-
-                // UpdateTreeItems()
-                if (PipelineProjectViewModel.Project != null && !string.IsNullOrEmpty(PipelineProjectViewModel.Project.OriginalPath))
+                foreach (var item in pipelineProjectVM.PipelineItemsVM)
                 {
-                    foreach (var item in PipelineProjectViewModel.PipelineItemsVM)
-                    {
-                        this.AddItem(item);
-                    }
+                    this.AddItem(item);
                 }
             }
-            else
-            {
-                PipelineProjectViewModel.NewProject(documentFile);
-                PipelineProjectViewModel.SaveProject(true);
-            }
-
-            // Create builder
-            _pipelineBuilder = new PipelineBuilderViewModel(PipelineProjectViewModel, this);
 
             // attach events
-            PipelineProjectViewModel.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
-            PipelineProjectViewModel.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
+            pipelineProjectVM.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
+            pipelineProjectVM.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
+
+            this.PipelineProjectViewModel = pipelineProjectVM;
+        }
+
+        internal void CreateContentProject(string documentFile)
+        {
+            System.Diagnostics.Debug.Assert(Path.GetExtension(documentFile) == ".mgcb");
+            System.Diagnostics.Debug.Assert(Path.IsPathRooted(documentFile));
+
+            PipelineProjectViewModel pipelineProjectVM = new PipelineProjectViewModel(this.Module.Site, this);
+
+            this.DocumentFile = documentFile;
+            pipelineProjectVM.NewProject(documentFile);
+            pipelineProjectVM.SaveProject(true);
+
+            // attach events
+            pipelineProjectVM.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
+            pipelineProjectVM.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
+
+            this.PipelineProjectViewModel = pipelineProjectVM;
+        }
+
+        internal void CreateBuilder(PipelineProjectViewModel pipelineProjectVM)
+        {
+            _pipelineBuilder = new PipelineBuilderViewModel(pipelineProjectVM, this);
             _pipelineBuilder.PipelineItemBuildCompleted += _pipelineBuilder_PipelineItemBuildCompleted;
             _pipelineBuilder.BuildEnded += _pipelineBuilder_BuildEnded;
             _pipelineBuilder.PropertyChanged += _pipelineBuilder_PropertyChanged;
-
-            //ScanAssetsRootFolder();
         }
 
         internal void AddItem(PipelineItemViewModel item)
@@ -207,7 +222,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal string GetAbsolutePath(string relativePath)
         {
-            var documentDirectory = Path.GetDirectoryName(DocumentFile);
+            string documentDirectory = Path.GetDirectoryName(this.DocumentFile);
             return Path.Combine(documentDirectory, relativePath);
         }
 

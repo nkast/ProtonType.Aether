@@ -320,8 +320,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            pipelineProxy.SetBaseDirectory(this._project.Location);
-            pipelineProxy.SetProjectFilename(Path.GetFileName(this._project.OriginalPath));
+            string location = this._project.Location;
+            string originalPath = this._project.OriginalPath;
+
+            pipelineProxy.SetBaseDirectory(location);
+            pipelineProxy.SetProjectFilename(Path.GetFileName(originalPath));
 
             ContentCompression compression = ContentCompression.Uncompressed;
             if (_project.Compress)

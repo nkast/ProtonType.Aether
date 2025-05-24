@@ -29,10 +29,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     /*internal*/ public class PipelineProject : IPipelineItem
     {
-        IList<PipelineItem> _pipelineItems;
+        IList<PipelineItem> _pipelineItems = new List<PipelineItem>();
 
-
-        public string OriginalPath { get; set; }
 
         public IList<PipelineItem> PipelineItems { get; private set; }
 
@@ -74,19 +72,30 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         {
             get
             {
-                if (string.IsNullOrEmpty(OriginalPath))
-                    return "";
-
-                var idx = OriginalPath.LastIndexOfAny(new char[] {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar}, OriginalPath.Length - 1);
-                return OriginalPath.Remove(idx);
+                string location = OriginalPath;
+                if (string.IsNullOrEmpty(location))
+                {
+                    location = "";
+                    return location;
+                }
+                else
+                {
+                    int idx = location.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, location.Length - 1);
+                    return location.Remove(idx);
+                }
             }
         }
-        
+
+        public string OriginalPath 
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         public PipelineProject()
         {
-            _pipelineItems = new List<PipelineItem>();
             PipelineItems = new ReadOnlyCollection<PipelineItem>(_pipelineItems);
             
             References = new List<string>();
@@ -121,9 +130,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         internal void ClearItems()
         {
             foreach (var item in _pipelineItems)
-            {
                 item.PropertyChanged -= item_PropertyChanged;
-            }
+
             _pipelineItems.Clear();
         }
         
@@ -158,8 +166,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
         internal int BinarySearch(PipelineItem pipelineItem, IComparer<PipelineItem> pipelineItemComparer)
         {
-            var pipelineItems = _pipelineItems as List<PipelineItem>;
-            int index = pipelineItems.BinarySearch(pipelineItem, pipelineItemComparer);
+            int index = ((List<PipelineItem>)_pipelineItems).BinarySearch(pipelineItem, pipelineItemComparer);
             return index;
         }
     }

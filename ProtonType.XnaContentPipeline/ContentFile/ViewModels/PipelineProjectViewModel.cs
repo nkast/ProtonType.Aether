@@ -56,9 +56,22 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         public bool IsProjectDirty { get; private set; }
 
-        public string Location { get { return Project.Location; } }
+        public string Location
+        {
+            get
+            {
+                string location = Project.Location;
+                return location;
+            }
+        }
 
-        public string ProjectName { get { return Path.GetFileNameWithoutExtension(Project.OriginalPath); } }
+        public string ProjectName
+        {
+            get 
+            {
+                return Path.GetFileNameWithoutExtension(Project.OriginalPath); 
+            }
+        }
 
 
 
@@ -153,7 +166,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
-
             Project.PipelineItemPropertyChanged += project_PipelineItemPropertyChanged;
 
             // Save the new project.
@@ -183,7 +195,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
                 CreateItems();
 
-                LoadTemplates(Project.Location);
+                string location = this.Location;
+                LoadTemplates(location);
 
                 IsProjectOpen = true;
                 IsProjectDirty = false;
@@ -265,17 +278,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             OnPipelineItemRemoved(new PipelineItemViewModelEventArgs(pipelineItemVM));
         }
 
-        public PipelineItemViewModel Include(string fileAbsolutePath)
+        public PipelineItemViewModel Include(string sourceFile)
         {
-            // Root the path to the project.
-            if (!Path.IsPathRooted(fileAbsolutePath))
-                fileAbsolutePath = Path.Combine(Location, fileAbsolutePath);
-
-            if (!File.Exists(fileAbsolutePath))
-                throw new Exception("File not found. " + fileAbsolutePath);
-
-            var itemVM = CreateContent(fileAbsolutePath);
-
+            var itemVM = CreateContent(sourceFile);
             this.Add(itemVM);
 
             return itemVM;
@@ -284,8 +289,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private PipelineItemViewModel CreateContent(string sourceFile)
         {
             // Make sure the source file is relative to the project.
-            var projectDir = Project.Location + Path.DirectorySeparatorChar;
-            sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
+            if (Path.IsPathRooted(sourceFile))
+                throw new InvalidOperationException("Relative path expected. " + sourceFile);
 
             // check duplicates.
             var previous = Project.PipelineItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile, StringComparison.InvariantCultureIgnoreCase));
@@ -378,21 +383,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             return null;
         }
 
-        public string GetFullPath(string filePath)
-        {
-            if (Project == null || Path.IsPathRooted(filePath))
-                return filePath;
-
-            filePath = filePath.Replace("/", Path.DirectorySeparatorChar.ToString());
-            if (filePath.StartsWith("\\"))
-                filePath = filePath.Substring(1);
-
-            if (Path.IsPathRooted(filePath))
-                return filePath;
-
-            return Project.Location + Path.DirectorySeparatorChar + filePath;
-        }
-
 
         private readonly ObservableCollection<ImporterDescription> _importers = new ObservableCollection<ImporterDescription>();
         private readonly ObservableCollection<ProcessorDescription> _processors = new ObservableCollection<ProcessorDescription>();
@@ -474,8 +464,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            pipelineProxy.SetBaseDirectory(this.Location);
-            pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+            string location = this.Location;
+            string originalPath = this.Project.OriginalPath;
+
+            pipelineProxy.SetBaseDirectory(location);
+            pipelineProxy.SetProjectFilename(Path.GetFileName(originalPath));
 
             ContentCompression compression = ContentCompression.Uncompressed;
             if (this.Project.Compress)
