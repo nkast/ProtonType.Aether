@@ -327,7 +327,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             io.WriteLine(String.Format(lineFormat, "outputDir", project.OutputDir));
             io.WriteLine(String.Format(lineFormat, "intermediateDir", project.IntermediateDir));
             io.WriteLine(String.Format(lineFormat, "platform", project.Platform));
-            io.WriteLine(String.Format(lineFormat, "config", project.Config));
+            if (project.Config != null)
+                io.WriteLine(String.Format(lineFormat, "config", project.Config));
             io.WriteLine(String.Format(lineFormat, "profile", project.Profile));
             io.WriteLine(String.Format(lineFormat, "compress", project.Compress));
             if (project.Compression != CompressionMethod.Default)

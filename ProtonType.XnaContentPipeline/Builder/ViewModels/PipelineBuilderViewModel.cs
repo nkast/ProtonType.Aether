@@ -197,6 +197,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             _pipelineBuilder.BuildQueueItemAdded += _pipelineBuilder_BuildQueueAdded;
             _pipelineBuilder.BuildQueueItemRemoved += _pipelineBuilder_BuildQueueRemoved;
             _pipelineBuilder.PipelineItemBuildCompleted += _pipelineBuilder_PipelineItemBuildCompleted;
+            _pipelineBuilder.BuildEnded += _pipelineBuilder_BuildEnded;
 
             IsQueuedSelected = true;
             IsBuildingSelected = true;
@@ -271,6 +272,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             OnPipelineItemBuildCompleted(new PipelineItemViewModelBuildCompletedEventArgs(pipelineItemVM, e.Result));
         }
 
+        void _pipelineBuilder_BuildEnded(object sender, EventArgs e)
+        {
+            OnBuildEnded(EventArgs.Empty);
+        }
+
         private PipelineItemViewModel FindPipelineItemVM(nkast.ProtonType.XnaContentPipeline.Common.PipelineItem pipelineItem)
         {
             foreach (var plItemVM in _projectVM.PipelineItemsVM)
@@ -319,10 +325,17 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
 
         public event EventHandler<PipelineItemViewModelBuildCompletedEventArgs> PipelineItemBuildCompleted;
+        public event EventHandler<EventArgs> BuildEnded;
 
         private void OnPipelineItemBuildCompleted(PipelineItemViewModelBuildCompletedEventArgs e)
         {
             var handler = PipelineItemBuildCompleted;
+            if (handler != null)
+                handler(this, e);
+        }
+        private void OnBuildEnded(EventArgs e)
+        {
+            var handler = BuildEnded;
             if (handler != null)
                 handler(this, e);
         }

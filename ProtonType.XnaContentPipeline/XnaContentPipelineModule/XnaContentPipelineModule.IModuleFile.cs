@@ -23,7 +23,7 @@ using nkast.ProtonType.XnaContentPipeline.ViewModels;
 
 namespace nkast.ProtonType.XnaContentPipeline 
 {
-    public partial class XnaContentPipelineModule: IModuleFile, IModuleFileSave
+    public partial class XnaContentPipelineModule: IModuleFile, IModuleFileNew, IModuleFileSave
     {
         public List<FileExtension> _fileExtensions = new List<FileExtension>();
 
@@ -42,6 +42,28 @@ namespace nkast.ProtonType.XnaContentPipeline
 
         IFileViewModel IModuleFile.FileOpen(string filepath)
         {
+            var contentPipeline = new ContentPipelineViewModel(this);
+            contentPipeline.LoadContentProject(filepath);
+            _fileViewModels.Add(contentPipeline);
+            OpenFileBrowserEx(contentPipeline);
+
+            return contentPipeline;
+        }
+
+        IFileViewModel IModuleFileNew.FileNew()
+        {
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.Filter = "MGCB files (*.mgcb)|*.mgcb";
+            saveFileDialog.DefaultExt = ".mgcb";
+            saveFileDialog.AddExtension = true;
+            saveFileDialog.FileName = "Content";
+            saveFileDialog.Title = "Create New Content Pipeline Project";
+
+            if (saveFileDialog.ShowDialog() == false)
+                return null;
+
+            string filepath = saveFileDialog.FileName;
+
             var contentPipeline = new ContentPipelineViewModel(this);
             contentPipeline.LoadContentProject(filepath);
             _fileViewModels.Add(contentPipeline);

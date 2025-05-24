@@ -143,6 +143,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         public event EventHandler<PipelineBuildItemEventArgs> BuildQueueItemAdded;
         public event EventHandler<PipelineBuildItemEventArgs> BuildQueueItemRemoved;
         public event EventHandler<PipelineBuildItemCompletedEventArgs> PipelineItemBuildCompleted;
+        public event EventHandler<EventArgs> BuildEnded;
 
         protected virtual void OnBuildStarted(EventArgs e)
         {
@@ -162,10 +163,15 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             if (handler == null) return;
             handler(this, e);
         }
-
         private void OnPipelineItemBuildCompleted(PipelineBuildItemCompletedEventArgs e)
         {
             var handler = PipelineItemBuildCompleted;
+            if (handler == null) return;
+            handler(this, e);
+        }
+        protected virtual void OnBuildEnded(EventArgs e)
+        {
+            var handler = BuildEnded;
             if (handler == null) return;
             handler(this, e);
         }
@@ -300,6 +306,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                         {
                             pipelineProxy.Dispose();
                             _buildTask = null;
+                            OnBuildEnded(EventArgs.Empty);
                         }
                     });
                 OnBuildStarted(EventArgs.Empty);
@@ -339,7 +346,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             pipelineProxy.SetOutputDir(_project.OutputDir);
             pipelineProxy.SetIntermediateDir(_project.IntermediateDir);
             pipelineProxy.SetPlatform(_project.Platform);
-            pipelineProxy.SetConfig(_project.Config);
+            if (_project.Config != null)
+                pipelineProxy.SetConfig(_project.Config);
             pipelineProxy.SetProfile(_project.Profile);
             pipelineProxy.SetCompression(compression);
 
@@ -370,6 +378,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     lock (_buildTaskLocker)
                     {
                         pipelineProxy.Dispose();
+                        OnBuildEnded(EventArgs.Empty);
                     }
                 });
             }

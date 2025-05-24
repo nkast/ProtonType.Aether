@@ -52,6 +52,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemAdded;
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemRemoved;
         public event EventHandler<PipelineItemViewModelBuildCompletedEventArgs> PipelineItemBuildCompleted;
+        public event EventHandler<EventArgs> BuildEnded;
         
 
         public ContentPipelineViewModel(XnaContentPipelineModule module)
@@ -98,6 +99,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             PipelineProjectViewModel.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
             PipelineProjectViewModel.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
             _pipelineBuilder.PipelineItemBuildCompleted += _pipelineBuilder_PipelineItemBuildCompleted;
+            _pipelineBuilder.BuildEnded += _pipelineBuilder_BuildEnded;
             _pipelineBuilder.PropertyChanged += _pipelineBuilder_PropertyChanged;
 
             //ScanAssetsRootFolder();
@@ -121,6 +123,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private void _pipelineBuilder_PipelineItemBuildCompleted(object sender, PipelineItemViewModelBuildCompletedEventArgs e)
         {
             OnPipelineItemBuildCompleted(e);
+        }
+
+        private void _pipelineBuilder_BuildEnded(object sender, EventArgs e)
+        {
+            OnBuildEnded(e);
         }
 
         void _pipelineBuilder_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -176,6 +183,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 handler(this, e);
         }
 
+        private void OnBuildEnded(EventArgs e)
+        {
+            var handler = BuildEnded;
+            if (handler != null)
+                handler(this, e);
+        }
+
         internal void Close()
         {
             if (PipelineProjectViewModel == null)
@@ -188,6 +202,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             PipelineProjectViewModel.PipelineItemAdded -= pipelineProjectViewModel_PipelineItemAdded;
             PipelineProjectViewModel.PipelineItemRemoved -= pipelineProjectViewModel_PipelineItemRemoved;
             _pipelineBuilder.PipelineItemBuildCompleted -= _pipelineBuilder_PipelineItemBuildCompleted;
+            _pipelineBuilder.BuildEnded -= _pipelineBuilder_BuildEnded;
         }
 
         internal string GetAbsolutePath(string relativePath)

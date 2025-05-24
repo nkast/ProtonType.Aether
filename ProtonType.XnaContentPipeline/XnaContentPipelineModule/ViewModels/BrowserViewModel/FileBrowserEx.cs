@@ -37,6 +37,37 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal ContentPipelineViewModel ContentPipelineViewModel { get { return (ContentPipelineViewModel)this.Model; } }
         
+
+        private bool _isBuildAllEnabled = true;
+        private bool _isCleanAllEnabled = true;
+
+        public bool IsBuildAllEnabled
+        {
+            get => _isBuildAllEnabled;
+            set
+            {
+                if (_isBuildAllEnabled != value)
+                {
+                    _isBuildAllEnabled = value;
+                    RaisePropertyChanged(() => IsBuildAllEnabled);
+                }
+            }
+        }
+
+        public bool IsCleanAllEnabled
+        {
+            get => _isCleanAllEnabled;
+            set
+            {
+                if (_isCleanAllEnabled != value)
+                {
+                    _isCleanAllEnabled = value;
+                    RaisePropertyChanged(() => IsCleanAllEnabled);
+                }
+            }
+        }
+
+
         public FileBrowserEx(ContentPipelineViewModel model, string contentFilename):base(model, contentFilename, null)
         {
             SaveCommand = new RelayCommand(Save);
@@ -76,14 +107,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         void BuildAll(object parameter)
         {
+            IsBuildAllEnabled = false;
+            IsCleanAllEnabled = false;
+            this.ContentPipelineViewModel.BuildEnded += ContentPipelineViewModel_BuildEnded;
             this.ContentPipelineViewModel.Build(true);
         }
 
         void CleanAll(object parameter)
         {
+            IsBuildAllEnabled = false;
+            IsCleanAllEnabled = false;
+            this.ContentPipelineViewModel.BuildEnded += ContentPipelineViewModel_BuildEnded;
             this.ContentPipelineViewModel.CleanAll();
         }
-        
+
+        private void ContentPipelineViewModel_BuildEnded(object sender, EventArgs e)
+        {
+            this.ContentPipelineViewModel.BuildEnded -= ContentPipelineViewModel_BuildEnded;
+            IsBuildAllEnabled = true;
+            IsCleanAllEnabled = true;
+        }
+
         internal void IncludeItem(object parameter)
         {
             BrowserItem item = (BrowserItem)parameter;

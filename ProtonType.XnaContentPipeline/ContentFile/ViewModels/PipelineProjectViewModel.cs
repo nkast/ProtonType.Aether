@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using nkast.ProtonType.Framework.Modules;
 using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
@@ -152,8 +153,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
-
-            this.LoadProject();
 
             Project.PipelineItemPropertyChanged += project_PipelineItemPropertyChanged;
 
@@ -422,64 +421,91 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 _packages._packages.Add(packageVM);
             }
 
-            using (PipelineProxyClient pipelineProxy = new PipelineProxyClient())
+            PipelineProxyClient pipelineProxy = InitProxy();
+
+            IProxyLogger logger = new ProxyLogger(this._logger);
+
+            List<Task> addPackageTasks = new List<Task>();
+            foreach (Package package in this.Project.PackageReferences)
             {
-                pipelineProxy.BeginListening();
-
-                pipelineProxy.SetBaseDirectory(this.Location);
-                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
-
-                // Set Global Settings
-                pipelineProxy.SetOutputDir(this.OutputDir);
-                pipelineProxy.SetIntermediateDir(this.IntermediateDir);
-                pipelineProxy.SetPlatform(this.Platform);
-                pipelineProxy.SetConfig(this.Config);
-                pipelineProxy.SetProfile(this.Profile);
-
-
-                IProxyLogger logger = new ProxyLogger(this._logger);
-
-                List<Task> addPackageTasks = new List<Task>();
-                foreach (Package package in this.Project.PackageReferences)
-                {
-                    Task task = pipelineProxy.AddPackageAsync(logger, package);
-                    addPackageTasks.Add(task);
-                }
-                Task.WaitAll(addPackageTasks.ToArray());
-
-                Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
-                resolvePackagesTask.Wait();
-
-                // load all types from references
-                List<Task> addAssemblyTasks = new List<Task>();
-                foreach (string refPath in this.Project.References)
-                {
-                    AssemblyViewModel assembly = this.CreateAssembly(refPath);
-                    if (assembly == null)
-                        continue;
-
-                    string assemblyPath = assembly.NormalizedAbsoluteFullPath;
-
-                    Task task = pipelineProxy.AddAssemblyAsync(logger, assemblyPath);
-                    addAssemblyTasks.Add(task);
-
-                    _references._assemblies.Add(assembly);
-                }
-                Task.WaitAll(addAssemblyTasks.ToArray());
-
-                IProxyLogger logger2 = new ProxyLogger(this._logger);
-                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger2);
-                importersTask.Wait();
-                List<ImporterDescription> importers = importersTask.Result;
-                foreach (ImporterDescription importerDesc in importers)
-                    _importers.Add(importerDesc);
-
-                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger2);
-                processorsTask.Wait();
-                List<ProcessorDescription> processors = processorsTask.Result;
-                foreach (ProcessorDescription processorDesc in processors)
-                    _processors.Add(processorDesc);
+                Task task = pipelineProxy.AddPackageAsync(logger, package);
+                addPackageTasks.Add(task);
             }
+            Task.WaitAll(addPackageTasks.ToArray());
+
+            Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
+            resolvePackagesTask.Wait();
+
+            // load all types from references
+            List<Task> addAssemblyTasks = new List<Task>();
+            foreach (string refPath in this.Project.References)
+            {
+                AssemblyViewModel assembly = this.CreateAssembly(refPath);
+                if (assembly == null)
+                    continue;
+
+                string assemblyPath = assembly.NormalizedAbsoluteFullPath;
+
+                Task task = pipelineProxy.AddAssemblyAsync(logger, assemblyPath);
+                addAssemblyTasks.Add(task);
+
+                _references._assemblies.Add(assembly);
+            }
+            Task.WaitAll(addAssemblyTasks.ToArray());
+
+            IProxyLogger logger2 = new ProxyLogger(this._logger);
+            Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger2);
+            importersTask.Wait();
+            List<ImporterDescription> importers = importersTask.Result;
+            foreach (ImporterDescription importerDesc in importers)
+                _importers.Add(importerDesc);
+
+            Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger2);
+            processorsTask.Wait();
+            List<ProcessorDescription> processors = processorsTask.Result;
+            foreach (ProcessorDescription processorDesc in processors)
+                _processors.Add(processorDesc);
+
+            pipelineProxy.Dispose();
+        }
+
+        private PipelineProxyClient InitProxy()
+        {
+            PipelineProxyClient pipelineProxy = new PipelineProxyClient();
+            pipelineProxy.BeginListening();
+
+            pipelineProxy.SetBaseDirectory(this.Location);
+            pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+
+            ContentCompression compression = ContentCompression.Uncompressed;
+            if (this.Project.Compress)
+            {
+                switch (this.Project.Compression)
+                {
+                    case CompressionMethod.Default:
+                        compression = ContentCompression.LegacyLZ4;
+                        break;
+                    case CompressionMethod.LZ4:
+                        compression = ContentCompression.LZ4;
+                        break;
+                    case CompressionMethod.Brotli:
+                        compression = ContentCompression.Brotli;
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+
+            // Set Global Settings
+            pipelineProxy.SetOutputDir(this.OutputDir);
+            pipelineProxy.SetIntermediateDir(this.IntermediateDir);
+            pipelineProxy.SetPlatform(this.Platform);
+            if (this.Config != null)
+                pipelineProxy.SetConfig(this.Config);
+            pipelineProxy.SetProfile(this.Profile);
+            pipelineProxy.SetCompression(compression);
+
+            return pipelineProxy;
         }
 
         internal PackageViewModel CreatePackage(Package package)
