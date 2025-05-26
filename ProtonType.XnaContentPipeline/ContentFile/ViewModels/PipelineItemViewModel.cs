@@ -32,11 +32,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         /*internal*/ public readonly PipelineItem PipelineItem;
         private readonly ProcessorParamsViewModel _processorParams;
 
-        #region mirror PipelineProject.IProjectItem
         public string Filename { get { return PipelineItem.Filename; } }
         public string Location { get { return PipelineItem.Location; } }
         public string OriginalPath { get { return PipelineItem.OriginalPath; } }
-        #endregion
         
         [Category("Build Settings")]
         [tainicom.WpfPropertyGrid.PropertyOrder(-4)]

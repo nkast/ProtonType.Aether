@@ -38,7 +38,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         private readonly Dictionary<string, List<BuildEvent>> _buildEventsMap;
 
         public string ProjectDirectory { get; private set; }
-        public string ProjectFilename { get; private set; }
+        public string ProjectName { get; private set; }
 
         public string OutputDirectory { get; private set; }
         public string IntermediateDirectory { get; private set; }
@@ -69,15 +69,15 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
         /// </summary>
         public ContentCompression Compression { get; set; }
 
-        internal const String DefaultFileCollectionFilename = "assetsdb.kniContent";
+        internal const String DefaultFileCollectionFilename = "assetsdb";
 
-        public PipelineManager(string projectDir, string projectFilename, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr,
+        public PipelineManager(string projectDir, string projectName, string outputDir, string intermediateDir, AssembliesMgr assembliesMgr,
             Dictionary<string, List<BuildEvent>> buildEventsMap)
         {
             Logger = null;
 
             ProjectDirectory = LegacyPathHelper.NormalizeDirectory(projectDir);
-            ProjectFilename = projectFilename;
+            ProjectName = projectName;
 
             OutputDirectory = LegacyPathHelper.NormalizeDirectory(outputDir);
             IntermediateDirectory = LegacyPathHelper.NormalizeDirectory(intermediateDir);
@@ -161,36 +161,36 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void DeleteBuildEvent(string destFile)
         {
-            string dbname = ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
-                dbname = DefaultFileCollectionFilename;
+                dbname = PipelineManager.DefaultFileCollectionFilename;
 
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, dbname, relativeEventPath);
             if (File.Exists(intermediateEventPath))
                 File.Delete(intermediateEventPath);
         }
 
         private void SaveBuildEvent(string destFile, BuildEvent buildEvent)
         {
-            string dbname = ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
-                dbname = DefaultFileCollectionFilename;
+                dbname = PipelineManager.DefaultFileCollectionFilename;
 
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, dbname, relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             buildEvent.SaveBinary(intermediateEventPath);
         }
 
         internal BuildEvent LoadBuildEvent(string destFile)
         {
-            string dbname = ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
-                dbname = DefaultFileCollectionFilename;
+                dbname = PipelineManager.DefaultFileCollectionFilename;
 
             string relativeEventPath = Path.ChangeExtension(LegacyPathHelper.GetRelativePath(OutputDirectory, destFile), BuildEvent.Extension);
-            string intermediateEventPath = Path.Combine(IntermediateDirectory, Path.GetFileNameWithoutExtension(dbname), relativeEventPath);
+            string intermediateEventPath = Path.Combine(IntermediateDirectory, dbname, relativeEventPath);
             intermediateEventPath = Path.GetFullPath(intermediateEventPath);
             return BuildEvent.LoadBinary(intermediateEventPath);
         }

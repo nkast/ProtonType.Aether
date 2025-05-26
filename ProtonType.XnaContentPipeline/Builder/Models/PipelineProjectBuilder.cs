@@ -180,7 +180,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
         {
             _buildItems.Clear();
 
-            PipelineProxyClient pipelineProxy = InitProxy();
+            string projectName = Path.GetFileNameWithoutExtension(this._project.OriginalPath);
+            string location = this._project.OriginalPath;
+            if (string.IsNullOrEmpty(location))
+                location = "";
+            else
+                location = Path.GetDirectoryName(location);
+
+            PipelineProxyClient pipelineProxy = InitProxy(this._project, projectName, location);
 
             pipelineProxy.SetRebuild();
             pipelineProxy.SetIncremental();
@@ -315,43 +322,25 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             return;
         }
 
-        private PipelineProxyClient InitProxy()
+        private static PipelineProxyClient InitProxy(PipelineProject project, string projectName, string location)
         {
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            string location = this._project.Location;
-            string originalPath = this._project.OriginalPath;
-
             pipelineProxy.SetBaseDirectory(location);
-            pipelineProxy.SetProjectFilename(Path.GetFileName(originalPath));
+            pipelineProxy.SetProjectName(projectName);
 
             ContentCompression compression = ContentCompression.Uncompressed;
-            if (_project.Compress)
-            {
-                switch (_project.Compression)
-                {
-                    case CompressionMethod.Default:
-                        compression = ContentCompression.LegacyLZ4;
-                        break;
-                    case CompressionMethod.LZ4:
-                        compression = ContentCompression.LZ4;
-                        break;
-                    case CompressionMethod.Brotli:
-                        compression = ContentCompression.Brotli;
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-            }
+            if (project.Compress)
+                compression = PipelineProject.ToContentCompression(project.Compression);
 
             // Set Global Settings
-            pipelineProxy.SetOutputDir(_project.OutputDir);
-            pipelineProxy.SetIntermediateDir(_project.IntermediateDir);
-            pipelineProxy.SetPlatform(_project.Platform);
-            if (_project.Config != null)
-                pipelineProxy.SetConfig(_project.Config);
-            pipelineProxy.SetProfile(_project.Profile);
+            pipelineProxy.SetOutputDir(project.OutputDir);
+            pipelineProxy.SetIntermediateDir(project.IntermediateDir);
+            pipelineProxy.SetPlatform(project.Platform);
+            if (project.Config != null)
+                pipelineProxy.SetConfig(project.Config);
+            pipelineProxy.SetProfile(project.Profile);
             pipelineProxy.SetCompression(compression);
 
             return pipelineProxy;
@@ -365,9 +354,16 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public void CleanAll()
         {
-            var commands = string.Format("/clean /intermediateDir:\"{0}\" /outputDir:\"{1}\"", _project.IntermediateDir, _project.OutputDir);
+            string commands = string.Format("/clean /intermediateDir:\"{0}\" /outputDir:\"{1}\"", _project.IntermediateDir, _project.OutputDir);
 
-            PipelineProxyClient pipelineProxy = InitProxy();
+            string projectName = Path.GetFileNameWithoutExtension(this._project.OriginalPath);
+            string location = this._project.OriginalPath;
+            if (string.IsNullOrEmpty(location))
+                location = "";
+            else
+                location = Path.GetDirectoryName(location);
+
+            PipelineProxyClient pipelineProxy = InitProxy(this._project, projectName, location);
 
             //pipelineProxy.SetClean();
 

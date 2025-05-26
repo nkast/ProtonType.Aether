@@ -22,13 +22,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
+using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
-    /*internal*/ public class PipelineProject : IPipelineItem
+    /*internal*/ public class PipelineProject
     {
+        public string OriginalPath
+        {
+            get;
+            set;
+        }
+
         IList<PipelineItem> _pipelineItems = new List<PipelineItem>();
 
 
@@ -54,45 +60,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         /// Gets or sets the compression method.
         /// </summary>
         public CompressionMethod Compression { get; set; }
-
-        #region IPipelineItem
-
-        public string Filename
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(OriginalPath))
-                    return "";
-
-                return System.IO.Path.GetFileNameWithoutExtension(OriginalPath);
-            }
-        }
-
-        public string Location
-        {
-            get
-            {
-                string location = OriginalPath;
-                if (string.IsNullOrEmpty(location))
-                {
-                    location = "";
-                    return location;
-                }
-                else
-                {
-                    int idx = location.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, location.Length - 1);
-                    return location.Remove(idx);
-                }
-            }
-        }
-
-        public string OriginalPath 
-        {
-            get;
-            set;
-        }
-
-        #endregion
 
         public PipelineProject()
         {
@@ -169,5 +136,23 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             int index = ((List<PipelineItem>)_pipelineItems).BinarySearch(pipelineItem, pipelineItemComparer);
             return index;
         }
+
+
+        public static ContentCompression ToContentCompression(CompressionMethod compressionMethod)
+        {
+            switch (compressionMethod)
+            {
+                case CompressionMethod.Default:
+                    return ContentCompression.LegacyLZ4;
+                case CompressionMethod.LZ4:
+                    return ContentCompression.LZ4;
+                case CompressionMethod.Brotli:
+                    return ContentCompression.Brotli;
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
     }
 }

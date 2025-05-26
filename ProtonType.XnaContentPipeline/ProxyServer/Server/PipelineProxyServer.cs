@@ -34,7 +34,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
     class PipelineProxyServer : IPCServer
     {
         private string BaseDirectory;
-        private string ProjectFilename;
+        private string ProjectName;
 
         private readonly ParametersContext _globalContext = new ParametersContext();
         private readonly ContentBuildLogger _globalLogger;
@@ -163,8 +163,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     case ProxyMsgType.BaseDirectory:
                         SetBaseDirectory();
                         break;                    
-                    case ProxyMsgType.ProjectFilename:
-                        SetProjectFilename();
+                    case ProxyMsgType.ProjectName:
+                        SetProjectName();
                         break;
                     case ProxyMsgType.AddPackage:
                         AddPackage();
@@ -254,10 +254,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             this.BaseDirectory = baseDirectory;
         }
 
-        private void SetProjectFilename()
+        private void SetProjectName()
         {
-            string projectFilename = Reader.ReadString();
-            this.ProjectFilename = projectFilename;
+            string projectName = Reader.ReadString();
+            this.ProjectName = projectName;
         }
 
         private void AddPackage()
@@ -311,7 +311,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
             string projectDirectory = this.BaseDirectory;
             projectDirectory = LegacyPathHelper.Normalize(projectDirectory);
 
-            string projFolder = Path.GetFileNameWithoutExtension(this.ProjectFilename);
+            string projFolder = this.ProjectName;
 
             _assembliesMgr.ResolvePackages(logger, projFolder, projectDirectory);
         }
@@ -572,7 +572,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 	                               ;
 
                 PipelineManager _manager;
-                _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
+                _manager = new PipelineManager(projectDirectory, this.ProjectName, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
                 _manager.Compression = Compression;
                 _manager.Logger = logger;
 
@@ -650,12 +650,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
                     intermediatePath = LegacyPathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
 
                 // TODO: we shouldn't be building a new PipelineManager.
-                _manager = new PipelineManager(
-                    projectDirectory,
-                    this.ProjectFilename,
-                    outputPath,
-                    intermediatePath,
-                    _assembliesMgr, _buildEventsMap);
+                _manager = new PipelineManager(projectDirectory, this.ProjectName, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
                 _manager.Compression = Compression;
             }
 
@@ -839,7 +834,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
             // TODO: we shouldn't be building a new PipelineManager.
             PipelineManager _manager;
-            _manager = new PipelineManager(projectDirectory, this.ProjectFilename, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
+            _manager = new PipelineManager(projectDirectory, this.ProjectName, outputPath, intermediatePath, _assembliesMgr, _buildEventsMap);
             _manager.Compression = Compression;
             ContentBuildLogger logger = new BuildLogger(this, itemContext.Guid);
             _manager.Logger = logger;
@@ -955,7 +950,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void DeleteFileCollection(string intermediatePath)
         {
-            string dbname = this.ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
                 dbname = PipelineManager.DefaultFileCollectionFilename;
 
@@ -966,7 +961,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private void SaveFileCollection(string intermediatePath, SourceFileCollection fileCollection)
         {
-            string dbname = this.ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
                 dbname = PipelineManager.DefaultFileCollectionFilename;
 
@@ -976,7 +971,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         private SourceFileCollection LoadFileCollection(string intermediatePath)
         {
-            string dbname = this.ProjectFilename;
+            string dbname = this.ProjectName;
             if (dbname == String.Empty)
                 dbname = PipelineManager.DefaultFileCollectionFilename;
 

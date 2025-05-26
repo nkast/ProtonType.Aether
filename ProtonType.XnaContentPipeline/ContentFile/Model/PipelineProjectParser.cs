@@ -50,9 +50,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
             project.ClearItems();
 
-            // Store the file name for saving later.
-            project.OriginalPath = projectFilePath;
-
             CommandLineParser parser = new CommandLineParser();
             IEnumerable<string> commands = ReadFile(projectFilePath);
             commands = CommandLineParser.Preprocess(commands);
@@ -301,7 +298,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
     /*internal*/ public class PipelineProjectWriter
     {
-        /*internal*/ public static void SaveProject(PipelineProject _project, string filePath, IEnumerable<PipelineItem> pipelineItems)
+        /*internal*/ public static void SaveProject(PipelineProject project, string filePath, IEnumerable<PipelineItem> pipelineItems)
         {
             string path = Path.GetDirectoryName(filePath);
             string fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -310,7 +307,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             string tmpFilename = Path.Combine(path, fileName + fileExtension + "~tmp");
 
             using (StreamWriter io = File.CreateText(tmpFilename))
-                SaveProject(_project, io, pipelineItems);
+                SaveProject(project, io, pipelineItems);
 
             if (File.Exists(filePath))
                 File.Delete(filePath);

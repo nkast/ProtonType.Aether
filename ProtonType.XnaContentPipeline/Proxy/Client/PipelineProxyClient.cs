@@ -223,12 +223,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             }
         }
 
-        public void SetProjectFilename(string projectFilename)
+        public void SetProjectName(string projectName)
         {
             lock (Writer)
             {
-                WriteMsg(ProxyMsgType.ProjectFilename);
-                Writer.Write(projectFilename);
+                WriteMsg(ProxyMsgType.ProjectName);
+                Writer.Write(projectName);
                 Writer.Flush();
             }
         }

@@ -23,7 +23,7 @@ using System.ComponentModel;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
-    /*internal*/ public partial class PipelineItem : IPipelineItem, INotifyPropertyChanged
+    /*internal*/ public partial class PipelineItem : INotifyPropertyChanged
     {
         internal PipelineProject Project;
 

@@ -60,7 +60,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         {
             get
             {
-                string location = Project.Location;
+                string location = Project.OriginalPath;
+                if (string.IsNullOrEmpty(location))
+                    location = "";
+                else
+                    location = Path.GetDirectoryName(location);
+
                 return location;
             }
         }
@@ -153,7 +158,8 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             Processors = new ReadOnlyObservableCollection<ProcessorDescription>(_processors);
 
             _templateItems = new List<ContentItemTemplate>();
-            LoadTemplates(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Templates"));
+            string location = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "Templates");
+            LoadTemplates(location);
 
             _logger = logger;
             this.IsProjectOpen = false;
@@ -189,13 +195,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             try
             {
                 PipelineProjectReader reader = new PipelineProjectReader();
-                Project = reader.LoadProject(projectFilePath, _logger);
+                this.Project = reader.LoadProject(projectFilePath, _logger);
+                this.Project.OriginalPath = projectFilePath;
 
                 this.LoadProject();
 
                 CreateItems();
 
-                string location = this.Location;
+                string location = Path.GetDirectoryName(projectFilePath);
                 LoadTemplates(location);
 
                 IsProjectOpen = true;
@@ -366,24 +373,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             }
         }
 
-
-        internal IPipelineItem GetItem(string originalPath)
-        {
-            if (Project.OriginalPath.Equals(originalPath, StringComparison.OrdinalIgnoreCase))
-                return Project;
-
-            foreach (var i in Project.PipelineItems)
-            {
-                if (string.Equals(i.OriginalPath, originalPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    return i;
-                }
-            }
-
-            return null;
-        }
-
-
         private readonly ObservableCollection<ImporterDescription> _importers = new ObservableCollection<ImporterDescription>();
         private readonly ObservableCollection<ProcessorDescription> _processors = new ObservableCollection<ProcessorDescription>();
 
@@ -411,7 +400,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 _packages._packages.Add(packageVM);
             }
 
-            PipelineProxyClient pipelineProxy = InitProxy();
+            string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
+            string location = this.Location;
+
+            PipelineProxyClient pipelineProxy = InitProxy(this.Project, projectName, location);
 
             IProxyLogger logger = new ProxyLogger(this._logger);
 
@@ -459,43 +451,25 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             pipelineProxy.Dispose();
         }
 
-        private PipelineProxyClient InitProxy()
+        private PipelineProxyClient InitProxy(PipelineProject project, string projectName, string location)
         {
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            string location = this.Location;
-            string originalPath = this.Project.OriginalPath;
-
             pipelineProxy.SetBaseDirectory(location);
-            pipelineProxy.SetProjectFilename(Path.GetFileName(originalPath));
+            pipelineProxy.SetProjectName(projectName);
 
             ContentCompression compression = ContentCompression.Uncompressed;
-            if (this.Project.Compress)
-            {
-                switch (this.Project.Compression)
-                {
-                    case CompressionMethod.Default:
-                        compression = ContentCompression.LegacyLZ4;
-                        break;
-                    case CompressionMethod.LZ4:
-                        compression = ContentCompression.LZ4;
-                        break;
-                    case CompressionMethod.Brotli:
-                        compression = ContentCompression.Brotli;
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-            }
+            if (project.Compress)
+                compression = PipelineProject.ToContentCompression(project.Compression);
 
             // Set Global Settings
-            pipelineProxy.SetOutputDir(this.OutputDir);
-            pipelineProxy.SetIntermediateDir(this.IntermediateDir);
-            pipelineProxy.SetPlatform(this.Platform);
-            if (this.Config != null)
-                pipelineProxy.SetConfig(this.Config);
-            pipelineProxy.SetProfile(this.Profile);
+            pipelineProxy.SetOutputDir(project.OutputDir);
+            pipelineProxy.SetIntermediateDir(project.IntermediateDir);
+            pipelineProxy.SetPlatform(project.Platform);
+            if (project.Config != null)
+                pipelineProxy.SetConfig(project.Config);
+            pipelineProxy.SetProfile(project.Profile);
             pipelineProxy.SetCompression(compression);
 
             return pipelineProxy;
@@ -666,8 +640,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             {
                 pipelineProxy.BeginListening();
 
-                pipelineProxy.SetBaseDirectory(this.Location);
-                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+                string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
+                string location = this.Location;
+
+                pipelineProxy.SetBaseDirectory(location);
+                pipelineProxy.SetProjectName(projectName);
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
                 Task task = pipelineProxy.AddAssemblyAsync(logger, assembly.NormalizedAbsoluteFullPath);
@@ -698,8 +675,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             {
                 pipelineProxy.BeginListening();
 
-                pipelineProxy.SetBaseDirectory(this.Location);
-                pipelineProxy.SetProjectFilename(Path.GetFileName(this.Project.OriginalPath));
+                string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
+                string location = this.Location;
+
+                pipelineProxy.SetBaseDirectory(location);
+                pipelineProxy.SetProjectName(projectName);
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
                 Task task = pipelineProxy.AddPackageAsync(logger, packageVM.Package);
