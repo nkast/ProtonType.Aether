@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using nkast.ProtonType.Framework.Attributes;
 using nkast.ProtonType.Framework.ViewModels;
@@ -60,11 +61,14 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
         public string ProjectName 
         { 
-            get { return _projectVM.ProjectName; }
+            get
+            {
+                return Path.GetFileNameWithoutExtension(_projectVM.DocumentFile);
+            }
         }
         public string OriginalPath
         {
-            get { return _projectVM.Project.OriginalPath; }
+            get { return _projectVM.DocumentFile; }
         }
 
         bool _isQueuedSelected;
@@ -298,7 +302,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
 
             List<PipelineItem> buildItems = items;
 
-            _pipelineBuilder.BuildItems(items, buildItems, rebuild);
+            _pipelineBuilder.BuildItems(this.OriginalPath, items, buildItems, rebuild);
         }
 
         public void BuildItem(PipelineItemViewModel buildPipelineItemVM, bool rebuild)
@@ -310,12 +314,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.ViewModels
             List<PipelineItem> buildItems = new List<PipelineItem>();
             buildItems.Add(buildPipelineItemVM.PipelineItem);
 
-            _pipelineBuilder.BuildItems(items, buildItems, rebuild);
+            _pipelineBuilder.BuildItems(this.OriginalPath, items, buildItems, rebuild);
         }
 
         public void CleanAll()
         {
-            _pipelineBuilder.CleanAll();
+            _pipelineBuilder.CleanAll(this.OriginalPath);
         }
 
         public void CleanItem(PipelineItemViewModel pipelineItemVM)

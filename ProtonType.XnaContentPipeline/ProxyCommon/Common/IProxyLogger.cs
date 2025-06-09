@@ -16,12 +16,16 @@
 
 using Microsoft.Xna.Framework.Content.Pipeline;
 
-namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
+namespace nkast.ProtonType.XnaContentPipeline.Common
 {
-    public interface IProxyLogger
+    public interface IProxyLoggerBase
     {
-        void LogImportantMessage(string filename, string message);
-        void LogMessage(string filename, string message);
+    }
+
+    public interface IProxyLogger : IProxyLoggerBase
+    {
+        void LogImportantMessage(string message);
+        void LogMessage(string message);
         void LogWarning(string filename, string helpLink, ContentIdentity contentIdentity, string message);
         void LogError(string filename, ContentIdentity contentIdentity, string message);
     }

@@ -25,9 +25,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         public readonly string AssemblyPath;
         public readonly string TypeName;
         public readonly string TypeFullName;
-        public readonly string InputTypeFullName;
         public readonly string OutputTypeFullName;
-        public readonly string[] InputBaseTypesFullName;
+        public readonly string InputTypeFullName;
         public readonly ProcessorParamDescription[] ProcessorParams;
 
         // ContentProcessorAttribute
@@ -40,11 +39,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             TypeFullName = ReadString(reader);
             InputTypeFullName = ReadString(reader);
             OutputTypeFullName = ReadString(reader);
-
-            InputBaseTypesFullName = new String[reader.ReadInt32()];
-            for (int i = 0; i < InputBaseTypesFullName.Length; i++)
-                InputBaseTypesFullName[i] = ReadString(reader);
-
 
             ProcessorParams = new ProcessorParamDescription[reader.ReadInt32()];
             for (int i = 0; i < ProcessorParams.Length; i++)
@@ -63,14 +57,13 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             DisplayName = ReadString(reader);
         }
         
-        public ProcessorDescription(string assemblyPath, string typeName, string typeFullName, string inputTypeFullName, string[] inputBaseTypesFullName, string outputTypeFullName, ProcessorParamDescription[] processorParams, string displayName)
+        public ProcessorDescription(string assemblyPath, string typeName, string typeFullName, string inputTypeFullName, string outputTypeFullName, ProcessorParamDescription[] processorParams, string displayName)
         {
             // TODO: Complete member initialization
             this.AssemblyPath = assemblyPath;
             this.TypeName = typeName;
             this.TypeFullName = typeFullName;
             this.InputTypeFullName = inputTypeFullName;
-            this.InputBaseTypesFullName = inputBaseTypesFullName;
             this.OutputTypeFullName = outputTypeFullName;
             this.ProcessorParams = processorParams;
             this.DisplayName = displayName;
@@ -83,11 +76,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             WriteString(writer, TypeFullName);
             WriteString(writer, InputTypeFullName);
             WriteString(writer, OutputTypeFullName);
-
-            writer.Write((Int32)InputBaseTypesFullName.Length);
-            for (int i = 0; i < InputBaseTypesFullName.Length; i++)
-                WriteString(writer, InputBaseTypesFullName[i]);
-
 
             writer.Write((Int32)ProcessorParams.Length);
             for (int i = 0; i < ProcessorParams.Length; i++)

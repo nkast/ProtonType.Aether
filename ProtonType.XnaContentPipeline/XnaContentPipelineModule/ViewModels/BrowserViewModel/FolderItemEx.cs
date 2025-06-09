@@ -116,7 +116,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 BrowserItemEx itemEx = null;
                 foreach (BrowserItem item in items)
                 {
-                    string contentFilename = Path.GetFileName(FileBrowserEx.ContentPipelineViewModel.DocumentFile);
+                    string contentFilename = Path.GetFileName(FileBrowserEx.ContentPipelineViewModel.PipelineProjectViewModel.DocumentFile);
                     if (item.Name == contentFilename)
                     {
                         itemEx = item as BrowserItemEx;

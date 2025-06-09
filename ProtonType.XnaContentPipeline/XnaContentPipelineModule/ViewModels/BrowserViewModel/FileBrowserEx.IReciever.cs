@@ -59,7 +59,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             if (pipelineItemVM == null)
             {
                 // Root the path to the project.
-                string documentDirectory = Path.GetDirectoryName(ContentPipelineViewModel.DocumentFile);
+                string documentDirectory = Path.GetDirectoryName(ContentPipelineViewModel.PipelineProjectViewModel.DocumentFile);
                 string fileAbsolutePath = Path.Combine(documentDirectory, item.RelativePath);
                 if (!File.Exists(fileAbsolutePath))
                     throw new Exception("File not found. " + fileAbsolutePath);

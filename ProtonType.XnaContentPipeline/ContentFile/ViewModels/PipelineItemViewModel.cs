@@ -21,6 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
 
@@ -96,10 +97,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
                 // Validate that our processor can accept input content of the type output by the new importer.
                 // If it cannot, set the default processor.
-                if ((_processor == null || _processor.InputTypeFullName != _importerDesc.OutputTypeFullName) &&
-                    _processor != PipelineTypes.MissingProcessor)
+                if (_importerDesc != PipelineTypes.MissingImporter)
                 {
-                    Processor = PipelineProject.FindProcessor(_importerDesc.DefaultProcessor, _importerDesc);
+                    if (_processor == null || !_importerDesc.OutputBaseTypesFullName.Contains(_processor.InputTypeFullName))
+                    {
+                        Processor = PipelineProject.FindProcessor(_importerDesc.DefaultProcessor, _importerDesc);
+                    }
                 }
             }
         }

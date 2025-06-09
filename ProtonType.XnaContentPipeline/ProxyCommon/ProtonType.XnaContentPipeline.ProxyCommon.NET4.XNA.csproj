@@ -47,6 +47,8 @@
     <Compile Include="Common\BuildState.cs" />
     <Compile Include="Common\Converters\StringToColorConverter.cs" />
     <Compile Include="Common\ImporterDescription.cs" />
+    <Compile Include="Common\IPipelineBuilder.cs" />
+    <Compile Include="Common\IProxyLogger.cs" />
     <Compile Include="Common\ProcessorDescription.cs" />
     <Compile Include="Common\ProcessorParamDescription.cs" />
     <Compile Include="Common\Package.cs" />

@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {

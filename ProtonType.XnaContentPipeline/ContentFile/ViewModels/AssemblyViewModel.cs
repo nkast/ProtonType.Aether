@@ -35,7 +35,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 if (_project == null)
                     return OriginalPath;
 
-                var projectRoot = _project.Location;
+                string projectRoot = _project.DocumentFile;
+                if (string.IsNullOrEmpty(projectRoot))
+                    projectRoot = "";
+                else
+                    projectRoot = Path.GetDirectoryName(projectRoot);
+
                 return Path.Combine(projectRoot, OriginalPath);
             }
         }

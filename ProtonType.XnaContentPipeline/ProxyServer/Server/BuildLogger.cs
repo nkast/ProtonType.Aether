@@ -17,10 +17,11 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Content.Pipeline;
+using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 {
-    public class BuildLogger : ContentBuildLogger
+    public class BuildLogger : ContentBuildLogger, IProxyLoggerBase
     {
         private readonly PipelineProxyServer _proxyServer;
         private readonly Guid ContextGuid;
@@ -33,18 +34,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer
 
         public override void LogMessage(string message, params object[] messageArgs)
         {
-            string currentFilename = GetCurrentFilename(null);
             string msg = string.Format(message, messageArgs);
             Trace.WriteLine(msg);
-            _proxyServer.LogMessage(ContextGuid, currentFilename, msg);
+            _proxyServer.LogMessage(ContextGuid, msg);
         }
 
         public override void LogImportantMessage(string message, params object[] messageArgs)
         {
-            string currentFilename = GetCurrentFilename(null);
             string msg = string.Format(message, messageArgs);
             Trace.WriteLine(msg);
-            _proxyServer.LogImportantMessage(ContextGuid, currentFilename, msg);
+            _proxyServer.LogImportantMessage(ContextGuid, msg);
         }
 
         public override void LogWarning(string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)

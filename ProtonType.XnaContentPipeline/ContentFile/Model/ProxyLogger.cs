@@ -30,12 +30,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             this._viewLogger = viewLogger;
         }
 
-        void IProxyLogger.LogImportantMessage(string filename, string message)
+        void IProxyLogger.LogImportantMessage(string message)
         {
             _viewLogger.LogMessage(message);
         }
 
-        void IProxyLogger.LogMessage(string filename, string message)
+        void IProxyLogger.LogMessage(string message)
         {
             _viewLogger.LogMessage(message);
         }

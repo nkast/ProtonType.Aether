@@ -67,13 +67,19 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 // TODO: is referencesViewModel1 == this ?
                 ReferencesViewModel referencesViewModel1 = listBox.ItemsSource as ReferencesViewModel;
 
+                string location = this._project.DocumentFile;
+                if (string.IsNullOrEmpty(location))
+                    location = "";
+                else
+                    location = Path.GetDirectoryName(location);
+
                 // select file and create an AssemblyViewModel
                 Win32.OpenFileDialog ofd = new Win32.OpenFileDialog();
                 ofd.Filter = ".Net assembly files (*.dll)|*.dll|All files (*.*)|*.*";
                 ofd.FilterIndex = 1;
                 ofd.AddExtension = true;
                 ofd.FileName = String.Empty;
-                ofd.InitialDirectory = this._project.Location;
+                ofd.InitialDirectory = location;
                 if (ofd.ShowDialog() != true)
                     return;
                 string fdFilenameResult = ofd.FileName;

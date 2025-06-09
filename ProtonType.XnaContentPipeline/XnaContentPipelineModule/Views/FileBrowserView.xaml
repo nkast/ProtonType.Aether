@@ -105,10 +105,10 @@
                     <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/Refresh.png" SnapsToDevicePixels="True"></Image>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Build All" ToolBar.OverflowMode="Never" Command="{Binding BuildAllCommand}" >
+                <Button ToolTip="Build All" ToolBar.OverflowMode="Never" Command="{Binding BuildAllCommand}" IsEnabled="{Binding IsBuildAllEnabled}">
                     <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/BuildSolution_16x.png" SnapsToDevicePixels="True" ></Image>
                 </Button>
-                <Button ToolTip="Clean All" ToolBar.OverflowMode="Never" Command="{Binding CleanAllCommand}" >
+                <Button ToolTip="Clean All" ToolBar.OverflowMode="Never" Command="{Binding CleanAllCommand}" IsEnabled="{Binding IsCleanAllEnabled}">
                     <Image Height="16" Source="/ProtonType.XnaContentPipelineModule;component/Icons/CleanData_16x.png" SnapsToDevicePixels="True" ></Image>
                 </Button>
             </ToolBar>

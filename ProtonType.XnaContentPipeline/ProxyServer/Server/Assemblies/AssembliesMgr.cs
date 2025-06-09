@@ -261,14 +261,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
             return _assemblies;
         }
 
-        internal IEnumerator<ImporterDescription> GetImporters()
+        internal List<ImporterDescription> GetImporters()
         {
-            return _importers.Select((item)=>item.Description).GetEnumerator();
+            return new List<ImporterDescription>(_importers.Select((item)=>item.Description));
         }
 
-        internal IEnumerator<ProcessorDescription> GetProcessors()
+        internal List<ProcessorDescription> GetProcessors()
         {
-            return _processors.Select((item)=>item.Description).GetEnumerator();
+            return new List<ProcessorDescription>(_processors.Select((item)=>item.Description));
         }
 
         private ImporterInfo ProcessImporter(Type importerType, string assemblyPath, DateTime assemblyTimestamp)
@@ -285,12 +285,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
 
             // find all output base type
             List<string> outputBaseTypesFullName = new List<string>();
+            outputBaseTypesFullName.Add(outputType.FullName);
             for (Type baseType = outputType.BaseType; baseType != null; baseType = baseType.BaseType)
             {
-                // ignore base class of content items
-                if (baseType == typeof(Microsoft.Xna.Framework.Content.Pipeline.ContentItem))
-                    break;
-
                 outputBaseTypesFullName.Add(baseType.FullName);
             }
 
@@ -315,8 +312,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                 assemblyPath,
                 importerType.Name,
                 importerType.FullName,
-                outputType.Name,
-                outputType.FullName,
                 outputBaseTypesFullName.ToArray(),
                 // ContentImporterAttribute
                 importerAttribute.DisplayName,
@@ -385,7 +380,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyServer.Assemblies
                     processorType.Name,
                     processorType.FullName,
                     inputType.FullName,
-                    inputBaseTypesFullName.ToArray(),
                     outputType.FullName,
                     processorParams.ToArray(),
                     // ContentProcessorAttribute

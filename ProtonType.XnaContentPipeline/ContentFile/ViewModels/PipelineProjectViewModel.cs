@@ -25,7 +25,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
+using Microsoft.Xna.Framework.Graphics;
 using nkast.ProtonType.Framework.Modules;
 using nkast.ProtonType.Framework.ViewModels;
 using nkast.ProtonType.XnaContentPipeline.Common;
@@ -46,6 +48,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         private readonly List<ContentItemTemplate> _templateItems;
         internal readonly IPipelineLogger _logger;
 
+        /// <remarks>full path + filename + .ext (.mgcb)</remarks>
+        public string DocumentFile
+        {
+            get;
+            private set;
+        }
 
         internal IEnumerable<ContentItemTemplate> Templates { get { return _templateItems; } }
 
@@ -56,39 +64,16 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         public bool IsProjectDirty { get; private set; }
 
-        public string Location
-        {
-            get
-            {
-                string location = Project.OriginalPath;
-                if (string.IsNullOrEmpty(location))
-                    location = "";
-                else
-                    location = Path.GetDirectoryName(location);
-
-                return location;
-            }
-        }
-
-        public string ProjectName
-        {
-            get 
-            {
-                return Path.GetFileNameWithoutExtension(Project.OriginalPath); 
-            }
-        }
-
-
 
         [Category("Settings")]
-        public ProxyTargetPlatform Platform
+        public TargetPlatform Platform
         {
             get { return Project.Platform; }
             set { Project.Platform = value; }
         }
 
         [Category("Settings")]
-        public ProxyGraphicsProfile Profile
+        public GraphicsProfile Profile
         {
             get { return Project.Profile; }
             set { Project.Profile = value; }
@@ -170,13 +155,14 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         public void NewProject(string projectFilePath)
         {
+            this.DocumentFile = projectFilePath;
+
             // Clear existing project data, initialize to a new blank project.
             Project = new PipelineProject();
             Project.PipelineItemPropertyChanged += project_PipelineItemPropertyChanged;
 
             // Save the new project.
-            Project.OriginalPath = projectFilePath;
-            Project.Profile = ProxyGraphicsProfile.Reach;
+            Project.Profile = GraphicsProfile.Reach;
             Project.OutputDir = "../Content";
             IsProjectOpen = true;
             IsProjectDirty = true;
@@ -194,9 +180,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
             try
             {
+                this.DocumentFile = projectFilePath;
+
                 PipelineProjectReader reader = new PipelineProjectReader();
                 this.Project = reader.LoadProject(projectFilePath, _logger);
-                this.Project.OriginalPath = projectFilePath;
 
                 this.LoadProject();
 
@@ -236,11 +223,11 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
             // Make sure project directory exist
             //var projectDirectory = _project.Location;
-            var projectDirectory = Path.GetDirectoryName(Project.OriginalPath);
+            var projectDirectory = Path.GetDirectoryName(this.DocumentFile);
             if (!Directory.Exists(projectDirectory))
                 Directory.CreateDirectory(projectDirectory);
 
-            PipelineProjectWriter.SaveProject(Project, Project.OriginalPath, null);
+            PipelineProjectWriter.SaveProject(Project, this.DocumentFile, null);
 
             IsProjectDirty = false;
         }
@@ -266,7 +253,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             OnPipelineItemAdded(new PipelineItemViewModelEventArgs(pipelineItemVM));
         }
 
-        static PipelineItemPathComparer _pipelineItemPathComparer = new PipelineItemPathComparer();       
+        static PipelineItemPathComparer _pipelineItemPathComparer = new PipelineItemPathComparer();
 
         private int FindInsertIndex(PipelineItemViewModel pipelineItemVM)
         {
@@ -400,8 +387,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                 _packages._packages.Add(packageVM);
             }
 
-            string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
-            string location = this.Location;
+            string projectName = Path.GetFileNameWithoutExtension(this.DocumentFile);
+            string location = this.DocumentFile;
+            if (string.IsNullOrEmpty(location))
+                location = "";
+            else
+                location = Path.GetDirectoryName(location);
 
             PipelineProxyClient pipelineProxy = InitProxy(this.Project, projectName, location);
 
@@ -410,12 +401,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             List<Task> addPackageTasks = new List<Task>();
             foreach (Package package in this.Project.PackageReferences)
             {
-                Task task = pipelineProxy.AddPackageAsync(logger, package);
+                Task task = ((IPipelineBuilder)pipelineProxy).AddPackageAsync(logger, package);
                 addPackageTasks.Add(task);
             }
             Task.WaitAll(addPackageTasks.ToArray());
 
-            Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
+            Task resolvePackagesTask = ((IPipelineBuilder)pipelineProxy).ResolvePackagesAsync(logger);
             resolvePackagesTask.Wait();
 
             // load all types from references
@@ -428,7 +419,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
                 string assemblyPath = assembly.NormalizedAbsoluteFullPath;
 
-                Task task = pipelineProxy.AddAssemblyAsync(logger, assemblyPath);
+                Task task = ((IPipelineBuilder)pipelineProxy).AddAssemblyAsync(logger, assemblyPath);
                 addAssemblyTasks.Add(task);
 
                 _references._assemblies.Add(assembly);
@@ -436,13 +427,13 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             Task.WaitAll(addAssemblyTasks.ToArray());
 
             IProxyLogger logger2 = new ProxyLogger(this._logger);
-            Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger2);
+            Task<List<ImporterDescription>> importersTask = ((IPipelineBuilder)pipelineProxy).GetImportersAsync(logger2);
             importersTask.Wait();
             List<ImporterDescription> importers = importersTask.Result;
             foreach (ImporterDescription importerDesc in importers)
                 _importers.Add(importerDesc);
 
-            Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger2);
+            Task<List<ProcessorDescription>> processorsTask = ((IPipelineBuilder)pipelineProxy).GetProcessorsAsync(logger2);
             processorsTask.Wait();
             List<ProcessorDescription> processors = processorsTask.Result;
             foreach (ProcessorDescription processorDesc in processors)
@@ -456,21 +447,21 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            pipelineProxy.SetBaseDirectory(location);
-            pipelineProxy.SetProjectName(projectName);
+            ((IPipelineBuilder)pipelineProxy).SetBaseDirectory(location);
+            ((IPipelineBuilder)pipelineProxy).SetProjectName(projectName);
 
             ContentCompression compression = ContentCompression.Uncompressed;
             if (project.Compress)
                 compression = PipelineProject.ToContentCompression(project.Compression);
 
             // Set Global Settings
-            pipelineProxy.SetOutputDir(project.OutputDir);
-            pipelineProxy.SetIntermediateDir(project.IntermediateDir);
-            pipelineProxy.SetPlatform(project.Platform);
+            ((IPipelineBuilder)pipelineProxy).SetOutputDir(project.OutputDir);
+            ((IPipelineBuilder)pipelineProxy).SetIntermediateDir(project.IntermediateDir);
+            ((IPipelineBuilder)pipelineProxy).SetPlatform(project.Platform);
             if (project.Config != null)
-                pipelineProxy.SetConfig(project.Config);
-            pipelineProxy.SetProfile(project.Profile);
-            pipelineProxy.SetCompression(compression);
+                ((IPipelineBuilder)pipelineProxy).SetConfig(project.Config);
+            ((IPipelineBuilder)pipelineProxy).SetProfile(project.Profile);
+            ((IPipelineBuilder)pipelineProxy).SetCompression(compression);
 
             return pipelineProxy;
         }
@@ -574,10 +565,10 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             if (importerDesc != null)
             {
                 List<ProcessorDescription> processors = new List<ProcessorDescription>();
-
                 foreach (ProcessorDescription processorDesc in this.Processors)
                 {
-                    if (IsProcessorValid(importerDesc, processorDesc))
+                    if (importerDesc.DefaultProcessor.Equals(processorDesc.TypeName)
+                    ||  importerDesc.OutputBaseTypesFullName.Contains(processorDesc.InputTypeFullName))
                     {
                         processors.Add(processorDesc);
                     }
@@ -588,23 +579,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
             //Debug.Fail(string.Format("Processor not found! name={0}, importer={1}", name, importer));
             return null;
-
-        }
-
-        private bool IsProcessorValid(ImporterDescription importer, ProcessorDescription processor)
-        {
-            if (processor.TypeName.Equals(importer.DefaultProcessor))
-                return true;
-            if (processor.InputTypeFullName == importer.OutputTypeFullName)
-                return true;
-            if (processor.InputBaseTypesFullName.Contains(importer.OutputTypeFullName))
-                return true;
-            if (importer.OutputBaseTypesFullName.Contains(processor.InputTypeFullName))
-                return true;
-
-            return false;
-
-
         }
 
         public ProcessorDescription FindProcessor(string processorName, ImporterDescription importerDesc)
@@ -640,27 +614,31 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             {
                 pipelineProxy.BeginListening();
 
-                string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
-                string location = this.Location;
+                string projectName = Path.GetFileNameWithoutExtension(this.DocumentFile);
+                string location = this.DocumentFile;
+                if (string.IsNullOrEmpty(location))
+                    location = "";
+                else
+                    location = Path.GetDirectoryName(location);
 
-                pipelineProxy.SetBaseDirectory(location);
-                pipelineProxy.SetProjectName(projectName);
+                ((IPipelineBuilder)pipelineProxy).SetBaseDirectory(location);
+                ((IPipelineBuilder)pipelineProxy).SetProjectName(projectName);
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
-                Task task = pipelineProxy.AddAssemblyAsync(logger, assembly.NormalizedAbsoluteFullPath);
+                Task task = ((IPipelineBuilder)pipelineProxy).AddAssemblyAsync(logger, assembly.NormalizedAbsoluteFullPath);
                 Task.WaitAll(new[] { task });
 
                 _references._assemblies.Add(assembly);
                 this.Project.References.Add(assembly.OriginalPath); // update model
 
-                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger);
+                Task<List<ImporterDescription>> importersTask = ((IPipelineBuilder)pipelineProxy).GetImportersAsync(logger);
                 importersTask.Wait();
                 List<ImporterDescription> importers = importersTask.Result;
                 foreach (ImporterDescription importerDesc in importers)
                     if (importerDesc.AssemblyPath == assembly.NormalizedAbsoluteFullPath)
                         _importers.Add(importerDesc);
 
-                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger);
+                Task<List<ProcessorDescription>> processorsTask = ((IPipelineBuilder)pipelineProxy).GetProcessorsAsync(logger);
                 processorsTask.Wait();
                 List<ProcessorDescription> processors = processorsTask.Result;
                 foreach (ProcessorDescription processorDesc in processors)
@@ -675,23 +653,27 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             {
                 pipelineProxy.BeginListening();
 
-                string projectName = Path.GetFileNameWithoutExtension(this.Project.OriginalPath);
-                string location = this.Location;
+                string projectName = Path.GetFileNameWithoutExtension(this.DocumentFile);
+                string location = this.DocumentFile;
+                if (string.IsNullOrEmpty(location))
+                    location = "";
+                else
+                    location = Path.GetDirectoryName(location);
 
-                pipelineProxy.SetBaseDirectory(location);
-                pipelineProxy.SetProjectName(projectName);
+                ((IPipelineBuilder)pipelineProxy).SetBaseDirectory(location);
+                ((IPipelineBuilder)pipelineProxy).SetProjectName(projectName);
 
                 IProxyLogger logger = new ProxyLogger(this._logger);
-                Task task = pipelineProxy.AddPackageAsync(logger, packageVM.Package);
+                Task task = ((IPipelineBuilder)pipelineProxy).AddPackageAsync(logger, packageVM.Package);
                 Task.WaitAll(new[] { task });
 
-                Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
+                Task resolvePackagesTask = ((IPipelineBuilder)pipelineProxy).ResolvePackagesAsync(logger);
                 resolvePackagesTask.Wait();
 
                 _packages._packages.Add(packageVM);
                 this.Project.PackageReferences.Add(packageVM.Package); // update model
 
-                Task<List<ImporterDescription>> importersTask = pipelineProxy.GetImportersAsync(logger);
+                Task<List<ImporterDescription>> importersTask = ((IPipelineBuilder)pipelineProxy).GetImportersAsync(logger);
                 importersTask.Wait();
                 List<ImporterDescription> importers = importersTask.Result;
                 foreach (ImporterDescription importerDesc in importers)
@@ -700,7 +682,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
                         _importers.Add(importerDesc);
                 }
 
-                Task<List<ProcessorDescription>> processorsTask = pipelineProxy.GetProcessorsAsync(logger);
+                Task<List<ProcessorDescription>> processorsTask = ((IPipelineBuilder)pipelineProxy).GetProcessorsAsync(logger);
                 processorsTask.Wait();
                 List<ProcessorDescription> processors = processorsTask.Result;
                 foreach (ProcessorDescription processorDesc in processors)

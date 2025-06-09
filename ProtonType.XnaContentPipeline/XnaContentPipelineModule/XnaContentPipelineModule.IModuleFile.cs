@@ -43,25 +43,12 @@ namespace nkast.ProtonType.XnaContentPipeline
         IFileViewModel IModuleFile.FileOpen(string filepath)
         {
             ContentPipelineViewModel contentPipelineVM = new ContentPipelineViewModel(this);
+            contentPipelineVM.LoadContentProject(filepath);
+            contentPipelineVM.CreateBuilder(contentPipelineVM.PipelineProjectViewModel);
 
-            if (File.Exists(filepath))
-            {
-                contentPipelineVM.LoadContentProject(filepath);
-                contentPipelineVM.CreateBuilder(contentPipelineVM.PipelineProjectViewModel);
-
-                _fileViewModels.Add(contentPipelineVM);
-                OpenFileBrowserEx(contentPipelineVM);
-                return contentPipelineVM;
-            }
-            else
-            {
-                contentPipelineVM.CreateContentProject(filepath);
-                contentPipelineVM.CreateBuilder(contentPipelineVM.PipelineProjectViewModel);
-
-                _fileViewModels.Add(contentPipelineVM);
-                OpenFileBrowserEx(contentPipelineVM);
-                return contentPipelineVM;
-            }
+            _fileViewModels.Add(contentPipelineVM);
+            OpenFileBrowserEx(contentPipelineVM);
+            return contentPipelineVM;
         }
 
         IFileViewModel IModuleFileNew.FileNew()
@@ -86,9 +73,21 @@ namespace nkast.ProtonType.XnaContentPipeline
             return contentPipelineVM;
         }
 
+        public IFileViewModel Create(string filepath)
+        {
+            ContentPipelineViewModel contentPipelineVM = new ContentPipelineViewModel(this);
+            contentPipelineVM.CreateContentProject(filepath);
+            contentPipelineVM.CreateBuilder(contentPipelineVM.PipelineProjectViewModel);
+
+            _fileViewModels.Add(contentPipelineVM);
+            OpenFileBrowserEx(contentPipelineVM);
+
+            return contentPipelineVM;
+        }
+
         private void OpenFileBrowserEx(ContentPipelineViewModel contentPipeline)
         {
-            string contentFilename = Path.GetFileName(contentPipeline.DocumentFile);
+            string contentFilename = Path.GetFileName(contentPipeline.PipelineProjectViewModel.DocumentFile);
             FileBrowserEx civm = new FileBrowserEx(contentPipeline, contentFilename);
             AddPaneCmd addPaneCmd = new AddPaneCmd(this.Site, civm);
             this.Site.Controller.EnqueueAndExecute(addPaneCmd);

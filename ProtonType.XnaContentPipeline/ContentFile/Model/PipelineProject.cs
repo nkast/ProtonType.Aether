@@ -22,19 +22,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
+using Microsoft.Xna.Framework.Graphics;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
 {
     /*internal*/ public class PipelineProject
     {
-        public string OriginalPath
-        {
-            get;
-            set;
-        }
-
         IList<PipelineItem> _pipelineItems = new List<PipelineItem>();
 
 
@@ -48,9 +44,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
         public List<Package> PackageReferences { get; set; }
 
-        public ProxyTargetPlatform Platform { get; set; }
+        public TargetPlatform Platform { get; set; }
 
-        public ProxyGraphicsProfile Profile { get; set; }
+        public GraphicsProfile Profile { get; set; }
 
         public string Config { get; set; }
 

@@ -45,13 +45,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
         public IValueConverter DragItemConverter { get; set; }
         public PipelineProjectViewModel PipelineProjectViewModel { get; private set; }
 
-        /// <remarks>full path + filename + .ext (.mgcb)</remarks>
-        public string DocumentFile
-        { 
-            get;
-            private set;
-        }
-
         public event EventHandler<PipelineItemViewModelAddedEventArgs> ItemAdded;
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemAdded;
         public event EventHandler<PipelineItemViewModelEventArgs> PipelineItemRemoved;
@@ -75,11 +68,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
             PipelineProjectViewModel pipelineProjectVM = new PipelineProjectViewModel(this.Module.Site, this);
 
-            this.DocumentFile = documentFile;
             pipelineProjectVM.OpenProject(documentFile);
 
+            this.PipelineProjectViewModel = pipelineProjectVM;
+
             // UpdateTreeItems()
-            if (pipelineProjectVM.Project != null && !string.IsNullOrEmpty(pipelineProjectVM.Project.OriginalPath))
+            if (pipelineProjectVM.Project != null && !string.IsNullOrEmpty(documentFile))
             {
                 foreach (var item in pipelineProjectVM.PipelineItemsVM)
                 {
@@ -90,8 +84,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
             // attach events
             pipelineProjectVM.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
             pipelineProjectVM.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
-
-            this.PipelineProjectViewModel = pipelineProjectVM;
         }
 
         internal void CreateContentProject(string documentFile)
@@ -101,15 +93,15 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
             PipelineProjectViewModel pipelineProjectVM = new PipelineProjectViewModel(this.Module.Site, this);
 
-            this.DocumentFile = documentFile;
             pipelineProjectVM.NewProject(documentFile);
             pipelineProjectVM.SaveProject(true);
+
+            this.PipelineProjectViewModel = pipelineProjectVM;
 
             // attach events
             pipelineProjectVM.PipelineItemAdded += pipelineProjectViewModel_PipelineItemAdded;
             pipelineProjectVM.PipelineItemRemoved += pipelineProjectViewModel_PipelineItemRemoved;
 
-            this.PipelineProjectViewModel = pipelineProjectVM;
         }
 
         internal void CreateBuilder(PipelineProjectViewModel pipelineProjectVM)
@@ -222,7 +214,7 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
         internal string GetAbsolutePath(string relativePath)
         {
-            string documentDirectory = Path.GetDirectoryName(this.DocumentFile);
+            string documentDirectory = Path.GetDirectoryName(this.PipelineProjectViewModel.DocumentFile);
             return Path.Combine(documentDirectory, relativePath);
         }
 

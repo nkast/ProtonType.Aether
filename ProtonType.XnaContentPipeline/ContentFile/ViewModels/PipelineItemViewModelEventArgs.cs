@@ -31,9 +31,9 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
 
     public class PipelineItemViewModelBuildCompletedEventArgs : PipelineItemViewModelEventArgs
     {
-        public readonly TaskResult Result;
+        public readonly bool Result;
 
-        public PipelineItemViewModelBuildCompletedEventArgs(PipelineItemViewModel pipelineItemVM, TaskResult taskResult) : base(pipelineItemVM)
+        public PipelineItemViewModelBuildCompletedEventArgs(PipelineItemViewModel pipelineItemVM, bool taskResult) : base(pipelineItemVM)
         {
             this.Result = taskResult;
         }

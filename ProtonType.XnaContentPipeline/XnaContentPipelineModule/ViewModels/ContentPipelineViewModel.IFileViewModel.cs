@@ -24,7 +24,12 @@ namespace nkast.ProtonType.XnaContentPipeline.ViewModels
     {
         string IFileViewModel.Filename
         {
-            get { return this.DocumentFile; }
+            get 
+            {
+                if (this.PipelineProjectViewModel == null)
+                    return null;
+                return this.PipelineProjectViewModel.DocumentFile;
+            }
         }
     }
 }

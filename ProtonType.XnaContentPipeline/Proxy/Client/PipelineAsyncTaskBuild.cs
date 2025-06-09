@@ -22,7 +22,7 @@ using nkast.ProtonType.XnaContentPipeline.Common;
 
 namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
 {
-    internal class PipelineAsyncTaskBuild : PipelineAsyncTask<bool>
+    internal class PipelineAsyncTaskBuild : PipelineAsyncTask
     {
         public readonly ProxyItem Item;
 
@@ -30,17 +30,6 @@ namespace nkast.ProtonType.XnaContentPipeline.ProxyClient
             : base(contextGuid, logger)
         {
             this.Item = proxyItem;
-        }
-
-        protected override void OnSucceeded()
-        {
-            base.TaskCompletionSource.SetResult(true);
-        }
-
-        protected override void OnFailed()
-        {
-            base.TaskCompletionSource.SetResult(false);
-
         }
 
     }

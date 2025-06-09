@@ -27,8 +27,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
         public readonly string AssemblyPath;
         public readonly string TypeName;
         public readonly string TypeFullName;
-        public readonly string OutputTypeName;
-        public readonly string OutputTypeFullName;
+
         public readonly string[] OutputBaseTypesFullName;
 
         // ContentImporterAttribute
@@ -41,8 +40,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             AssemblyPath = ReadString(reader);
             TypeName = ReadString(reader);
             TypeFullName = ReadString(reader);
-            OutputTypeName = ReadString(reader);
-            OutputTypeFullName = ReadString(reader);
 
             OutputBaseTypesFullName = new String[reader.ReadInt32()];
             for (int i = 0; i < OutputBaseTypesFullName.Length; i++)
@@ -59,13 +56,11 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             FileExtensions = fileExtensions;
         }
 
-        public ImporterDescription(string assemblyPath, string typeName, string typeFullName, string outputTypeName, string outputTypeFullName, string[] outputBaseTypesFullName, string displayName, string defaultProcessor, IEnumerable<string> fileExtensions)
+        public ImporterDescription(string assemblyPath, string typeName, string typeFullName, string[] outputBaseTypesFullName, string displayName, string defaultProcessor, IEnumerable<string> fileExtensions)
         {
             this.AssemblyPath = assemblyPath;
             this.TypeName = typeName;
             this.TypeFullName = typeFullName;
-            this.OutputTypeName = outputTypeName;
-            this.OutputTypeFullName = outputTypeFullName;
             this.OutputBaseTypesFullName = outputBaseTypesFullName;
             this.DisplayName = displayName;
             this.DefaultProcessor = defaultProcessor;
@@ -78,8 +73,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             WriteString(writer, AssemblyPath);
             WriteString(writer, TypeName);
             WriteString(writer, TypeFullName);
-            WriteString(writer, OutputTypeName);
-            WriteString(writer, OutputTypeFullName);
 
             writer.Write((Int32)OutputBaseTypesFullName.Length);
             for (int i = 0; i < OutputBaseTypesFullName.Length;i++)

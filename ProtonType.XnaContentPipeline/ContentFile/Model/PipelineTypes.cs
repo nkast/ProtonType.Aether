@@ -37,8 +37,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                             assemblyPath: null,
                             typeName: null,
                             typeFullName: null,
-                            outputTypeName: null,
-                            outputTypeFullName: null,
                             outputBaseTypesFullName: new string[] { },
                             displayName: "Invalid / Missing Importer",
                             defaultProcessor: null,
@@ -50,7 +48,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                             typeName: null,
                             typeFullName: null,
                             inputTypeFullName: null,
-                            inputBaseTypesFullName: new string[] {},
                             outputTypeFullName: null,
                             processorParams: new ProcessorParamDescription[0],
                             displayName: "Invalid / Missing Processor"
@@ -60,8 +57,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                             assemblyPath: null,
                             typeName: null,
                             typeFullName: null,
-                            outputTypeName: null,
-                            outputTypeFullName: null,
                             outputBaseTypesFullName: new string[] { },
                             displayName: "",
                             defaultProcessor: null,
@@ -73,7 +68,6 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
                             typeName: null,
                             typeFullName: null,
                             inputTypeFullName: null,
-                            inputBaseTypesFullName: new string[] { },
                             outputTypeFullName: null,
                             processorParams: new ProcessorParamDescription[0],
                             displayName: ""

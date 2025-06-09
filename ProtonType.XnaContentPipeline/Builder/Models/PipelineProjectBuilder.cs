@@ -131,9 +131,9 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
         public class PipelineBuildItemCompletedEventArgs : PipelineBuildItemEventArgs
         {
-            public readonly TaskResult Result;
+            public readonly bool Result;
 
-            public PipelineBuildItemCompletedEventArgs(PipelineBuildItem buildItem, TaskResult taskResult) : base(buildItem)
+            public PipelineBuildItemCompletedEventArgs(PipelineBuildItem buildItem, bool taskResult) : base(buildItem)
             {
                 this.Result = taskResult;
             }
@@ -176,12 +176,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             handler(this, e);
         }
 
-        internal void BuildItems(List<PipelineItem> pipelineItems, List<PipelineItem> buildPipelineItems, bool rebuild)
+        internal void BuildItems(string documentFile, List<PipelineItem> pipelineItems, List<PipelineItem> buildPipelineItems, bool rebuild)
         {
             _buildItems.Clear();
 
-            string projectName = Path.GetFileNameWithoutExtension(this._project.OriginalPath);
-            string location = this._project.OriginalPath;
+            string projectName = Path.GetFileNameWithoutExtension(documentFile);
+            string location = documentFile;
             if (string.IsNullOrEmpty(location))
                 location = "";
             else
@@ -189,8 +189,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             PipelineProxyClient pipelineProxy = InitProxy(this._project, projectName, location);
 
-            pipelineProxy.SetRebuild();
-            pipelineProxy.SetIncremental();
+            ((IPipelineBuilder)pipelineProxy).SetRebuild();
+            ((IPipelineBuilder)pipelineProxy).SetIncremental();
 
             ProxyLogger logger = new ProxyLogger(_viewLogger);
 
@@ -198,19 +198,19 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 List<Task> addPackageTasks = new List<Task>();
                 foreach (Package package in _project.PackageReferences)
                 {
-                    Task task = pipelineProxy.AddPackageAsync(logger, package);
+                    Task task = ((IPipelineBuilder)pipelineProxy).AddPackageAsync(logger, package);
                     addPackageTasks.Add(task);
                 }
                 Task.WaitAll(addPackageTasks.ToArray());
 
-                Task resolvePackagesTask = pipelineProxy.ResolvePackagesAsync(logger);
+                Task resolvePackagesTask = ((IPipelineBuilder)pipelineProxy).ResolvePackagesAsync(logger);
                 resolvePackagesTask.Wait();
 
                 // load all types from references
                 List<Task> addAssemblyTasks = new List<Task>();
                 foreach (string assemblyPath in _project.References)
                 {
-                    Task task = pipelineProxy.AddAssemblyAsync(logger, assemblyPath);
+                    Task task = ((IPipelineBuilder)pipelineProxy).AddAssemblyAsync(logger, assemblyPath);
                     addAssemblyTasks.Add(task);
                 }
                 Task.WaitAll(addAssemblyTasks.ToArray());
@@ -220,13 +220,13 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             {
                 foreach (PipelineItem pipelineItem in pipelineItems)
                 {
-                    pipelineProxy.SetImporter(pipelineItem.Importer);
+                    ((IPipelineBuilder)pipelineProxy).SetImporter(pipelineItem.Importer);
 
-                    pipelineProxy.SetProcessor(pipelineItem.Processor);
+                    ((IPipelineBuilder)pipelineProxy).SetProcessor(pipelineItem.Processor);
                     foreach (var processorParamName in pipelineItem.ProcessorParams.Keys)
                     {
                         string processorParamValue = pipelineItem.ProcessorParams[processorParamName];
-                        pipelineProxy.AddProcessorParam(processorParamName, processorParamValue);
+                        ((IPipelineBuilder)pipelineProxy).AddProcessorParam(processorParamName, processorParamValue);
                     }
 
                     string originalPath = pipelineItem.OriginalPath;
@@ -253,7 +253,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
                 // Before building the content, register all files to be built.
                 // (Necessary to correctly resolve external references.)
-                Task buildBeginTask = pipelineProxy.BuildBeginAsync(logger);
+                Task buildBeginTask = ((IPipelineBuilder)pipelineProxy).BuildBeginAsync(logger);
                 buildBeginTask.Wait();
 
                 if (_buildTask != null)
@@ -266,7 +266,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
                     int maxConcurrentTasks = Environment.ProcessorCount;
 
-                    List<Task<bool>> buildTasks = new List<Task<bool>>();
+                    List<Task> buildTasks = new List<Task>();
                     while (_queuedItems.Count > 0 || buildTasks.Count > 0)
                     {
                         while (_queuedItems.Count > 0 && buildTasks.Count < maxConcurrentTasks)
@@ -275,10 +275,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                             {
                                 OnBuildQueueItemRemoved(new PipelineBuildItemEventArgs(buildItem));
                                 IProxyLogger itemLogger = new ProxyLogger(_viewLogger);
-                                Task<bool> buildTask = pipelineProxy.BuildAsync(itemLogger, buildItem.ProxyItem);
+                                Task buildTask = pipelineProxy.BuildAsync(itemLogger, buildItem.ProxyItem);
                                 buildTask.ContinueWith((task) =>
                                 {
-                                    switch (task.Result)
+                                    bool result = (buildItem.ProxyItem.State != BuildState.Failed);
+
+                                    switch (result)
                                     {
                                         case true:
                                             buildItem.Status = PipelineBuildItemStatus.Build;
@@ -287,7 +289,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                                             buildItem.Status = PipelineBuildItemStatus.Failed;
                                             break;
                                     }
-                                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, (task.Result) ? TaskResult.SUCCEEDED : TaskResult.FAILED));
+
+                                    OnPipelineItemBuildCompleted(new PipelineBuildItemCompletedEventArgs(buildItem, result));
                                 });
                                 buildTasks.Add(buildTask);
                             }
@@ -297,7 +300,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                         // Remove completed tasks.
                         for (int i = buildTasks.Count - 1; i >= 0; i--)
                         {
-                            Task<bool> task = buildTasks[i];
+                            Task task = buildTasks[i];
                             if (task.IsCompleted || task.IsCanceled || task.IsFaulted)
                             {
                                 buildTasks.RemoveAt(i);
@@ -306,7 +309,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                     }
                 }).ContinueWith((t) =>
                     {
-                        Task buildEndTask = pipelineProxy.BuildEndAsync(logger);
+                        Task buildEndTask = ((IPipelineBuilder)pipelineProxy).BuildEndAsync(logger);
                         buildEndTask.Wait();
                         
                         lock (_buildTaskLocker)
@@ -327,21 +330,21 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
             PipelineProxyClient pipelineProxy = new PipelineProxyClient();
             pipelineProxy.BeginListening();
 
-            pipelineProxy.SetBaseDirectory(location);
-            pipelineProxy.SetProjectName(projectName);
+            ((IPipelineBuilder)pipelineProxy).SetBaseDirectory(location);
+            ((IPipelineBuilder)pipelineProxy).SetProjectName(projectName);
 
             ContentCompression compression = ContentCompression.Uncompressed;
             if (project.Compress)
                 compression = PipelineProject.ToContentCompression(project.Compression);
 
             // Set Global Settings
-            pipelineProxy.SetOutputDir(project.OutputDir);
-            pipelineProxy.SetIntermediateDir(project.IntermediateDir);
-            pipelineProxy.SetPlatform(project.Platform);
+            ((IPipelineBuilder)pipelineProxy).SetOutputDir(project.OutputDir);
+            ((IPipelineBuilder)pipelineProxy).SetIntermediateDir(project.IntermediateDir);
+            ((IPipelineBuilder)pipelineProxy).SetPlatform(project.Platform);
             if (project.Config != null)
-                pipelineProxy.SetConfig(project.Config);
-            pipelineProxy.SetProfile(project.Profile);
-            pipelineProxy.SetCompression(compression);
+                ((IPipelineBuilder)pipelineProxy).SetConfig(project.Config);
+            ((IPipelineBuilder)pipelineProxy).SetProfile(project.Profile);
+            ((IPipelineBuilder)pipelineProxy).SetCompression(compression);
 
             return pipelineProxy;
         }
@@ -352,12 +355,12 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
                 _viewLogger.LogMessage("Build terminated!");
         }
 
-        public void CleanAll()
+        public void CleanAll(string documentFile)
         {
             string commands = string.Format("/clean /intermediateDir:\"{0}\" /outputDir:\"{1}\"", _project.IntermediateDir, _project.OutputDir);
 
-            string projectName = Path.GetFileNameWithoutExtension(this._project.OriginalPath);
-            string location = this._project.OriginalPath;
+            string projectName = Path.GetFileNameWithoutExtension(documentFile);
+            string location = documentFile;
             if (string.IsNullOrEmpty(location))
                 location = "";
             else
@@ -371,8 +374,8 @@ namespace nkast.ProtonType.XnaContentPipeline.Builder.Models
 
             lock (_buildTaskLocker)
             {
-                Task cleanItemsTask = pipelineProxy.CleanItemsAsync(logger);
-                cleanItemsTask.ContinueWith((t) =>
+                Task cleanItemsTask = ((IPipelineBuilder)pipelineProxy).CleanItemsAsync(logger);
+                cleanItemsTask.ContinueWith((task) =>
                 {
                     lock (_buildTaskLocker)
                     {

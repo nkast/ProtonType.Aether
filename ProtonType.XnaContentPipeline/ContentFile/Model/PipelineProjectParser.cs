@@ -24,6 +24,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Microsoft.Xna.Framework.Content.Pipeline;
+using Microsoft.Xna.Framework.Graphics;
 using nkast.ProtonType.XnaContentPipeline.ProxyClient;
 
 namespace nkast.ProtonType.XnaContentPipeline.Common
@@ -57,7 +59,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
 
             foreach (string option in commands)
             {
-                if (!ParseOption(option, project, logger))
+                if (!ParseOption(option, projectFilePath, project, logger))
                     break;
             }
 
@@ -86,7 +88,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             return lines;
         }
 
-        private bool ParseOption(string line, PipelineProject project, IPipelineLogger logger)
+        private bool ParseOption(string line, string projectFilePath, PipelineProject project, IPipelineLogger logger)
         {
             if (string.IsNullOrWhiteSpace(line))
                 return true;
@@ -115,7 +117,7 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             }
             else
             {
-                logger.LogMessage(Path.GetFileName(project.OriginalPath) + ": Invalid line.");
+                logger.LogMessage(Path.GetFileName(projectFilePath) + ": Invalid line.");
                 return false;
             }
         }
@@ -134,15 +136,15 @@ namespace nkast.ProtonType.XnaContentPipeline.Common
             }
             if (String.Compare(optionName, "platform", true) == 0)
             {
-                TypeConverter converter = TypeDescriptor.GetConverter(typeof(ProxyTargetPlatform));
-                ProxyTargetPlatform objValue = (ProxyTargetPlatform)converter.ConvertFromInvariantString(optionValue);
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(TargetPlatform));
+                TargetPlatform objValue = (TargetPlatform)converter.ConvertFromInvariantString(optionValue);
                 project.Platform = objValue;
                 return true;
             }
             if (String.Compare(optionName, "profile", true) == 0)
             {
-                TypeConverter converter = TypeDescriptor.GetConverter(typeof(ProxyGraphicsProfile));
-                ProxyGraphicsProfile objValue = (ProxyGraphicsProfile)converter.ConvertFromInvariantString(optionValue);
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(GraphicsProfile));
+                GraphicsProfile objValue = (GraphicsProfile)converter.ConvertFromInvariantString(optionValue);
                 project.Profile = objValue;
                 return true;
             }

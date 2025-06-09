@@ -57,6 +57,7 @@
     <Compile Include="Server\LegacyMGCB\SourceFileCollection.cs" />
     <Compile Include="Server\ParametersContext.cs" />
     <Compile Include="Server\PipelineProxyServer.cs" />
+    <Compile Include="Server\PipelineProxyServer.IPipelineBuilder.cs" />
     <Compile Include="Server\Program.cs" />
   </ItemGroup>
 
